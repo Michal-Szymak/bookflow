@@ -3,9 +3,9 @@
 - Cel: webowa aplikacja (PL) pomagająca zaawansowanym użytkownikom Legimi zarządzać dużą listą autorów i książek, śledzić status przeczytania oraz dostępność w Legimi.
 - Grupa docelowa: użytkownicy Legimi z co najmniej 20 autorami i 100 tytułami.
 - Platforma: responsywny web, brak PWA i aplikacji mobilnych.
-- Integracje: OpenLibrary (wyszukiwanie autora i pobieranie pełnej listy works). Legimi tylko manualne oznaczanie dostępności; eksperymentalny checker za flagą (domyślnie wyłączony).
+- Integracje: OpenLibrary (wyszukiwanie autora i pobieranie pełnej listy works). Legimi tylko manualne oznaczanie dostępności.
 - Technologia i bezpieczeństwo: Supabase (auth, RLS, szyfrowanie, HTTPS), TypeScript/Astro/React/Tailwind, dane z identyfikatorami OpenLibrary.
-- Harmonogram MVP: 6–7 tygodni, 1 developer; etapy T1–T6 (auth i model, backend/API + OL, UI autor/książka, filtry/cache, analityka/testy, eksperymentalny checker Legimi).
+- Harmonogram MVP: 6–7 tygodni, 1 developer; etapy T1–T6 (auth i model, backend/API + OL, UI autor/książka, filtry/cache, analityka/testy).
 
 ## 2. Problem użytkownika
 - Przy dużej liczbie autorów i książek w Legimi trudno śledzić, co już przeczytano i co można dodać na półkę.
@@ -17,19 +17,18 @@
 - Integracja OpenLibrary: wyszukiwanie autora po imieniu/nazwisku, wybór kanonicznego author_id; pobranie pełnej listy works dla autora; cache/TTL 7 dni; sortowanie po first_publish_date z fallbackiem do edition.publish_date (rok); domyślne sortowanie od najnowszych; w UI używanie pól edition (tytuł, autor, ISBN, okładka, język), sort po dacie z work/edition.
 - Dodawanie autorów i książek: zapisywanie, odczytywanie, przeglądanie i usuwanie autorów; dodawanie książek autora do profilu (bulk); paginacja 30 pozycji na stronę; limity 500 autorów i 5000 książek na użytkownika.
 - Statusy i operacje na książkach: zmiana statusu pojedynczo i hurtowo (checkboxy/bulk); status Ukryj ukrywa tytuł z widoku domyślnego; brak wirtualizacji list w MVP.
-- Dostępność w Legimi: manualne oznaczanie availableInLegimi; brak auto-refresh; prosty checker Legimi za globalną flagą (OFF domyślnie), TTL 7 dni, bez batch i bez auto-odświeżania.
+- Dostępność w Legimi: w MVP tylko manualne oznaczanie availableInLegimi.
 - Ręczne dodawanie: możliwość ręcznego dodania autora/książki z flagą manual, gdy brak w OpenLibrary; brak edycji/konsolidacji rekordów OL w MVP.
 - Filtry i sortowanie: filtry po statusie i dostępności w Legimi; sortowanie po tytule A–Z oraz po dacie publikacji od najnowszych; daty prezentowane jako rok.
 - UX flow: Dodaj autora → wybór kanoniczny → pobranie i lista works → szybkie oznaczanie statusów/bulk → filtry/sort; brak powiadomień push/e-mail.
 - Komunikaty przyjazne użytkownikowi przy błędach API; logi techniczne dla developera.
-- Analityka: eventy sign_up, add_author, add_books_bulk, mark_read, check_legimi; cele aktywacyjne zgodnie z kryteriami sukcesu.
+- Analityka: eventy sign_up, add_author, add_books_bulk, mark_read, cele aktywacyjne zgodnie z kryteriami sukcesu.
 - Wydajność i cache: cache OpenLibrary TTL 7 dni; paginacja 30/strona; brak wirtualizacji list w MVP.
 - Bezpieczeństwo/prywatność: Supabase auth + RLS; szyfrowanie i HTTPS; dane nieudostępniane stronom trzecim; możliwość usunięcia konta i danych.
 - Testy: unit dla krytycznych funkcji (walidacje, logika first_publish_date); E2E główny flow Dodaj autora → lista → oznacz jako przeczytane; pokrycie 20–30%, reszta manualnie.
 
 ## 4. Granice produktu
-- Poza zakresem: PWA, aplikacje mobilne, funkcje społecznościowe i współdzielenie danych, integracje inne niż OpenLibrary/Legimi, automatyczne dodawanie tytułów na półkę w Legimi, pełna a11y (tylko podstawy), wirtualizacja list, zaawansowane rate limiting, edycja/konsolidacja rekordów z OL, powiadomienia.
-- Nice-to-have za flagą: checker Legimi (scraping) z TTL 7 dni, globalny toggle, domyślnie wyłączony.
+- Poza zakresem: PWA, aplikacje mobilne, funkcje społecznościowe i współdzielenie danych, integracje inne niż OpenLibrary, sprawdzanie dostępności w Legimi i automatyczne dodawanie tytułów na półkę w Legimi, pełna a11y (tylko podstawy), wirtualizacja list, zaawansowane rate limiting, edycja/konsolidacja rekordów z OL, powiadomienia.
 
 ## 5. Historyjki użytkowników
 - US-001 Rejestracja e-mail/hasło
@@ -62,35 +61,31 @@
 - US-010 Oznaczenie dostępności w Legimi ręcznie
   - Opis: Jako użytkownik chcę ręcznie ustawić dostępność książki w Legimi.
   - Kryteria akceptacji: pole availableInLegimi można ustawić true/false, zmiana zapisuje się w profilu, brak auto-refresh, zmiana jest widoczna w filtrach.
-- US-011 Sprawdzenie Legimi za flagą
-  - Opis: Jako użytkownik (gdy funkcja włączona) chcę na żądanie sprawdzić dostępność w Legimi.
-  - Kryteria akceptacji: funkcja jest widoczna tylko gdy flaga globalna jest ON, wynik zapisywany z TTL 7 dni, brak batch/auto-refresh, w razie błędu pokazany jest komunikat i dane nie są nadpisane.
-- US-012 Ręczne dodanie autora lub książki
+- US-011 Ręczne dodanie autora lub książki
   - Opis: Jako użytkownik chcę dodać autora/książkę ręcznie, gdy brak w OpenLibrary.
   - Kryteria akceptacji: mogę wprowadzić dane ręcznie, rekord jest oznaczony manual=true, ręcznie dodane pozycje mogą mieć statusy i dostępność jak inne, brak łączenia z OL w MVP.
-- US-013 Usuwanie autora i jego książek z profilu
+- US-012 Usuwanie autora i jego książek z profilu
   - Opis: Jako użytkownik chcę usunąć autora wraz z przypisanymi książkami z mojego profilu.
   - Kryteria akceptacji: potwierdzenie przed usunięciem, usunięty autor znika z listy, jego książki są usunięte lub odłączone od użytkownika, limit autorów aktualizuje się.
-- US-014 Ukrywanie i przywracanie tytułów
+- US-013 Ukrywanie i przywracanie tytułów
   - Opis: Jako użytkownik chcę ukrywać tytuły, aby nie zasłaniały listy, i móc je przywrócić.
   - Kryteria akceptacji: ustawienie statusu Ukryj usuwa tytuł z widoku domyślnego, filtr statusu umożliwia podgląd i przywrócenie innego statusu, zmiana zapisuje się.
-- US-015 Przegląd profilu z paginacją i limitami
+- US-014 Przegląd profilu z paginacją i limitami
   - Opis: Jako użytkownik chcę przeglądać autorów i książki w paginacji 30/strona z limitami 500 autorów i 5000 książek.
   - Kryteria akceptacji: lista jest paginowana 30 pozycji, dodanie powyżej limitu jest blokowane z komunikatem, przełączanie stron zachowuje filtry i sort.
-- US-016 Walidacja tempa dodawania autorów
+- US-015 Walidacja tempa dodawania autorów
   - Opis: Jako użytkownik chcę otrzymać informację, gdy próbuję dodać zbyt wielu autorów w krótkim czasie.
   - Kryteria akceptacji: przy próbie dodania ponad 10 autorów/min otrzymuję komunikat, dotychczas dodani autorzy pozostają, po odczekaniu mogę dodać kolejne.
-- US-017 Obsługa błędów i komunikaty
-  - Opis: Jako użytkownik chcę jasne komunikaty, gdy API OpenLibrary lub checker Legimi jest niedostępny.
+- US-016 Obsługa błędów i komunikaty
+  - Opis: Jako użytkownik chcę jasne komunikaty, gdy API OpenLibrary jest niedostępne.
   - Kryteria akceptacji: błędy wyświetlają przyjazny komunikat, dane niepobrane nie nadpisują istniejących, oferowany jest fallback ręczny dla autora/książki.
-- US-018 Analityka zdarzeń
+- US-017 Analityka zdarzeń
   - Opis: Jako właściciel produktu chcę rejestrować kluczowe zdarzenia, aby mierzyć aktywację i retencję.
-  - Kryteria akceptacji: eventy sign_up, add_author, add_books_bulk, mark_read, check_legimi są wysyłane z identyfikacją użytkownika, dane zawierają podstawowe parametry (liczba autorów/książek), błędne wysłanie nie blokuje akcji użytkownika.
+  - Kryteria akceptacji: eventy sign_up, add_author, add_books_bulk, mark_read są wysyłane z identyfikacją użytkownika, dane zawierają podstawowe parametry (liczba autorów/książek), błędne wysłanie nie blokuje akcji użytkownika.
 
 ## 6. Metryki sukcesu
 - Aktywacja: 90% użytkowników ma w profilu co najmniej 1 autora z minimum 3 książkami (D30).
 - Retencja dodatków: 75% użytkowników dodaje co najmniej 5 nowych książek w ciągu 12 miesięcy.
 - Zaangażowanie: MAU, retention D30, liczba akcji na sesję (dodanie autora, dodanie książek, zmiana statusu).
-- Wydajność danych: cache OpenLibrary aktualizowane co 7 dni, błędy OL/Legimi poniżej uzgodnionego progu (monitoring).
+- Wydajność danych: cache OpenLibrary aktualizowane co 7 dni.
 - Jakość doświadczenia: czas dodania autora do listy z pełnym pobraniem works poniżej ustalonego SLA MVP (np. kilka sekund), brak krytycznych błędów uniemożliwiających główny flow E2E.
-
