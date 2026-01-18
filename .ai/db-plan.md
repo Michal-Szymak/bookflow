@@ -1,7 +1,7 @@
 1. Lista tabel, kolumn, typów i ograniczeń
    - enums
      - user_work_status_enum: to_read | in_progress | read | hidden
-   This table is managed by Supabase Auth:
+       This table is managed by Supabase Auth:
    - profiles (PK user_id uuid references auth.users on delete cascade)
      - author_count int not null default 0 check (author_count >= 0 and author_count <= max_authors)
      - work_count int not null default 0 check (work_count >= 0 and work_count <= max_works)
@@ -96,4 +96,3 @@
    - Cache OpenLibrary: authors.ol_fetched_at i ol_expires_at (TTL 7 dni) aktualizowane tylko przy imporcie OL.
    - published date sort: UI używa COALESCE(works.first_publish_year, editions.publish_year) (dla primary_edition_id).
    - available_in_legimi w user_works jako tri-state (NULL = nieoznaczone).
-

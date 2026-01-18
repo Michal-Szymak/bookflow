@@ -1,5 +1,7 @@
 # Dokument wymagań produktu (PRD) - BookFlow
+
 ## 1. Przegląd produktu
+
 - Cel: webowa aplikacja (PL) pomagająca zaawansowanym użytkownikom Legimi zarządzać dużą listą autorów i książek, śledzić status przeczytania oraz dostępność w Legimi.
 - Grupa docelowa: użytkownicy Legimi z co najmniej 20 autorami i 100 tytułami.
 - Platforma: responsywny web, brak PWA i aplikacji mobilnych.
@@ -8,10 +10,12 @@
 - Harmonogram MVP: 6–7 tygodni, 1 developer; etapy T1–T6 (auth i model, backend/API + OL, UI autor/książka, filtry/cache, analityka/testy).
 
 ## 2. Problem użytkownika
+
 - Przy dużej liczbie autorów i książek w Legimi trudno śledzić, co już przeczytano i co można dodać na półkę.
 - Brak jednego widoku łączącego dane autora/książki z informacją o dostępności w Legimi i statusem czytania.
 
 ## 3. Wymagania funkcjonalne
+
 - Uwierzytelnianie: rejestracja i logowanie e-mail + hasło; sesja użytkownika; wylogowanie; usuwanie konta i danych; brak SSO/Legimi.
 - Model danych: User, Author, Work, Edition; relacje User–Author M2M, Author–Work M2M, Work–Edition 1:N; pola statusu książki (Do przeczytania, W trakcie, Przeczytana, Ukryj), availableInLegimi (boolean), manual (boolean); identyfikatory OpenLibrary.
 - Integracja OpenLibrary: wyszukiwanie autora po imieniu/nazwisku, wybór kanonicznego author_id; pobranie pełnej listy works dla autora; cache/TTL 7 dni; sortowanie po first_publish_date z fallbackiem do edition.publish_date (rok); domyślne sortowanie od najnowszych; w UI używanie pól edition (tytuł, autor, ISBN, okładka, język), sort po dacie z work/edition.
@@ -28,9 +32,11 @@
 - Testy: unit dla krytycznych funkcji (walidacje, logika first_publish_date); E2E główny flow Dodaj autora → lista → oznacz jako przeczytane; pokrycie 20–30%, reszta manualnie.
 
 ## 4. Granice produktu
+
 - Poza zakresem: PWA, aplikacje mobilne, funkcje społecznościowe i współdzielenie danych, integracje inne niż OpenLibrary, sprawdzanie dostępności w Legimi i automatyczne dodawanie tytułów na półkę w Legimi, pełna a11y (tylko podstawy), wirtualizacja list, zaawansowane rate limiting, edycja/konsolidacja rekordów z OL, powiadomienia.
 
 ## 5. Historyjki użytkowników
+
 - US-001 Rejestracja e-mail/hasło
   - Opis: Jako nowy użytkownik chcę założyć konto przez e-mail i hasło, aby korzystać z aplikacji.
   - Kryteria akceptacji: mogę wprowadzić e-mail i hasło, po rejestracji jestem zalogowany, błędne dane pokazują komunikat, dane są zapisywane w Supabase.
@@ -84,6 +90,7 @@
   - Kryteria akceptacji: eventy sign_up, add_author, add_books_bulk, mark_read są wysyłane z identyfikacją użytkownika, dane zawierają podstawowe parametry (liczba autorów/książek), błędne wysłanie nie blokuje akcji użytkownika.
 
 ## 6. Metryki sukcesu
+
 - Aktywacja: 90% użytkowników ma w profilu co najmniej 1 autora z minimum 3 książkami (D30).
 - Retencja dodatków: 75% użytkowników dodaje co najmniej 5 nowych książek w ciągu 12 miesięcy.
 - Zaangażowanie: MAU, retention D30, liczba akcji na sesję (dodanie autora, dodanie książek, zmiana statusu).

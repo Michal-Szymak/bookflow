@@ -4,7 +4,7 @@
   "tabWidth": 2,
   "printWidth": 120,
   "trailingComma": "es5",
-  "endOfLine": "lf",
+  "endOfLine": "crlf",
   "plugins": ["prettier-plugin-astro"],
   "overrides": [
     {
