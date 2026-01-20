@@ -96,64 +96,31 @@ export class OpenLibraryService {
    * @throws Error if response structure is invalid
    */
   private parseAuthorResponse(data: unknown): OpenLibraryAuthor[] {
-    console.log("[OpenLibraryService] Parsing response, data type:", typeof data);
-
     if (!data || typeof data !== "object") {
-      console.error("[OpenLibraryService] Invalid response format:", data);
       throw new Error("Invalid response format from OpenLibrary");
     }
 
     const response = data as OpenLibrarySearchResponse;
 
-    console.log("[OpenLibraryService] Response structure:", {
-      hasDocs: Array.isArray(response.docs),
-      docsLength: Array.isArray(response.docs) ? response.docs.length : 0,
-      numFound: response.numFound,
-    });
-
     if (!Array.isArray(response.docs)) {
-      console.error("[OpenLibraryService] Missing docs array, response:", JSON.stringify(response, null, 2));
       throw new Error("OpenLibrary response missing docs array");
     }
 
     const authors: OpenLibraryAuthor[] = [];
-    let skippedCount = 0;
-    const skippedReasons: { missingFields: number; invalidId: number } = {
-      missingFields: 0,
-      invalidId: 0,
-    };
 
-    console.log("[OpenLibraryService] Processing", response.docs.length, "documents");
-
-    for (let i = 0; i < response.docs.length; i++) {
-      const doc = response.docs[i];
+    for (const doc of response.docs) {
       // Extract OpenLibrary ID from key (e.g., "/authors/OL23919A" -> "OL23919A")
       const key = doc.key;
       const name = doc.name;
 
-      console.log(`[OpenLibraryService] Doc ${i + 1}/${response.docs.length}:`, {
-        key,
-        name,
-        fullDoc: JSON.stringify(doc),
-      });
-
       if (!key || !name) {
         // Skip entries without required fields
-        skippedCount++;
-        skippedReasons.missingFields++;
-        console.warn(`[OpenLibraryService] Skipping doc ${i + 1}: missing key or name`, { key, name });
         continue;
       }
 
       // const openlibraryId = this.extractAuthorId(key);
       // if (!openlibraryId) {
       //   // Skip if we can't extract a valid ID
-      //   skippedCount++;
-      //   skippedReasons.invalidId++;
-      //   console.warn(`[OpenLibraryService] Skipping doc ${i + 1}: invalid ID format`, {
-      //     key,
-      //     extractedId: openlibraryId,
-      //   });
       //   continue;
       // }
 
@@ -161,30 +128,19 @@ export class OpenLibraryService {
         openlibrary_id: key,
         name: name.trim(),
       });
-      console.log(`[OpenLibraryService] Added author ${i + 1}:`, {
-        openlibrary_id: key,
-        name: name.trim(),
-      });
     }
-
-    console.log("[OpenLibraryService] Parsing complete:", {
-      totalDocs: response.docs.length,
-      validAuthors: authors.length,
-      skipped: skippedCount,
-      skipReasons: skippedReasons,
-    });
 
     return authors;
   }
 
-  /**
-   * Extracts author ID from OpenLibrary key.
-   *
-   * @param key - OpenLibrary key (e.g., "/authors/OL23919A")
-   * @returns Author ID (e.g., "OL23919A") or null if invalid
-   */
-  private extractAuthorId(key: string): string | null {
-    const match = key.match(/\/authors\/(OL\d+[A-Z])/);
-    return match ? match[1] : null;
-  }
+  // /**
+  //  * Extracts author ID from OpenLibrary key.
+  //  *
+  //  * @param key - OpenLibrary key (e.g., "/authors/OL23919A")
+  //  * @returns Author ID (e.g., "OL23919A") or null if invalid
+  //  */
+  // private extractAuthorId(key: string): string | null {
+  //   const match = key.match(/\/authors\/(OL\d+[A-Z])/);
+  //   return match ? match[1] : null;
+  // }
 }
