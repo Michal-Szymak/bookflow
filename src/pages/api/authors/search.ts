@@ -3,6 +3,7 @@ import { AuthorSearchQuerySchema } from "@/lib/validation/author-search.schema";
 import { OpenLibraryService } from "@/lib/services/openlibrary.service";
 import { AuthorsService } from "@/lib/services/authors.service";
 import type { AuthorSearchResponseDto, AuthorSearchResultDto, AuthorRow } from "@/types";
+import { logger } from "@/lib/logger";
 
 export const prerender = false;
 
@@ -55,7 +56,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     try {
       olResults = await olService.searchAuthors(q, limit ?? 10);
     } catch (error) {
-      console.error("OpenLibrary API error:", error);
+      logger.error("OpenLibrary API error:", error);
       return new Response(
         JSON.stringify({
           error: "External service error",
@@ -74,7 +75,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       const olIds = olResults.map((r) => r.openlibrary_id);
       cachedAuthors = await authorsService.findByOpenLibraryIds(olIds);
     } catch (error) {
-      console.error("Cache lookup failed, proceeding without cache:", error);
+      logger.error("Cache lookup failed, proceeding without cache:", error);
       cachedAuthors = new Map();
     }
 
@@ -125,7 +126,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     // 6. Update cache (don't await - background operation)
     if (toCache.length > 0) {
       authorsService.upsertAuthorsCache(toCache).catch((error) => {
-        console.error("Failed to update authors cache:", error);
+        logger.error("Failed to update authors cache:", error);
       });
     }
 
@@ -139,7 +140,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Unexpected error in /api/authors/search:", error);
+    logger.error("Unexpected error in /api/authors/search:", error);
     return new Response(
       JSON.stringify({
         error: "Internal server error",

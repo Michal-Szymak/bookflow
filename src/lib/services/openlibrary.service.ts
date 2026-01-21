@@ -5,6 +5,8 @@
  * Implements timeout handling, error management, and response validation.
  */
 
+import { logger } from "@/lib/logger";
+
 /**
  * Represents an author result from OpenLibrary API.
  */
@@ -30,6 +32,7 @@ interface OpenLibrarySearchResponse {
 export class OpenLibraryService {
   private readonly baseUrl = "https://openlibrary.org";
   private readonly timeout = 10000; // 10 seconds
+  private readonly logger = logger.fork("OpenLibraryService");
 
   /**
    * Searches for authors in OpenLibrary by name.
@@ -44,7 +47,7 @@ export class OpenLibraryService {
     searchUrl.searchParams.set("q", query);
     searchUrl.searchParams.set("limit", limit.toString());
 
-    console.log("[OpenLibraryService] Searching authors:", {
+    this.logger.debug("Searching authors", {
       query,
       limit,
       url: searchUrl.toString(),
@@ -64,7 +67,7 @@ export class OpenLibraryService {
 
       clearTimeout(timeoutId);
 
-      console.log("[OpenLibraryService] Response status:", {
+      this.logger.debug("Response status", {
         status: response.status,
         statusText: response.statusText,
         ok: response.ok,
@@ -75,7 +78,7 @@ export class OpenLibraryService {
       }
 
       const data: unknown = await response.json();
-      console.log("[OpenLibraryService] Raw response data:", JSON.stringify(data, null, 2));
+      this.logger.debug("Raw response data", JSON.stringify(data, null, 2));
       return this.parseAuthorResponse(data);
     } catch (error) {
       if (error instanceof Error) {
