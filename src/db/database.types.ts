@@ -288,7 +288,19 @@ export interface Database {
       };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      upsert_authors_cache: {
+        Args: {
+          authors_data: {
+            openlibrary_id: string;
+            name: string;
+            ol_fetched_at: string;
+            ol_expires_at: string;
+          }[];
+        };
+        Returns: undefined;
+      };
+    };
     Enums: {
       user_work_status_enum: "to_read" | "in_progress" | "read" | "hidden";
     };

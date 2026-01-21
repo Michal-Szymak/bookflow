@@ -118,12 +118,6 @@ export class OpenLibraryService {
         continue;
       }
 
-      // const openlibraryId = this.extractAuthorId(key);
-      // if (!openlibraryId) {
-      //   // Skip if we can't extract a valid ID
-      //   continue;
-      // }
-
       authors.push({
         openlibrary_id: key,
         name: name.trim(),
@@ -132,15 +126,4 @@ export class OpenLibraryService {
 
     return authors;
   }
-
-  // /**
-  //  * Extracts author ID from OpenLibrary key.
-  //  *
-  //  * @param key - OpenLibrary key (e.g., "/authors/OL23919A")
-  //  * @returns Author ID (e.g., "OL23919A") or null if invalid
-  //  */
-  // private extractAuthorId(key: string): string | null {
-  //   const match = key.match(/\/authors\/(OL\d+[A-Z])/);
-  //   return match ? match[1] : null;
-  // }
 }

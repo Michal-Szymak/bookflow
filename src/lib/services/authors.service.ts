@@ -52,7 +52,7 @@ export class AuthorsService {
 
   /**
    * Upserts authors to the cache (bulk operation).
-   * Uses ON CONFLICT to update existing records or insert new ones.
+   * Uses RPC function with SECURITY DEFINER to bypass RLS policies.
    * Sets manual=false for all cache entries from OpenLibrary.
    *
    * @param authors - Array of authors to upsert to cache
@@ -70,18 +70,16 @@ export class AuthorsService {
       return;
     }
 
-    // Prepare data for upsert
-    const authorsToUpsert = authors.map((author) => ({
+    // Prepare data as JSONB array for RPC function
+    const authorsData = authors.map((author) => ({
       openlibrary_id: author.openlibrary_id,
       name: author.name,
       ol_fetched_at: author.ol_fetched_at,
       ol_expires_at: author.ol_expires_at,
-      manual: false,
     }));
 
-    const { error } = await this.supabase.from("authors").upsert(authorsToUpsert, {
-      onConflict: "openlibrary_id",
-      ignoreDuplicates: false,
+    const { error } = await this.supabase.rpc("upsert_authors_cache", {
+      authors_data: authorsData,
     });
 
     if (error) {
