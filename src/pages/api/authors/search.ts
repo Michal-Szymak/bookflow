@@ -96,7 +96,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
         // Cache valid - use DB data
         results.push({
           id: cached.id,
-          openlibrary_id: cached.openlibrary_id!,
+          openlibrary_id: cached.openlibrary_id as string,
           name: cached.name,
           ol_fetched_at: cached.ol_fetched_at,
           ol_expires_at: cached.ol_expires_at,

@@ -86,4 +86,89 @@ export class AuthorsService {
       throw new Error(`Failed to upsert authors cache: ${error.message}`);
     }
   }
+
+  /**
+   * Checks user's author limit and returns current count and max limit.
+   * Expects user profile to exist (should be created during user registration).
+   *
+   * @param userId - User ID to check limits for
+   * @returns Object with authorCount and maxAuthors
+   * @throws Error if database operation fails or profile is not found
+   */
+  async checkUserAuthorLimit(userId: string): Promise<{ authorCount: number; maxAuthors: number }> {
+    const { data: profile, error: fetchError } = await this.supabase
+      .from("profiles")
+      .select("author_count, max_authors")
+      .eq("user_id", userId)
+      .single();
+
+    if (fetchError) {
+      // Profile not found - this should not happen if profile is created during registration
+      if (fetchError.code === "PGRST116") {
+        throw new Error(`User profile not found for user ${userId}. Profile should be created during registration.`);
+      }
+
+      throw new Error(`Failed to fetch user profile: ${fetchError.message}`);
+    }
+
+    if (!profile) {
+      throw new Error(`User profile not found for user ${userId}. Profile should be created during registration.`);
+    }
+
+    return {
+      authorCount: profile.author_count,
+      maxAuthors: profile.max_authors,
+    };
+  }
+
+  /**
+   * Creates a manual author owned by the specified user.
+   * Validates constraints and handles database errors appropriately.
+   *
+   * @param userId - User ID who will own the author
+   * @param name - Author name (will be trimmed)
+   * @returns Created author row
+   * @throws Error with appropriate message for constraint violations or other DB errors
+   */
+  async createManualAuthor(userId: string, name: string): Promise<AuthorRow> {
+    const trimmedName = name.trim();
+
+    const { data, error } = await this.supabase
+      .from("authors")
+      .insert({
+        name: trimmedName,
+        manual: true,
+        owner_user_id: userId,
+        openlibrary_id: null,
+        ol_fetched_at: null,
+        ol_expires_at: null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      // Handle PostgreSQL constraint violations
+      if (error.code === "23514") {
+        // Check constraint violation (authors_manual_owner or authors_manual_or_ol)
+        const constraintName = error.message.includes("authors_manual_owner")
+          ? "authors_manual_owner"
+          : "authors_manual_or_ol";
+        throw new Error(`Database constraint violation: ${constraintName}`);
+      }
+
+      if (error.code === "42501") {
+        // RLS policy violation
+        throw new Error("Cannot create manual author without ownership");
+      }
+
+      // Generic database error
+      throw new Error(`Failed to create author: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error("Failed to create author: no data returned");
+    }
+
+    return data;
+  }
 }
