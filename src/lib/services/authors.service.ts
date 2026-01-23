@@ -272,4 +272,43 @@ export class AuthorsService {
 
     return data;
   }
+
+  /**
+   * Deletes a manual author owned by the specified user.
+   * Only manual authors (manual=true) owned by the user can be deleted.
+   * Cascading deletions are handled by the database:
+   * - author_works (author-work relationships) - ON DELETE CASCADE
+   * - user_authors (user-author relationships) - ON DELETE CASCADE
+   *
+   * Note: Works are NOT automatically deleted when an author is deleted.
+   * Only the relationships in author_works are removed.
+   *
+   * @param authorId - Author UUID to delete
+   * @param userId - User ID who owns the author
+   * @throws Error if author is not found, not manual, not owned by user, or database operation fails
+   */
+  async deleteManualAuthor(authorId: string, userId: string): Promise<void> {
+    const { data, error } = await this.supabase
+      .from("authors")
+      .delete()
+      .eq("id", authorId)
+      .eq("manual", true)
+      .eq("owner_user_id", userId)
+      .select();
+
+    if (error) {
+      // Handle RLS policy violations
+      if (error.code === "42501") {
+        throw new Error("Cannot delete author: insufficient permissions");
+      }
+
+      // Generic database error
+      throw new Error(`Failed to delete author: ${error.message}`);
+    }
+
+    // Check if any row was actually deleted
+    if (!data || data.length === 0) {
+      throw new Error("Author not found, not manual, or not owned by user");
+    }
+  }
 }
