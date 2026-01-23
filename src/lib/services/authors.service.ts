@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@/db/supabase.client";
 import type { AuthorRow } from "@/types";
+import type { OpenLibraryAuthor } from "./openlibrary.service";
 
 /**
  * Authors Service
@@ -9,6 +10,35 @@ import type { AuthorRow } from "@/types";
  */
 export class AuthorsService {
   constructor(private supabase: SupabaseClient) {}
+
+  /**
+   * Finds a single author by OpenLibrary ID.
+   * Uses indexed openlibrary_id field for efficient lookup.
+   *
+   * @param openlibrary_id - OpenLibrary ID to look up
+   * @returns AuthorRow if found, null otherwise
+   * @throws Error if database query fails
+   */
+  async findByOpenLibraryId(openlibrary_id: string): Promise<AuthorRow | null> {
+    const { data, error } = await this.supabase
+      .from("authors")
+      .select("id, name, openlibrary_id, ol_fetched_at, ol_expires_at, manual, owner_user_id, created_at, updated_at")
+      .eq("openlibrary_id", openlibrary_id)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch author from database: ${error.message}`);
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    return {
+      ...data,
+      owner_user_id: data.owner_user_id ?? null,
+    };
+  }
 
   /**
    * Finds authors by their OpenLibrary IDs in batch.
@@ -48,6 +78,47 @@ export class AuthorsService {
     }
 
     return authorsMap;
+  }
+
+  /**
+   * Upserts a single author from OpenLibrary to the cache.
+   * Uses RPC function with SECURITY DEFINER to bypass RLS policies.
+   * Sets manual=false and owner_user_id=null for cache entries from OpenLibrary.
+   * Only updates cache if it has expired or author doesn't exist.
+   *
+   * @param author - Author data from OpenLibrary
+   * @param fetchedAt - Timestamp when data was fetched from OpenLibrary
+   * @param expiresAt - Timestamp when cache expires (typically +7 days)
+   * @returns Updated or created author row
+   * @throws Error if database operation fails
+   */
+  async upsertAuthorFromOpenLibrary(author: OpenLibraryAuthor, fetchedAt: Date, expiresAt: Date): Promise<AuthorRow> {
+    // Prepare data as JSONB array for RPC function (single element)
+    const authorsData = [
+      {
+        openlibrary_id: author.openlibrary_id,
+        name: author.name,
+        ol_fetched_at: fetchedAt.toISOString(),
+        ol_expires_at: expiresAt.toISOString(),
+      },
+    ];
+
+    const { error } = await this.supabase.rpc("upsert_authors_cache", {
+      authors_data: authorsData,
+    });
+
+    if (error) {
+      throw new Error(`Failed to upsert author cache: ${error.message}`);
+    }
+
+    // Fetch the updated/created record to return
+    const updated = await this.findByOpenLibraryId(author.openlibrary_id);
+
+    if (!updated) {
+      throw new Error("Failed to retrieve upserted author from database");
+    }
+
+    return updated;
   }
 
   /**
