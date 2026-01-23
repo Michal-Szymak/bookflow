@@ -12,6 +12,36 @@ export class AuthorsService {
   constructor(private supabase: SupabaseClient) {}
 
   /**
+   * Finds a single author by ID (UUID).
+   * Uses indexed id field (primary key) for efficient lookup.
+   * Respects RLS policies - returns null if author is not accessible to the user.
+   *
+   * @param authorId - Author UUID to look up
+   * @returns AuthorRow if found and accessible, null otherwise
+   * @throws Error if database query fails
+   */
+  async findById(authorId: string): Promise<AuthorRow | null> {
+    const { data, error } = await this.supabase
+      .from("authors")
+      .select("id, name, openlibrary_id, manual, owner_user_id, ol_fetched_at, ol_expires_at, created_at, updated_at")
+      .eq("id", authorId)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch author from database: ${error.message}`);
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    return {
+      ...data,
+      owner_user_id: data.owner_user_id ?? null,
+    };
+  }
+
+  /**
    * Finds a single author by OpenLibrary ID.
    * Uses indexed openlibrary_id field for efficient lookup.
    *
