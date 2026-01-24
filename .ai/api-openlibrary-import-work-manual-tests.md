@@ -58,6 +58,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/work" \
 1. Check `works` table for the imported work.
 2. Check `author_works` table for the author-work link.
 3. If `primary_edition` is present, verify `editions` row exists.
+4. If `primary_edition` is present, verify `editions.ol_fetched_at` is recent and `ol_expires_at` is ~7 days later.
 
 ---
 

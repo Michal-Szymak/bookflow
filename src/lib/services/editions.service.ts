@@ -10,6 +10,37 @@ export class EditionsService {
   constructor(private supabase: SupabaseClient) {}
 
   /**
+   * Finds a single edition by OpenLibrary ID.
+   * Uses indexed openlibrary_id field for efficient lookup.
+   *
+   * @param openlibrary_id - OpenLibrary ID to look up
+   * @returns EditionRow if found, null otherwise
+   * @throws Error if database query fails
+   */
+  async findByOpenLibraryId(openlibrary_id: string): Promise<EditionRow | null> {
+    const { data, error } = await this.supabase
+      .from("editions")
+      .select(
+        "id, work_id, title, openlibrary_id, publish_year, publish_date, publish_date_raw, isbn13, cover_url, language, ol_fetched_at, ol_expires_at, manual, owner_user_id, created_at, updated_at"
+      )
+      .eq("openlibrary_id", openlibrary_id)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch edition from database: ${error.message}`);
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    return {
+      ...data,
+      owner_user_id: data.owner_user_id ?? null,
+    };
+  }
+
+  /**
    * Creates a manual edition owned by the specified user.
    * Validates constraints and handles database errors appropriately.
    *

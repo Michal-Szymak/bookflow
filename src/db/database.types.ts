@@ -97,6 +97,8 @@ export interface Database {
           isbn13: string | null;
           language: string | null;
           manual: boolean;
+          ol_expires_at: string | null;
+          ol_fetched_at: string | null;
           openlibrary_id: string | null;
           owner_user_id: string | null;
           publish_date: string | null;
@@ -113,6 +115,8 @@ export interface Database {
           isbn13?: string | null;
           language?: string | null;
           manual?: boolean;
+          ol_expires_at?: string | null;
+          ol_fetched_at?: string | null;
           openlibrary_id?: string | null;
           owner_user_id?: string | null;
           publish_date?: string | null;
@@ -129,6 +133,8 @@ export interface Database {
           isbn13?: string | null;
           language?: string | null;
           manual?: boolean;
+          ol_expires_at?: string | null;
+          ol_fetched_at?: string | null;
           openlibrary_id?: string | null;
           owner_user_id?: string | null;
           publish_date?: string | null;

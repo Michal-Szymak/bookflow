@@ -91,6 +91,8 @@ export class WorksService {
     isbn13: string | null;
     cover_url: string | null;
     language: string | null;
+    ol_fetched_at?: string | null;
+    ol_expires_at?: string | null;
   }): Promise<EditionRow> {
     const editionData = {
       work_id: data.work_id,
@@ -102,6 +104,8 @@ export class WorksService {
       isbn13: data.isbn13 ?? null,
       cover_url: data.cover_url ?? null,
       language: data.language ?? null,
+      ol_fetched_at: data.ol_fetched_at ?? null,
+      ol_expires_at: data.ol_expires_at ?? null,
     };
 
     const { data: rpcResult, error } = await this.callRpc<unknown>("upsert_edition_from_ol", {

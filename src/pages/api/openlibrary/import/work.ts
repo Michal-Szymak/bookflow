@@ -225,6 +225,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const selectedEdition = selectPrimaryEdition(olWork, editions);
     if (selectedEdition) {
       try {
+        const fetchedAt = new Date();
+        const expiresAt = new Date(fetchedAt.getTime() + 7 * 24 * 60 * 60 * 1000); // +7 days
+
         const edition = await worksService.upsertEditionFromOpenLibrary({
           work_id: work.id,
           openlibrary_id: selectedEdition.openlibrary_id,
@@ -235,6 +238,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
           isbn13: selectedEdition.isbn13,
           cover_url: selectedEdition.cover_url,
           language: selectedEdition.language,
+          ol_fetched_at: fetchedAt.toISOString(),
+          ol_expires_at: expiresAt.toISOString(),
         });
 
         await worksService.setPrimaryEdition(work.id, edition.id);

@@ -50,7 +50,7 @@ Endpoint importuje lub odświeża dane utworu (work) z OpenLibrary i dołącza g
 6. Import i ustawienie primary edition:
    - jeśli OL dostarcza `primary_edition`, użyć jej jako źródła.
    - jeśli OL nie dostarcza `primary_edition`, wybrać edycję z najnowszym `publish_date` spośród edycji zwróconych przez OL.
-   - RPC `upsert_edition_from_ol` dla wybranej edycji głównej.
+   - RPC `upsert_edition_from_ol` dla wybranej edycji głównej, wraz z ustawieniem `ol_fetched_at` i `ol_expires_at` (TTL 7 dni).
    - RPC `set_primary_edition` (lub część RPC zbiorczego), aby ustawić `primary_edition_id`.
 7. Powiązanie autora i utworu:
    - RPC `link_author_work` (upewnić się, że jest idempotentny).

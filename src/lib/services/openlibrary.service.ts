@@ -75,6 +75,18 @@ interface OpenLibraryWorkResponse {
 }
 
 /**
+ * Raw response structure from OpenLibrary edition detail API.
+ */
+interface OpenLibraryEditionResponse {
+  key?: string; // e.g., "/books/OL123M"
+  title?: string;
+  publish_date?: string;
+  isbn_13?: string[];
+  covers?: number[];
+  languages?: { key?: string }[];
+}
+
+/**
  * Raw response structure from OpenLibrary editions list API.
  */
 interface OpenLibraryEditionsResponse {
@@ -268,6 +280,67 @@ export class OpenLibraryService {
       const data: unknown = await response.json();
       this.logger.debug("Raw response data", JSON.stringify(data, null, 2));
       return this.parseWorkDetailResponse(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name === "AbortError") {
+          throw new Error("OpenLibrary API request timed out");
+        }
+        if (error.message.includes("not found")) {
+          throw error;
+        }
+        throw new Error(`Failed to fetch from OpenLibrary: ${error.message}`);
+      }
+      throw new Error("Unknown error occurred while fetching from OpenLibrary");
+    }
+  }
+
+  /**
+   * Fetches a single edition from OpenLibrary by OpenLibrary ID.
+   * Accepts only short format (e.g., "OL123M"), not long format (e.g., "/books/OL123M").
+   * The API returns full key format, which is normalized to short format in the response.
+   *
+   * @param openlibrary_id - OpenLibrary ID in short format (e.g., "OL123M")
+   * @returns Edition with OpenLibrary ID in short format and minimal metadata
+   * @throws Error if edition not found (404), API unavailable, or invalid response
+   */
+  async fetchEditionByOpenLibraryId(openlibrary_id: string): Promise<OpenLibraryEdition> {
+    const editionUrl = `${this.baseUrl}/books/${openlibrary_id}.json`;
+
+    this.logger.debug("Fetching edition by OpenLibrary ID", {
+      openlibrary_id,
+      url: editionUrl,
+    });
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+      const response = await fetch(editionUrl, {
+        signal: controller.signal,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      this.logger.debug("Response status", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+      });
+
+      if (response.status === 404) {
+        throw new Error(`Edition with openlibrary_id '${openlibrary_id}' not found in OpenLibrary`);
+      }
+
+      if (!response.ok) {
+        throw new Error(`OpenLibrary API returned status ${response.status}`);
+      }
+
+      const data: unknown = await response.json();
+      this.logger.debug("Raw response data", JSON.stringify(data, null, 2));
+      return this.parseEditionDetailResponse(data);
     } catch (error) {
       if (error instanceof Error) {
         if (error.name === "AbortError") {
@@ -483,6 +556,51 @@ export class OpenLibraryService {
     }
 
     return editions;
+  }
+
+  /**
+   * Validates and transforms OpenLibrary edition detail API response to internal format.
+   *
+   * @param data - Raw response data from OpenLibrary
+   * @returns Validated edition object with short format openlibrary_id
+   * @throws Error if response structure is invalid or missing required fields
+   */
+  private parseEditionDetailResponse(data: unknown): OpenLibraryEdition {
+    if (!data || typeof data !== "object") {
+      throw new Error("Invalid response format from OpenLibrary");
+    }
+
+    const response = data as OpenLibraryEditionResponse;
+
+    if (!response.key) {
+      throw new Error("OpenLibrary response missing required field 'key'");
+    }
+
+    if (!response.title) {
+      throw new Error("OpenLibrary response missing required field 'title'");
+    }
+
+    const shortId = this.extractShortIdFromKey(response.key);
+    const publishDateRaw = response.publish_date?.trim() ?? null;
+    const publishYear = this.parseYearFromDateString(publishDateRaw) ?? null;
+    const publishDate = this.parseDateFromPublishDate(publishDateRaw);
+    const isbn13 = Array.isArray(response.isbn_13) && response.isbn_13.length > 0 ? response.isbn_13[0] : null;
+    const coverUrl =
+      Array.isArray(response.covers) && response.covers.length > 0 ? this.buildCoverUrl(response.covers[0]) : null;
+    const languageKey =
+      Array.isArray(response.languages) && response.languages.length > 0 ? response.languages[0]?.key : null;
+    const language = languageKey ? this.extractShortIdFromKey(languageKey) : null;
+
+    return {
+      openlibrary_id: shortId,
+      title: response.title.trim(),
+      publish_year: publishYear,
+      publish_date: publishDate,
+      publish_date_raw: publishDateRaw,
+      isbn13,
+      cover_url: coverUrl,
+      language,
+    };
   }
 
   private parseYearFromDateString(value: string | null): number | null {

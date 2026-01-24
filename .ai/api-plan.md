@@ -6,7 +6,7 @@
 - `Profile` ↔ table `profiles`: `user_id` PK/FK auth.users; counters `author_count`, `work_count`; limits `max_authors` (500 default), `max_works` (5000 default); timestamps `created_at`, `updated_at`.
 - `Author` ↔ table `authors`: `id` uuid PK; `name`; `openlibrary_id` (partial unique, nullable); `manual` bool; `owner_user_id` FK auth.users (manual rows only); cache `ol_fetched_at`, `ol_expires_at`; timestamps and constraints `authors_manual_owner`, `authors_manual_or_ol`.
 - `Work` ↔ table `works`: `id`; `title`; `openlibrary_id` (partial unique); `first_publish_year`; `primary_edition_id` FK editions; `manual`; `owner_user_id`; timestamps; constraints `works_manual_owner`, `works_manual_or_ol`.
-- `Edition` ↔ table `editions`: `id`; `work_id` FK works; `title`; `openlibrary_id` (partial unique); `publish_year`; `publish_date`; `publish_date_raw`; `isbn13` (partial unique); `cover_url`; `language`; `manual`; `owner_user_id`; timestamps; constraints `editions_manual_owner`, `editions_manual_or_ol`.
+- `Edition` ↔ table `editions`: `id`; `work_id` FK works; `title`; `openlibrary_id` (partial unique); `publish_year`; `publish_date`; `publish_date_raw`; `isbn13` (partial unique); `cover_url`; `language`; `manual`; `owner_user_id`; cache `ol_fetched_at`, `ol_expires_at`; timestamps; constraints `editions_manual_owner`, `editions_manual_or_ol`.
 - `AuthorWork` ↔ table `author_works`: composite PK (`author_id`, `work_id`); FKs to authors/works; `created_at`.
 - `UserAuthor` ↔ table `user_authors`: composite PK (`user_id`, `author_id`); FKs to auth.users/authors; `created_at`.
 - `UserWork` ↔ table `user_works`: composite PK (`user_id`, `work_id`); FKs to auth.users/works; `status` enum (`to_read | in_progress | read | hidden`); `available_in_legimi` tri-state; timestamps `created_at`, `updated_at`, `status_updated_at`.
@@ -98,8 +98,9 @@
 - **POST** `/api/openlibrary/import/edition`
   - Description: Import or refresh an edition from OpenLibrary for a work.
   - Body: `{ "openlibrary_id": string, "work_id": uuid }`
-  - SECURITY DEFINER RPC; sets `ol_fetched_at`, `ol_expires_at`.
-  - Responses: `200`; `404`; `502`.
+  - SECURITY DEFINER RPC; sets `ol_fetched_at`, `ol_expires_at` (TTL 7d).
+  - Auth required; validates work visibility (RLS).
+  - Responses: `200`; `400`; `401`; `404`; `502`.
 
 ### User Authors (profile)
 
