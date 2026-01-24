@@ -41,6 +41,37 @@ export class EditionsService {
   }
 
   /**
+   * Lists editions for a specific work, sorted by publish year (desc, nulls last).
+   * Respects RLS policies - returns empty array if no editions are accessible.
+   *
+   * @param workId - Work UUID to list editions for
+   * @returns Array of editions for the work
+   * @throws Error if database query fails
+   */
+  async listByWorkId(workId: string): Promise<EditionRow[]> {
+    const { data, error } = await this.supabase
+      .from("editions")
+      .select(
+        "id, work_id, title, openlibrary_id, publish_year, publish_date, publish_date_raw, isbn13, cover_url, language, ol_fetched_at, ol_expires_at, manual, owner_user_id, created_at, updated_at"
+      )
+      .eq("work_id", workId)
+      .order("publish_year", { ascending: false, nullsFirst: false });
+
+    if (error) {
+      throw new Error(`Failed to fetch editions from database: ${error.message}`);
+    }
+
+    if (!data) {
+      return [];
+    }
+
+    return data.map((edition) => ({
+      ...edition,
+      owner_user_id: edition.owner_user_id ?? null,
+    }));
+  }
+
+  /**
    * Creates a manual edition owned by the specified user.
    * Validates constraints and handles database errors appropriately.
    *
