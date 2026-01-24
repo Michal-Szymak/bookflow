@@ -59,8 +59,10 @@
 - **POST** `/api/works`
   - Description: Create a manual work and link it to authors.
   - Body (manual): `{ "title": string, "manual": true, "owner_user_id": auto, "author_ids": [uuid], "first_publish_year": smallint?, "primary_edition_id": uuid? }`.
-  - Links authors via `author_works`; validates `works_manual_owner` and `works_manual_or_ol`.
-  - Responses: `201` `{ work }`; `400`; `409` uniqueness.
+  - Validations: `title` 1-500 chars (trimmed), `author_ids` non-empty UUID array, `first_publish_year` 1500-2100, `primary_edition_id` (if provided) must belong to created work.
+  - Enforces user limit `max_works` (default 5000) and constraints `works_manual_owner`, `works_manual_or_ol`.
+  - Links authors via `author_works`.
+  - Responses: `201` `{ work }`; `400` validation; `401` auth required; `403` RLS; `404` author not found; `409` limit/constraint; `500` server error.
 
 - **POST** `/api/openlibrary/import/work`
   - Description: Import or refresh a work from OpenLibrary and attach to an author.
