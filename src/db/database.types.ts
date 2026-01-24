@@ -300,6 +300,46 @@ export interface Database {
         };
         Returns: undefined;
       };
+      upsert_work_from_ol: {
+        Args: {
+          work_data: {
+            openlibrary_id: string;
+            title: string;
+            first_publish_year: number | null;
+          };
+        };
+        Returns: string;
+      };
+      upsert_edition_from_ol: {
+        Args: {
+          edition_data: {
+            work_id: string;
+            openlibrary_id: string;
+            title: string;
+            publish_year: number | null;
+            publish_date: string | null;
+            publish_date_raw: string | null;
+            isbn13: string | null;
+            cover_url: string | null;
+            language: string | null;
+          };
+        };
+        Returns: string;
+      };
+      link_author_work: {
+        Args: {
+          author_id: string;
+          work_id: string;
+        };
+        Returns: undefined;
+      };
+      set_primary_edition: {
+        Args: {
+          work_id: string;
+          edition_id: string;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       user_work_status_enum: "to_read" | "in_progress" | "read" | "hidden";

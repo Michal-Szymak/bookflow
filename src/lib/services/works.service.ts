@@ -1,6 +1,19 @@
 import type { SupabaseClient } from "@/db/supabase.client";
-import type { WorkRow, WorkWithPrimaryEditionDto, PrimaryEditionSummaryDto, WorkListItemDto } from "@/types";
+import type {
+  EditionRow,
+  WorkRow,
+  WorkWithPrimaryEditionDto,
+  PrimaryEditionSummaryDto,
+  WorkListItemDto,
+} from "@/types";
 import type { CreateWorkCommand } from "@/types";
+
+interface RpcResponse<T> {
+  data: T | null;
+  error: { message: string } | null;
+}
+
+type RpcCaller = <T>(fn: string, args: Record<string, unknown>) => Promise<RpcResponse<T>>;
 
 /**
  * Works Service
@@ -10,6 +23,148 @@ import type { CreateWorkCommand } from "@/types";
  */
 export class WorksService {
   constructor(private supabase: SupabaseClient) {}
+
+  private callRpc<T>(fn: string, args: Record<string, unknown>): Promise<RpcResponse<T>> {
+    return (this.supabase as unknown as { rpc: RpcCaller }).rpc<T>(fn, args);
+  }
+
+  /**
+   * Upserts a work from OpenLibrary using SECURITY DEFINER RPC.
+   * Ensures global catalog entries (manual=false, owner_user_id=null) are managed in the database.
+   *
+   * @param data - Work data from OpenLibrary
+   * @returns Work row after upsert
+   * @throws Error if database operation fails or result cannot be retrieved
+   */
+  async upsertWorkFromOpenLibrary(data: {
+    openlibrary_id: string;
+    title: string;
+    first_publish_year: number | null;
+  }): Promise<WorkRow> {
+    const workData = {
+      openlibrary_id: data.openlibrary_id,
+      title: data.title.trim(),
+      first_publish_year: data.first_publish_year ?? null,
+    };
+
+    const { data: rpcResult, error } = await this.callRpc<unknown>("upsert_work_from_ol", {
+      work_data: workData,
+    });
+
+    if (error) {
+      throw new Error(`Failed to upsert work from OpenLibrary: ${error.message}`);
+    }
+
+    const workId = this.extractIdFromRpcResult(rpcResult, ["id", "work_id"]);
+    const { data: work, error: fetchError } = await this.supabase
+      .from("works")
+      .select("*")
+      .eq(workId ? "id" : "openlibrary_id", workId ?? workData.openlibrary_id)
+      .maybeSingle();
+
+    if (fetchError) {
+      throw new Error(`Failed to fetch upserted work: ${fetchError.message}`);
+    }
+
+    if (!work) {
+      throw new Error("Failed to retrieve upserted work from database");
+    }
+
+    return work;
+  }
+
+  /**
+   * Upserts an edition from OpenLibrary using SECURITY DEFINER RPC.
+   * Ensures global catalog entries (manual=false, owner_user_id=null) are managed in the database.
+   *
+   * @param data - Edition data from OpenLibrary
+   * @returns Edition row after upsert
+   * @throws Error if database operation fails or result cannot be retrieved
+   */
+  async upsertEditionFromOpenLibrary(data: {
+    work_id: string;
+    openlibrary_id: string;
+    title: string;
+    publish_year: number | null;
+    publish_date: string | null;
+    publish_date_raw: string | null;
+    isbn13: string | null;
+    cover_url: string | null;
+    language: string | null;
+  }): Promise<EditionRow> {
+    const editionData = {
+      work_id: data.work_id,
+      openlibrary_id: data.openlibrary_id,
+      title: data.title.trim(),
+      publish_year: data.publish_year ?? null,
+      publish_date: data.publish_date ?? null,
+      publish_date_raw: data.publish_date_raw ?? null,
+      isbn13: data.isbn13 ?? null,
+      cover_url: data.cover_url ?? null,
+      language: data.language ?? null,
+    };
+
+    const { data: rpcResult, error } = await this.callRpc<unknown>("upsert_edition_from_ol", {
+      edition_data: editionData,
+    });
+
+    if (error) {
+      throw new Error(`Failed to upsert edition from OpenLibrary: ${error.message}`);
+    }
+
+    const editionId = this.extractIdFromRpcResult(rpcResult, ["id", "edition_id"]);
+    const { data: edition, error: fetchError } = await this.supabase
+      .from("editions")
+      .select("*")
+      .eq(editionId ? "id" : "openlibrary_id", editionId ?? editionData.openlibrary_id)
+      .maybeSingle();
+
+    if (fetchError) {
+      throw new Error(`Failed to fetch upserted edition: ${fetchError.message}`);
+    }
+
+    if (!edition) {
+      throw new Error("Failed to retrieve upserted edition from database");
+    }
+
+    return edition;
+  }
+
+  /**
+   * Links an author to a work using SECURITY DEFINER RPC (idempotent).
+   *
+   * @param authorId - Author UUID to link
+   * @param workId - Work UUID to link
+   * @throws Error if database operation fails
+   */
+  async linkAuthorWork(authorId: string, workId: string): Promise<void> {
+    const { error } = await this.callRpc<unknown>("link_author_work", {
+      author_id: authorId,
+      work_id: workId,
+    });
+
+    if (error) {
+      throw new Error(`Failed to link author and work: ${error.message}`);
+    }
+  }
+
+  /**
+   * Sets a work's primary edition using SECURITY DEFINER RPC.
+   *
+   * @param workId - Work UUID to update
+   * @param editionId - Edition UUID to set as primary
+   * @throws Error if database operation fails
+   */
+  async setPrimaryEdition(workId: string, editionId: string): Promise<void> {
+    const { error } = await this.callRpc<unknown>("set_primary_edition", {
+      work_id: workId,
+      edition_id: editionId,
+    });
+
+    if (error) {
+      throw new Error(`Failed to set primary edition: ${error.message}`);
+    }
+  }
 
   /**
    * Checks user's work limit and returns current count and max limit.
@@ -51,11 +206,10 @@ export class WorksService {
    * Respects RLS policies - only returns authors accessible to the user.
    *
    * @param authorIds - Array of author UUIDs to verify
-   * @param userId - User ID for RLS context (not used directly, but affects RLS filtering)
    * @returns Array of invalid author IDs (empty if all are valid)
    * @throws Error if database query fails
    */
-  async verifyAuthorsExist(authorIds: string[], userId: string): Promise<string[]> {
+  async verifyAuthorsExist(authorIds: string[]): Promise<string[]> {
     if (authorIds.length === 0) {
       return [];
     }
@@ -315,37 +469,66 @@ export class WorksService {
     }
 
     // Transform the data to WorkListItemDto format
+    interface AuthorWorksQueryRow {
+      work: (WorkRow & { primary_edition?: PrimaryEditionSummaryDto | PrimaryEditionSummaryDto[] | null }) | null;
+    }
+
     const items: WorkListItemDto[] =
-      data?.map((item: any) => {
-        const work = item.work as any;
-        const primaryEdition: PrimaryEditionSummaryDto | null =
-          work.primary_edition && Array.isArray(work.primary_edition) && work.primary_edition.length > 0
-            ? (work.primary_edition[0] as PrimaryEditionSummaryDto)
-            : work.primary_edition && !Array.isArray(work.primary_edition)
-              ? (work.primary_edition as PrimaryEditionSummaryDto)
-              : null;
+      (data as AuthorWorksQueryRow[] | null)
+        ?.map((item) => {
+          const work = item.work;
+          if (!work) {
+            return null;
+          }
 
-        // Compute publish_year: COALESCE(work.first_publish_year, edition.publish_year)
-        const publishYear = work.first_publish_year ?? primaryEdition?.publish_year ?? null;
+          const primaryEditionData = work.primary_edition ?? null;
+          const primaryEdition: PrimaryEditionSummaryDto | null = Array.isArray(primaryEditionData)
+            ? (primaryEditionData[0] ?? null)
+            : (primaryEditionData ?? null);
 
-        return {
-          id: work.id,
-          title: work.title,
-          openlibrary_id: work.openlibrary_id,
-          first_publish_year: work.first_publish_year,
-          primary_edition_id: work.primary_edition_id,
-          manual: work.manual,
-          owner_user_id: work.owner_user_id,
-          created_at: work.created_at,
-          updated_at: work.updated_at,
-          primary_edition: primaryEdition,
-          publish_year: publishYear,
-        };
-      }) || [];
+          // Compute publish_year: COALESCE(work.first_publish_year, edition.publish_year)
+          const publishYear = work.first_publish_year ?? primaryEdition?.publish_year ?? null;
+
+          return {
+            id: work.id,
+            title: work.title,
+            openlibrary_id: work.openlibrary_id,
+            first_publish_year: work.first_publish_year,
+            primary_edition_id: work.primary_edition_id,
+            manual: work.manual,
+            owner_user_id: work.owner_user_id,
+            created_at: work.created_at,
+            updated_at: work.updated_at,
+            primary_edition: primaryEdition,
+            publish_year: publishYear,
+          };
+        })
+        .filter((item): item is WorkListItemDto => item !== null) || [];
 
     return {
       items,
       total: count || 0,
     };
+  }
+
+  private extractIdFromRpcResult(result: unknown, keys: string[]): string | null {
+    if (typeof result === "string") {
+      return result;
+    }
+
+    if (Array.isArray(result) && result.length > 0) {
+      return this.extractIdFromRpcResult(result[0], keys);
+    }
+
+    if (result && typeof result === "object") {
+      for (const key of keys) {
+        const value = (result as Record<string, unknown>)[key];
+        if (typeof value === "string" && value.length > 0) {
+          return value;
+        }
+      }
+    }
+
+    return null;
   }
 }
