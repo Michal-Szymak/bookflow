@@ -331,6 +331,46 @@ export class WorksService {
   }
 
   /**
+   * Finds a single work by ID with minimal fields.
+   * Respects RLS policies - returns null if work is not accessible to the user.
+   *
+   * @param workId - Work UUID to look up
+   * @returns Work id if found and accessible, null otherwise
+   * @throws Error if database query fails
+   */
+  async findById(workId: string): Promise<Pick<WorkRow, "id"> | null> {
+    const { data, error } = await this.supabase.from("works").select("id").eq("id", workId).maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch work from database: ${error.message}`);
+    }
+
+    return data ?? null;
+  }
+
+  /**
+   * Finds a single edition by ID with minimal fields.
+   * Respects RLS policies - returns null if edition is not accessible to the user.
+   *
+   * @param editionId - Edition UUID to look up
+   * @returns Edition id and work_id if found and accessible, null otherwise
+   * @throws Error if database query fails
+   */
+  async findEditionById(editionId: string): Promise<Pick<EditionRow, "id" | "work_id"> | null> {
+    const { data, error } = await this.supabase
+      .from("editions")
+      .select("id, work_id")
+      .eq("id", editionId)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch edition from database: ${error.message}`);
+    }
+
+    return data ?? null;
+  }
+
+  /**
    * Finds a single work by ID with its primary edition details.
    * Fetches work first, then fetches primary edition if it exists.
    * Respects RLS policies - returns null if work is not accessible to the user.
