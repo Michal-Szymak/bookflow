@@ -138,7 +138,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Step 4: Verify authors exist and are accessible
     let invalidAuthorIds;
     try {
-      invalidAuthorIds = await worksService.verifyAuthorsExist(author_ids, user.id);
+      invalidAuthorIds = await worksService.verifyAuthorsExist(author_ids);
     } catch (error) {
       logger.error("POST /api/works: Failed to verify authors", {
         userId: user.id,
