@@ -458,51 +458,12 @@ export class WorksService {
     sort: "published_desc" | "title_asc"
   ): Promise<{ items: WorkListItemDto[]; total: number }> {
     const pageSize = 20;
-    const offset = (page - 1) * pageSize;
-
-    // Build query for works with primary edition
-    let query = this.supabase
-      .from("author_works")
-      .select(
-        `
-        work:works!author_works_work_id_fkey(
-          id,
-          title,
-          openlibrary_id,
-          first_publish_year,
-          primary_edition_id,
-          manual,
-          owner_user_id,
-          created_at,
-          updated_at,
-          primary_edition:editions!works_primary_edition_fk(
-            id,
-            title,
-            openlibrary_id,
-            publish_year,
-            publish_date,
-            publish_date_raw,
-            isbn13,
-            cover_url,
-            language
-          )
-        )
-      `,
-        { count: "exact" }
-      )
-      .eq("author_id", authorId);
-
-    // Apply sorting
-    if (sort === "published_desc") {
-      query = query.order("created_at", { ascending: false, referencedTable: "works" });
-    } else if (sort === "title_asc") {
-      query = query.order("title", { ascending: true, referencedTable: "works" });
-    }
-
-    // Apply pagination
-    query = query.range(offset, offset + pageSize - 1);
-
-    const { data, error, count } = await query;
+    const { data, error } = await this.callRpc<AuthorWorksQueryRow[]>("get_author_works", {
+      p_author_id: authorId,
+      p_page: page,
+      p_page_size: pageSize,
+      p_sort: sort,
+    });
 
     if (error) {
       throw new Error(`Failed to fetch works: ${error.message}`);
@@ -510,44 +471,64 @@ export class WorksService {
 
     // Transform the data to WorkListItemDto format
     interface AuthorWorksQueryRow {
-      work: (WorkRow & { primary_edition?: PrimaryEditionSummaryDto | PrimaryEditionSummaryDto[] | null }) | null;
+      author_id: string;
+      id: WorkRow["id"];
+      title: WorkRow["title"];
+      openlibrary_id: WorkRow["openlibrary_id"];
+      first_publish_year: WorkRow["first_publish_year"];
+      primary_edition_id: WorkRow["primary_edition_id"];
+      manual: WorkRow["manual"];
+      owner_user_id: WorkRow["owner_user_id"];
+      created_at: WorkRow["created_at"];
+      updated_at: WorkRow["updated_at"];
+      primary_edition_title: EditionRow["title"] | null;
+      primary_edition_openlibrary_id: EditionRow["openlibrary_id"] | null;
+      primary_edition_publish_year: EditionRow["publish_year"] | null;
+      primary_edition_publish_date: EditionRow["publish_date"] | null;
+      primary_edition_publish_date_raw: EditionRow["publish_date_raw"] | null;
+      primary_edition_isbn13: EditionRow["isbn13"] | null;
+      primary_edition_cover_url: EditionRow["cover_url"] | null;
+      primary_edition_language: EditionRow["language"] | null;
+      publish_year: number | string | null;
+      total_count: number | string | null;
     }
 
-    const items: WorkListItemDto[] =
-      (data as AuthorWorksQueryRow[] | null)
-        ?.map((item) => {
-          const work = item.work;
-          if (!work) {
-            return null;
+    const rows = (data as AuthorWorksQueryRow[] | null) ?? [];
+    const total = rows.length > 0 ? Number(rows[0].total_count ?? 0) : 0;
+
+    const items: WorkListItemDto[] = rows.map((row) => {
+      const primaryEdition: PrimaryEditionSummaryDto | null = row.primary_edition_id
+        ? {
+            id: row.primary_edition_id,
+            title: row.primary_edition_title as EditionRow["title"],
+            openlibrary_id: row.primary_edition_openlibrary_id,
+            publish_year: row.primary_edition_publish_year,
+            publish_date: row.primary_edition_publish_date,
+            publish_date_raw: row.primary_edition_publish_date_raw,
+            isbn13: row.primary_edition_isbn13,
+            cover_url: row.primary_edition_cover_url,
+            language: row.primary_edition_language,
           }
+        : null;
 
-          const primaryEditionData = work.primary_edition ?? null;
-          const primaryEdition: PrimaryEditionSummaryDto | null = Array.isArray(primaryEditionData)
-            ? (primaryEditionData[0] ?? null)
-            : (primaryEditionData ?? null);
-
-          // Compute publish_year: COALESCE(work.first_publish_year, edition.publish_year)
-          const publishYear = work.first_publish_year ?? primaryEdition?.publish_year ?? null;
-
-          return {
-            id: work.id,
-            title: work.title,
-            openlibrary_id: work.openlibrary_id,
-            first_publish_year: work.first_publish_year,
-            primary_edition_id: work.primary_edition_id,
-            manual: work.manual,
-            owner_user_id: work.owner_user_id,
-            created_at: work.created_at,
-            updated_at: work.updated_at,
-            primary_edition: primaryEdition,
-            publish_year: publishYear,
-          };
-        })
-        .filter((item): item is WorkListItemDto => item !== null) || [];
+      return {
+        id: row.id,
+        title: row.title,
+        openlibrary_id: row.openlibrary_id,
+        first_publish_year: row.first_publish_year,
+        primary_edition_id: row.primary_edition_id,
+        manual: row.manual,
+        owner_user_id: row.owner_user_id,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        primary_edition: primaryEdition,
+        publish_year: row.publish_year === null ? null : Number(row.publish_year),
+      };
+    });
 
     return {
       items,
-      total: count || 0,
+      total: Number.isFinite(total) ? total : 0,
     };
   }
 

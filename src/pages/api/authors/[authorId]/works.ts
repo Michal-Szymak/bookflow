@@ -72,11 +72,10 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     const { authorId } = pathValidation.data;
 
     // Step 2: Extract and validate query parameters
-    const urlObj = new URL(url);
     const queryParams = {
-      page: urlObj.searchParams.get("page") ? Number(urlObj.searchParams.get("page")) : undefined,
-      sort: urlObj.searchParams.get("sort") || undefined,
-      forceRefresh: urlObj.searchParams.get("forceRefresh") || undefined,
+      page: url.searchParams.get("page") ?? undefined,
+      sort: url.searchParams.get("sort") ?? undefined,
+      forceRefresh: url.searchParams.get("forceRefresh") ?? undefined,
     };
 
     const queryValidation = AuthorWorksListQuerySchema.safeParse(queryParams);
