@@ -432,4 +432,72 @@ export class AuthorsService {
 
     return data !== null;
   }
+
+  /**
+   * Detaches an author from a user's profile.
+   * Cascades deletion of all user_works records for works by this author.
+   * Database triggers automatically update author_count and work_count in profiles.
+   *
+   * Operations performed:
+   * 1. Finds all works by the author via author_works table
+   * 2. Deletes all user_works records for those works belonging to the user
+   * 3. Deletes the user_authors record
+   *
+   * Note: The author itself is NOT deleted from the authors table.
+   * Only the user-author relationship is removed.
+   *
+   * @param userId - User ID to detach author from
+   * @param authorId - Author ID to detach
+   * @throws Error if author is not attached, RLS violation, or database operation fails
+   */
+  async detachUserAuthor(userId: string, authorId: string): Promise<void> {
+    // Step 1: Find all works by this author
+    const { data: authorWorks, error: authorWorksError } = await this.supabase
+      .from("author_works")
+      .select("work_id")
+      .eq("author_id", authorId);
+
+    if (authorWorksError) {
+      throw new Error(`Failed to fetch author works: ${authorWorksError.message}`);
+    }
+
+    // Step 2: Delete all user_works for these works belonging to the user
+    if (authorWorks && authorWorks.length > 0) {
+      const workIds = authorWorks.map((aw) => aw.work_id);
+      const { error: deleteWorksError } = await this.supabase
+        .from("user_works")
+        .delete()
+        .eq("user_id", userId)
+        .in("work_id", workIds);
+
+      if (deleteWorksError) {
+        // Handle RLS policy violations
+        if (deleteWorksError.code === "42501") {
+          throw new Error("Cannot detach author: insufficient permissions");
+        }
+        throw new Error(`Failed to delete user works: ${deleteWorksError.message}`);
+      }
+    }
+
+    // Step 3: Delete the user_authors record
+    const { data, error } = await this.supabase
+      .from("user_authors")
+      .delete()
+      .eq("user_id", userId)
+      .eq("author_id", authorId)
+      .select();
+
+    if (error) {
+      // Handle RLS policy violations
+      if (error.code === "42501") {
+        throw new Error("Cannot detach author: insufficient permissions");
+      }
+      throw new Error(`Failed to detach author: ${error.message}`);
+    }
+
+    // Check if any row was actually deleted
+    if (!data || data.length === 0) {
+      throw new Error("Author is not attached to user profile");
+    }
+  }
 }
