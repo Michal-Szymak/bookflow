@@ -15,7 +15,7 @@ This endpoint does **not require authentication** (anonymous access). However, i
 ### Optional: Using curl with Session Cookie (for logging)
 ```bash
 # If you want to track requests in logs, you can provide a session cookie:
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{"openlibrary_id": "OL23919A"}'
@@ -23,12 +23,12 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 
 ### Using curl without Authentication (default)
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{"openlibrary_id": "OL23919A"}'
 ```
 
-**Note:** Replace `localhost:4321` with your dev server URL if different.
+**Note:** Replace `localhost:3000` with your dev server URL if different.
 
 ---
 
@@ -39,7 +39,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{
     "openlibrary_id": "OL23919A"
@@ -105,7 +105,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{
     "openlibrary_id": "OL23919A"
@@ -143,7 +143,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{
     "openlibrary_id": "OL23919A"
@@ -174,7 +174,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
@@ -210,7 +210,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 
 **Request (Long Format - Should be Rejected):**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{
     "openlibrary_id": "/authors/OL23919A"
@@ -235,7 +235,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 
 **Request (Leading Slash - Should be Rejected):**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{
     "openlibrary_id": "/OL23919A"
@@ -248,7 +248,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 
 **Request (Too Long - Should be Rejected):**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{
     "openlibrary_id": "OL23919A" + "X".repeat(20)
@@ -277,7 +277,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{
     "openlibrary_id": "OL99999Z"
@@ -316,7 +316,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{
     "openlibrary_id": "OL23919A"
@@ -351,7 +351,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{invalid json}'
 ```
@@ -388,17 +388,17 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
 **Request (Run multiple times simultaneously):**
 ```bash
 # Terminal 1
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{"openlibrary_id": "OL23919A"}' &
 
 # Terminal 2 (run immediately after Terminal 1)
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{"openlibrary_id": "OL23919A"}' &
 
 # Terminal 3 (run immediately after Terminal 2)
-curl -X POST "http://localhost:4321/api/openlibrary/import/author" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/author" \
   -H "Content-Type: application/json" \
   -d '{"openlibrary_id": "OL23919A"}' &
 

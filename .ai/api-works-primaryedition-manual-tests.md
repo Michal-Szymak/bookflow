@@ -15,7 +15,7 @@ This endpoint **requires authentication**. Use an access token or session cookie
 
 ### Using curl with Authorization header
 ```bash
-curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
+curl -X POST "http://localhost:3000/api/works/<work_uuid>/primary-edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{"edition_id":"<edition_uuid>"}'
@@ -23,13 +23,13 @@ curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
 
 ### Using curl with Session Cookie
 ```bash
-curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
+curl -X POST "http://localhost:3000/api/works/<work_uuid>/primary-edition" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{"edition_id":"<edition_uuid>"}'
 ```
 
-**Note:** Replace `localhost:4321` with your dev server URL if different.
+**Note:** Replace `localhost:3000` with your dev server URL if different.
 
 ---
 
@@ -40,7 +40,7 @@ curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
+curl -X POST "http://localhost:3000/api/works/<work_uuid>/primary-edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -77,7 +77,7 @@ curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works/not-a-uuid/primary-edition" \
+curl -X POST "http://localhost:3000/api/works/not-a-uuid/primary-edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{"edition_id":"<edition_uuid>"}'
@@ -94,7 +94,7 @@ curl -X POST "http://localhost:4321/api/works/not-a-uuid/primary-edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
+curl -X POST "http://localhost:3000/api/works/<work_uuid>/primary-edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{"edition_id":"not-a-uuid"}'
@@ -111,7 +111,7 @@ curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
+curl -X POST "http://localhost:3000/api/works/<work_uuid>/primary-edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{"edition_id":'
@@ -128,7 +128,7 @@ curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works/<missing_work_uuid>/primary-edition" \
+curl -X POST "http://localhost:3000/api/works/<missing_work_uuid>/primary-edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{"edition_id":"<edition_uuid>"}'
@@ -145,7 +145,7 @@ curl -X POST "http://localhost:4321/api/works/<missing_work_uuid>/primary-editio
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
+curl -X POST "http://localhost:3000/api/works/<work_uuid>/primary-edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{"edition_id":"<missing_edition_uuid>"}'
@@ -162,7 +162,7 @@ curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
+curl -X POST "http://localhost:3000/api/works/<work_uuid>/primary-edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{"edition_id":"<edition_uuid_from_other_work>"}'
@@ -179,7 +179,7 @@ curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works/<work_uuid>/primary-edition" \
+curl -X POST "http://localhost:3000/api/works/<work_uuid>/primary-edition" \
   -H "Content-Type: application/json" \
   -d '{"edition_id":"<edition_uuid>"}'
 ```

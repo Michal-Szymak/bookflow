@@ -15,7 +15,7 @@ This endpoint **requires authentication**. Use an access token or session cookie
 
 ### Using curl with Authorization header
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{"openlibrary_id":"OL7353617M","work_id":"<work_uuid>"}'
@@ -23,13 +23,13 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
 
 ### Using curl with Session Cookie
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{"openlibrary_id":"OL7353617M","work_id":"<work_uuid>"}'
 ```
 
-**Note:** Replace `localhost:4321` with your dev server URL if different.
+**Note:** Replace `localhost:3000` with your dev server URL if different.
 
 ---
 
@@ -40,7 +40,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -118,7 +118,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{}'
@@ -135,7 +135,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -155,7 +155,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -175,7 +175,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -195,7 +195,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -215,7 +215,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
   -d '{
     "openlibrary_id": "OL7353617M",
@@ -242,7 +242,7 @@ curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/openlibrary/import/edition" \
+curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{invalid json}'

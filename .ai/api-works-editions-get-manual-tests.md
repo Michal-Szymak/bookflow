@@ -12,17 +12,17 @@ This endpoint does **not** require authentication, but RLS may restrict visibili
 
 ### Using curl with Authorization header (if needed)
 ```bash
-curl -X GET "http://localhost:4321/api/works/<work_uuid>/editions" \
+curl -X GET "http://localhost:3000/api/works/<work_uuid>/editions" \
   -H "Authorization: Bearer <access_token>"
 ```
 
 ### Using curl with Session Cookie (if needed)
 ```bash
-curl -X GET "http://localhost:4321/api/works/<work_uuid>/editions" \
+curl -X GET "http://localhost:3000/api/works/<work_uuid>/editions" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>"
 ```
 
-**Note:** Replace `localhost:4321` with your dev server URL if different.
+**Note:** Replace `localhost:3000` with your dev server URL if different.
 
 ---
 
@@ -33,7 +33,7 @@ curl -X GET "http://localhost:4321/api/works/<work_uuid>/editions" \
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/works/<work_with_editions_uuid>/editions"
+curl -X GET "http://localhost:3000/api/works/<work_with_editions_uuid>/editions"
 ```
 
 **Expected Response:**
@@ -53,7 +53,7 @@ curl -X GET "http://localhost:4321/api/works/<work_with_editions_uuid>/editions"
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/works/<work_without_editions_uuid>/editions"
+curl -X GET "http://localhost:3000/api/works/<work_without_editions_uuid>/editions"
 ```
 
 **Expected Response:**
@@ -67,7 +67,7 @@ curl -X GET "http://localhost:4321/api/works/<work_without_editions_uuid>/editio
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/works/not-a-uuid/editions"
+curl -X GET "http://localhost:3000/api/works/not-a-uuid/editions"
 ```
 
 **Expected Response:**
@@ -81,7 +81,7 @@ curl -X GET "http://localhost:4321/api/works/not-a-uuid/editions"
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/works/00000000-0000-4000-8000-000000000000/editions"
+curl -X GET "http://localhost:3000/api/works/00000000-0000-4000-8000-000000000000/editions"
 ```
 
 **Expected Response:**
@@ -95,7 +95,7 @@ curl -X GET "http://localhost:4321/api/works/00000000-0000-4000-8000-00000000000
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/works/<restricted_work_uuid>/editions"
+curl -X GET "http://localhost:3000/api/works/<restricted_work_uuid>/editions"
 ```
 
 **Expected Response:**

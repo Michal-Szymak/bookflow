@@ -21,7 +21,7 @@ This endpoint requires authentication. You need to obtain a valid session token.
 ```bash
 # First, sign in and get session cookie
 # Then use it in subsequent requests:
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{"name": "Test Author", "manual": true}'
@@ -29,7 +29,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 ### Option 3: Using Bearer Token (if supported)
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access-token>" \
   -d '{"name": "Test Author", "manual": true}'
@@ -46,7 +46,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -93,7 +93,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -120,7 +120,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -153,7 +153,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -177,7 +177,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Also test with whitespace only:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -193,7 +193,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d "{
@@ -213,7 +213,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -232,7 +232,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -261,7 +261,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -282,7 +282,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -303,7 +303,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{ invalid json }'
@@ -323,7 +323,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -361,7 +361,7 @@ WHERE user_id = '<your-user-id>';
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -383,7 +383,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -403,7 +403,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -424,7 +424,7 @@ curl -X POST "http://localhost:4321/api/authors" \
 **Request:**
 ```bash
 # Create first author
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{
@@ -433,7 +433,7 @@ curl -X POST "http://localhost:4321/api/authors" \
   }'
 
 # Create second author with same name
-curl -X POST "http://localhost:4321/api/authors" \
+curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{

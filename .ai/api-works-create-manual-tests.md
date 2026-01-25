@@ -13,7 +13,7 @@ This endpoint **requires authentication**. Use an access token or session cookie
 
 ### Using curl with Authorization header
 ```bash
-curl -X POST "http://localhost:4321/api/works" \
+curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{"title":"Test Work","manual":true,"author_ids":["<author_uuid>"]}'
@@ -21,13 +21,13 @@ curl -X POST "http://localhost:4321/api/works" \
 
 ### Using curl with Session Cookie
 ```bash
-curl -X POST "http://localhost:4321/api/works" \
+curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -d '{"title":"Test Work","manual":true,"author_ids":["<author_uuid>"]}'
 ```
 
-**Note:** Replace `localhost:4321` with your dev server URL if different.
+**Note:** Replace `localhost:3000` with your dev server URL if different.
 
 ---
 
@@ -38,7 +38,7 @@ curl -X POST "http://localhost:4321/api/works" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works" \
+curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -69,7 +69,7 @@ curl -X POST "http://localhost:4321/api/works" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works" \
+curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -93,7 +93,7 @@ curl -X POST "http://localhost:4321/api/works" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works" \
+curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -115,7 +115,7 @@ curl -X POST "http://localhost:4321/api/works" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works" \
+curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -141,7 +141,7 @@ curl -X POST "http://localhost:4321/api/works" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works" \
+curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -162,7 +162,7 @@ curl -X POST "http://localhost:4321/api/works" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works" \
+curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -183,7 +183,7 @@ curl -X POST "http://localhost:4321/api/works" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works" \
+curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Unauthorized Work",
@@ -202,7 +202,7 @@ curl -X POST "http://localhost:4321/api/works" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works" \
+curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{
@@ -230,7 +230,7 @@ WHERE user_id = '<user_uuid>';
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/works" \
+curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access_token>" \
   -d '{

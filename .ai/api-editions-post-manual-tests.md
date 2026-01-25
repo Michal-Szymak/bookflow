@@ -13,7 +13,7 @@ This endpoint **requires authentication**.
 
 ### Using curl with Authorization header
 ```bash
-curl -X POST "http://localhost:4321/api/editions" \
+curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -21,13 +21,13 @@ curl -X POST "http://localhost:4321/api/editions" \
 
 ### Using curl with Session Cookie
 ```bash
-curl -X POST "http://localhost:4321/api/editions" \
+curl -X POST "http://localhost:3000/api/editions" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
 
-**Note:** Replace `localhost:4321` with your dev server URL if different.
+**Note:** Replace `localhost:3000` with your dev server URL if different.
 
 ---
 
@@ -38,7 +38,7 @@ curl -X POST "http://localhost:4321/api/editions" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/editions" \
+curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -61,7 +61,7 @@ curl -X POST "http://localhost:4321/api/editions" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/editions" \
+curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -81,7 +81,7 @@ curl -X POST "http://localhost:4321/api/editions" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/editions" \
+curl -X POST "http://localhost:3000/api/editions" \
   -H "Content-Type: application/json" \
   -d '{
     "work_id": "<work_uuid>",
@@ -101,7 +101,7 @@ curl -X POST "http://localhost:4321/api/editions" \
 
 **Request:**
 ```bash
-curl -X POST "http://localhost:4321/api/editions" \
+curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -122,7 +122,7 @@ curl -X POST "http://localhost:4321/api/editions" \
 
 **Request 1:**
 ```bash
-curl -X POST "http://localhost:4321/api/editions" \
+curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -135,7 +135,7 @@ curl -X POST "http://localhost:4321/api/editions" \
 
 **Request 2:**
 ```bash
-curl -X POST "http://localhost:4321/api/editions" \
+curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{

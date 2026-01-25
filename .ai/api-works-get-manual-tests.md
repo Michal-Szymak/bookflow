@@ -15,17 +15,17 @@ If you want to validate user-specific visibility, use an access token or session
 
 ### Using curl with Authorization header (optional)
 ```bash
-curl -X GET "http://localhost:4321/api/works/<work_uuid>" \
+curl -X GET "http://localhost:3000/api/works/<work_uuid>" \
   -H "Authorization: Bearer <access_token>"
 ```
 
 ### Using curl with Session Cookie (optional)
 ```bash
-curl -X GET "http://localhost:4321/api/works/<work_uuid>" \
+curl -X GET "http://localhost:3000/api/works/<work_uuid>" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>"
 ```
 
-**Note:** Replace `localhost:4321` with your dev server URL if different.
+**Note:** Replace `localhost:3000` with your dev server URL if different.
 
 ---
 
@@ -36,7 +36,7 @@ curl -X GET "http://localhost:4321/api/works/<work_uuid>" \
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/works/<work_with_primary_edition_uuid>"
+curl -X GET "http://localhost:3000/api/works/<work_with_primary_edition_uuid>"
 ```
 
 **Expected Response:**
@@ -52,7 +52,7 @@ curl -X GET "http://localhost:4321/api/works/<work_with_primary_edition_uuid>"
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/works/<work_without_primary_edition_uuid>"
+curl -X GET "http://localhost:3000/api/works/<work_without_primary_edition_uuid>"
 ```
 
 **Expected Response:**
@@ -68,7 +68,7 @@ curl -X GET "http://localhost:4321/api/works/<work_without_primary_edition_uuid>
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/works/not-a-uuid"
+curl -X GET "http://localhost:3000/api/works/not-a-uuid"
 ```
 
 **Expected Response:**
@@ -82,7 +82,7 @@ curl -X GET "http://localhost:4321/api/works/not-a-uuid"
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/works/00000000-0000-0000-0000-000000000000"
+curl -X GET "http://localhost:3000/api/works/00000000-0000-0000-0000-000000000000"
 ```
 
 **Expected Response:**
@@ -98,7 +98,7 @@ curl -X GET "http://localhost:4321/api/works/00000000-0000-0000-0000-00000000000
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/works/<restricted_work_uuid>" \
+curl -X GET "http://localhost:3000/api/works/<restricted_work_uuid>" \
   -H "Authorization: Bearer <access_token_of_user_without_access>"
 ```
 

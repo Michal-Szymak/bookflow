@@ -15,17 +15,17 @@ If you want to validate user-specific visibility, use an access token or session
 
 ### Using curl with Authorization header (optional)
 ```bash
-curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works" \
+curl -X GET "http://localhost:3000/api/authors/<author_uuid>/works" \
   -H "Authorization: Bearer <access_token>"
 ```
 
 ### Using curl with Session Cookie (optional)
 ```bash
-curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works" \
+curl -X GET "http://localhost:3000/api/authors/<author_uuid>/works" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>"
 ```
 
-**Note:** Replace `localhost:4321` with your dev server URL if different.
+**Note:** Replace `localhost:3000` with your dev server URL if different.
 
 ---
 
@@ -36,7 +36,7 @@ curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works" \
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works"
+curl -X GET "http://localhost:3000/api/authors/<author_uuid>/works"
 ```
 
 **Expected Response:**
@@ -52,7 +52,7 @@ curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works"
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works?page=2"
+curl -X GET "http://localhost:3000/api/authors/<author_uuid>/works?page=2"
 ```
 
 **Expected Response:**
@@ -67,7 +67,7 @@ curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works?page=2"
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works?sort=title_asc"
+curl -X GET "http://localhost:3000/api/authors/<author_uuid>/works?sort=title_asc"
 ```
 
 **Expected Response:**
@@ -86,7 +86,7 @@ curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works?sort=title_as
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works?sort=published_desc"
+curl -X GET "http://localhost:3000/api/authors/<author_uuid>/works?sort=published_desc"
 ```
 
 **Expected Response:**
@@ -100,7 +100,7 @@ curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works?sort=publishe
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/not-a-uuid/works"
+curl -X GET "http://localhost:3000/api/authors/not-a-uuid/works"
 ```
 
 **Expected Response:**
@@ -114,7 +114,7 @@ curl -X GET "http://localhost:4321/api/authors/not-a-uuid/works"
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works?page=0"
+curl -X GET "http://localhost:3000/api/authors/<author_uuid>/works?page=0"
 ```
 
 **Expected Response:**
@@ -128,7 +128,7 @@ curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works?page=0"
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works?sort=invalid"
+curl -X GET "http://localhost:3000/api/authors/<author_uuid>/works?sort=invalid"
 ```
 
 **Expected Response:**
@@ -142,7 +142,7 @@ curl -X GET "http://localhost:4321/api/authors/<author_uuid>/works?sort=invalid"
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/<missing_author_uuid>/works"
+curl -X GET "http://localhost:3000/api/authors/<missing_author_uuid>/works"
 ```
 
 **Expected Response:**
@@ -156,7 +156,7 @@ curl -X GET "http://localhost:4321/api/authors/<missing_author_uuid>/works"
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/<ol_author_uuid>/works?forceRefresh=true"
+curl -X GET "http://localhost:3000/api/authors/<ol_author_uuid>/works?forceRefresh=true"
 ```
 
 **Expected Response:**
@@ -171,7 +171,7 @@ curl -X GET "http://localhost:4321/api/authors/<ol_author_uuid>/works?forceRefre
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/<manual_author_uuid>/works?forceRefresh=true"
+curl -X GET "http://localhost:3000/api/authors/<manual_author_uuid>/works?forceRefresh=true"
 ```
 
 **Expected Response:**

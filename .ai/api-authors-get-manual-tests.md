@@ -19,25 +19,25 @@ For testing RLS behavior, you can optionally provide authentication:
 
 ### Using curl without Authentication (default)
 ```bash
-curl -X GET "http://localhost:4321/api/authors/{authorId}" \
+curl -X GET "http://localhost:3000/api/authors/{authorId}" \
   -H "Content-Type: application/json"
 ```
 
 ### Using curl with Session Cookie (for RLS testing)
 ```bash
-curl -X GET "http://localhost:4321/api/authors/{authorId}" \
+curl -X GET "http://localhost:3000/api/authors/{authorId}" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>"
 ```
 
 ### Using Bearer Token (if supported)
 ```bash
-curl -X GET "http://localhost:4321/api/authors/{authorId}" \
+curl -X GET "http://localhost:3000/api/authors/{authorId}" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access-token>"
 ```
 
-**Note:** Replace `localhost:4321` with your dev server URL if different. Replace `{authorId}` with actual UUID.
+**Note:** Replace `localhost:3000` with your dev server URL if different. Replace `{authorId}` with actual UUID.
 
 ---
 
@@ -55,7 +55,7 @@ curl -X GET "http://localhost:4321/api/authors/{authorId}" \
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/550e8400-e29b-41d4-a716-446655440000" \
+curl -X GET "http://localhost:3000/api/authors/550e8400-e29b-41d4-a716-446655440000" \
   -H "Content-Type: application/json"
 ```
 
@@ -112,7 +112,7 @@ curl -X GET "http://localhost:4321/api/authors/550e8400-e29b-41d4-a716-446655440
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/550e8400-e29b-41d4-a716-446655440000" \
+curl -X GET "http://localhost:3000/api/authors/550e8400-e29b-41d4-a716-446655440000" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>"
 ```
@@ -175,7 +175,7 @@ curl -X GET "http://localhost:4321/api/authors/550e8400-e29b-41d4-a716-446655440
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/550e8400-e29b-41d4-a716-446655440000" \
+curl -X GET "http://localhost:3000/api/authors/550e8400-e29b-41d4-a716-446655440000" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<user-b-session-token>"
 ```
@@ -207,7 +207,7 @@ curl -X GET "http://localhost:4321/api/authors/550e8400-e29b-41d4-a716-446655440
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/invalid-uuid" \
+curl -X GET "http://localhost:3000/api/authors/invalid-uuid" \
   -H "Content-Type: application/json"
 ```
 
@@ -246,7 +246,7 @@ curl -X GET "http://localhost:4321/api/authors/invalid-uuid" \
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/550e8400-e29b-41d4-a716-446655440000" \
+curl -X GET "http://localhost:3000/api/authors/550e8400-e29b-41d4-a716-446655440000" \
   -H "Content-Type: application/json"
 ```
 
@@ -286,7 +286,7 @@ uuidgen
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/" \
+curl -X GET "http://localhost:3000/api/authors/" \
   -H "Content-Type: application/json"
 ```
 
@@ -313,7 +313,7 @@ curl -X GET "http://localhost:4321/api/authors/" \
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/$(python3 -c 'print("a" * 1000)')" \
+curl -X GET "http://localhost:3000/api/authors/$(python3 -c 'print("a" * 1000)')" \
   -H "Content-Type: application/json"
 ```
 
@@ -327,7 +327,7 @@ curl -X GET "http://localhost:4321/api/authors/$(python3 -c 'print("a" * 1000)')
 
 **Request:**
 ```bash
-curl -X GET "http://localhost:4321/api/authors/550e8400-e29b-41d4-a716-446655440000'; DROP TABLE authors;--" \
+curl -X GET "http://localhost:3000/api/authors/550e8400-e29b-41d4-a716-446655440000'; DROP TABLE authors;--" \
   -H "Content-Type: application/json"
 ```
 
@@ -363,7 +363,7 @@ curl -X GET "http://localhost:4321/api/authors/550e8400-e29b-41d4-a716-446655440
 
 **Request:**
 ```bash
-time curl -X GET "http://localhost:4321/api/authors/{valid-author-id}" \
+time curl -X GET "http://localhost:3000/api/authors/{valid-author-id}" \
   -H "Content-Type: application/json" \
   -o /dev/null -s -w "%{time_total}\n"
 ```

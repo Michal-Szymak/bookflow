@@ -12,7 +12,7 @@
 
 **Request:**
 ```bash
-curl "http://localhost:4321/api/authors/search?q=tolkien"
+curl "http://localhost:3000/api/authors/search?q=tolkien"
 ```
 
 **Expected Response:** 
@@ -42,7 +42,7 @@ curl "http://localhost:4321/api/authors/search?q=tolkien"
 
 **Request:**
 ```bash
-curl "http://localhost:4321/api/authors/search?q=king&limit=3"
+curl "http://localhost:3000/api/authors/search?q=king&limit=3"
 ```
 
 **Expected Response:**
@@ -56,7 +56,7 @@ curl "http://localhost:4321/api/authors/search?q=king&limit=3"
 
 **Request:**
 ```bash
-curl "http://localhost:4321/api/authors/search"
+curl "http://localhost:3000/api/authors/search"
 ```
 
 **Expected Response:**
@@ -79,8 +79,8 @@ curl "http://localhost:4321/api/authors/search"
 
 **Request:**
 ```bash
-curl "http://localhost:4321/api/authors/search?q="
-curl "http://localhost:4321/api/authors/search?q=%20%20%20"
+curl "http://localhost:3000/api/authors/search?q="
+curl "http://localhost:3000/api/authors/search?q=%20%20%20"
 ```
 
 **Expected Response:**
@@ -94,7 +94,7 @@ curl "http://localhost:4321/api/authors/search?q=%20%20%20"
 
 **Request:**
 ```bash
-curl "http://localhost:4321/api/authors/search?q=$(printf 'a%.0s' {1..201})"
+curl "http://localhost:3000/api/authors/search?q=$(printf 'a%.0s' {1..201})"
 ```
 
 **Expected Response:**
@@ -108,7 +108,7 @@ curl "http://localhost:4321/api/authors/search?q=$(printf 'a%.0s' {1..201})"
 
 **Request:**
 ```bash
-curl "http://localhost:4321/api/authors/search?q=test&limit=0"
+curl "http://localhost:3000/api/authors/search?q=test&limit=0"
 ```
 
 **Expected Response:**
@@ -122,7 +122,7 @@ curl "http://localhost:4321/api/authors/search?q=test&limit=0"
 
 **Request:**
 ```bash
-curl "http://localhost:4321/api/authors/search?q=test&limit=100"
+curl "http://localhost:3000/api/authors/search?q=test&limit=100"
 ```
 
 **Expected Response:**
@@ -136,7 +136,7 @@ curl "http://localhost:4321/api/authors/search?q=test&limit=100"
 
 **Request:**
 ```bash
-curl "http://localhost:4321/api/authors/search?q=test&limit=abc"
+curl "http://localhost:3000/api/authors/search?q=test&limit=abc"
 ```
 
 **Expected Response:**
@@ -150,7 +150,7 @@ curl "http://localhost:4321/api/authors/search?q=test&limit=abc"
 
 **Step 1 - First Request:**
 ```bash
-curl "http://localhost:4321/api/authors/search?q=asimov&limit=1"
+curl "http://localhost:3000/api/authors/search?q=asimov&limit=1"
 ```
 - Should fetch from OpenLibrary
 - May not have `id` field if author doesn't exist in DB
@@ -158,7 +158,7 @@ curl "http://localhost:4321/api/authors/search?q=asimov&limit=1"
 
 **Step 2 - Second Request (immediately after):**
 ```bash
-curl "http://localhost:4321/api/authors/search?q=asimov&limit=1"
+curl "http://localhost:3000/api/authors/search?q=asimov&limit=1"
 ```
 - Should include `id` field (author now cached in DB)
 - Same `ol_fetched_at` and `ol_expires_at` as first request
@@ -175,7 +175,7 @@ curl "http://localhost:4321/api/authors/search?q=asimov&limit=1"
 
 **Request:**
 ```bash
-curl "http://localhost:4321/api/authors/search?q=xyzxyzxyznonexistent123456"
+curl "http://localhost:3000/api/authors/search?q=xyzxyzxyznonexistent123456"
 ```
 
 **Expected Response:**
@@ -194,8 +194,8 @@ curl "http://localhost:4321/api/authors/search?q=xyzxyzxyznonexistent123456"
 ## Browser Testing (Optional)
 
 You can also test in browser by navigating to:
-- http://localhost:4321/api/authors/search?q=tolkien
-- http://localhost:4321/api/authors/search?q=king&limit=5
+- http://localhost:3000/api/authors/search?q=tolkien
+- http://localhost:3000/api/authors/search?q=king&limit=5
 
 The response should be displayed as JSON.
 

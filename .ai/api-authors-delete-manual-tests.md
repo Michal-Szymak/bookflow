@@ -21,14 +21,14 @@ This endpoint **requires authentication**. You need to obtain a valid session to
 ```bash
 # First, sign in and get session cookie
 # Then use it in subsequent requests:
-curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
+curl -X DELETE "http://localhost:3000/api/authors/{authorId}" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>"
 ```
 
 ### Option 3: Using Bearer Token (if supported)
 ```bash
-curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
+curl -X DELETE "http://localhost:3000/api/authors/{authorId}" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <access-token>"
 ```
@@ -54,7 +54,7 @@ curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
 
 **Request:**
 ```bash
-curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
+curl -X DELETE "http://localhost:3000/api/authors/{authorId}" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>"
 ```
@@ -97,7 +97,7 @@ curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
 
 **Request:**
 ```bash
-curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
+curl -X DELETE "http://localhost:3000/api/authors/{authorId}" \
   -H "Content-Type: application/json"
 ```
 
@@ -125,7 +125,7 @@ curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
 
 **Request:**
 ```bash
-curl -X DELETE "http://localhost:4321/api/authors/invalid-uuid-format" \
+curl -X DELETE "http://localhost:3000/api/authors/invalid-uuid-format" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>"
 ```
@@ -187,7 +187,7 @@ curl -X DELETE "http://localhost:4321/api/authors/invalid-uuid-format" \
 
 **Request:**
 ```bash
-curl -X DELETE "http://localhost:4321/api/authors/00000000-0000-0000-0000-000000000000" \
+curl -X DELETE "http://localhost:3000/api/authors/00000000-0000-0000-0000-000000000000" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>"
 ```
@@ -223,7 +223,7 @@ curl -X DELETE "http://localhost:4321/api/authors/00000000-0000-0000-0000-000000
 
 **Request:**
 ```bash
-curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
+curl -X DELETE "http://localhost:3000/api/authors/{authorId}" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>"
 ```
@@ -262,7 +262,7 @@ curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
 
 **Request:**
 ```bash
-curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
+curl -X DELETE "http://localhost:3000/api/authors/{authorId}" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token-for-user-a>"
 ```
@@ -317,7 +317,7 @@ curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
 
 **Request:**
 ```bash
-curl -X DELETE "http://localhost:4321/api/authors/{authorId}" \
+curl -X DELETE "http://localhost:3000/api/authors/{authorId}" \
   -H "Content-Type: application/json" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>"
 ```
