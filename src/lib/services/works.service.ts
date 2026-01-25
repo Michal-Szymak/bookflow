@@ -7,6 +7,7 @@ import type {
   WorkListItemDto,
   UserWorkItemDto,
   UserWorkStatus,
+  UpdateUserWorkCommand,
 } from "@/types";
 import type { CreateWorkCommand } from "@/types";
 
@@ -879,6 +880,243 @@ export class WorksService {
     if (!data || data.length === 0) {
       throw new Error("Work is not attached to user profile");
     }
+  }
+
+  /**
+   * Fetches user work data with full work and primary edition details.
+   * Uses JOIN to efficiently retrieve all related data in a single query.
+   *
+   * @param userId - User ID to fetch works for
+   * @param workIds - Array of work IDs to fetch (empty array returns empty result)
+   * @returns Array of UserWorkItemDto for found works
+   * @throws Error if database query fails
+   */
+  private async fetchUserWorksWithDetails(userId: string, workIds: string[]): Promise<UserWorkItemDto[]> {
+    if (workIds.length === 0) {
+      return [];
+    }
+
+    // Step 1: Fetch user_works records
+    const { data: userWorks, error: userWorksError } = await this.supabase
+      .from("user_works")
+      .select("status, available_in_legimi, status_updated_at, created_at, updated_at, work_id")
+      .eq("user_id", userId)
+      .in("work_id", workIds);
+
+    if (userWorksError) {
+      throw new Error(`Failed to fetch user works: ${userWorksError.message}`);
+    }
+
+    if (!userWorks || userWorks.length === 0) {
+      return [];
+    }
+
+    // Step 2: Fetch works for these work IDs
+    const fetchedWorkIds = userWorks.map((uw) => uw.work_id);
+    const { data: works, error: worksError } = await this.supabase
+      .from("works")
+      .select(
+        "id, title, openlibrary_id, first_publish_year, primary_edition_id, manual, owner_user_id, created_at, updated_at"
+      )
+      .in("id", fetchedWorkIds);
+
+    if (worksError) {
+      throw new Error(`Failed to fetch works: ${worksError.message}`);
+    }
+
+    if (!works || works.length === 0) {
+      return [];
+    }
+
+    // Step 3: Fetch primary editions for works that have them
+    const primaryEditionIds = works.map((w) => w.primary_edition_id).filter((id): id is string => id !== null);
+    const editionsMap = new Map<string, PrimaryEditionSummaryDto>();
+
+    if (primaryEditionIds.length > 0) {
+      const { data: editions, error: editionsError } = await this.supabase
+        .from("editions")
+        .select("id, title, openlibrary_id, publish_year, publish_date, publish_date_raw, isbn13, cover_url, language")
+        .in("id", primaryEditionIds);
+
+      if (editionsError) {
+        throw new Error(`Failed to fetch editions: ${editionsError.message}`);
+      }
+
+      if (editions) {
+        for (const edition of editions) {
+          editionsMap.set(edition.id, {
+            id: edition.id,
+            title: edition.title,
+            openlibrary_id: edition.openlibrary_id,
+            publish_year: edition.publish_year,
+            publish_date: edition.publish_date,
+            publish_date_raw: edition.publish_date_raw,
+            isbn13: edition.isbn13,
+            cover_url: edition.cover_url,
+            language: edition.language,
+          });
+        }
+      }
+    }
+
+    // Step 4: Build a map of work_id -> work for quick lookup
+    const worksMap = new Map<string, WorkRow>();
+    for (const work of works) {
+      worksMap.set(work.id, work);
+    }
+
+    // Step 5: Transform the data to UserWorkItemDto format
+    return userWorks.map((userWork) => {
+      const work = worksMap.get(userWork.work_id);
+      if (!work) {
+        // This should not happen, but handle gracefully
+        throw new Error(`Work ${userWork.work_id} not found in works map`);
+      }
+
+      // Get primary edition if it exists
+      const primaryEdition = work.primary_edition_id ? (editionsMap.get(work.primary_edition_id) ?? null) : null;
+
+      const workWithEdition: WorkWithPrimaryEditionDto = {
+        id: work.id,
+        title: work.title,
+        openlibrary_id: work.openlibrary_id,
+        first_publish_year: work.first_publish_year,
+        primary_edition_id: work.primary_edition_id,
+        manual: work.manual,
+        owner_user_id: work.owner_user_id,
+        created_at: work.created_at,
+        updated_at: work.updated_at,
+        primary_edition: primaryEdition,
+      };
+
+      return {
+        work: workWithEdition,
+        status: userWork.status,
+        available_in_legimi: userWork.available_in_legimi,
+        status_updated_at: userWork.status_updated_at,
+        created_at: userWork.created_at,
+        updated_at: userWork.updated_at,
+      };
+    });
+  }
+
+  /**
+   * Updates a user work's status and/or availability in Legimi.
+   * Verifies that the work is attached to the user before updating.
+   * Database trigger automatically updates status_updated_at when status changes.
+   *
+   * @param userId - User ID who owns the work
+   * @param workId - Work ID to update
+   * @param data - Update data (status and/or available_in_legimi)
+   * @returns UserWorkItemDto with updated data, or null if work is not attached
+   * @throws Error if database operation fails
+   */
+  async updateUserWork(userId: string, workId: string, data: UpdateUserWorkCommand): Promise<UserWorkItemDto | null> {
+    // Build update object with only provided fields
+    const updateData: Partial<{
+      status: UserWorkStatus;
+      available_in_legimi: boolean | null;
+    }> = {};
+
+    if (data.status !== undefined) {
+      updateData.status = data.status;
+    }
+
+    if (data.available_in_legimi !== undefined) {
+      updateData.available_in_legimi = data.available_in_legimi;
+    }
+
+    // Update the user_works record
+    const { data: updatedRows, error: updateError } = await this.supabase
+      .from("user_works")
+      .update(updateData)
+      .eq("user_id", userId)
+      .eq("work_id", workId)
+      .select();
+
+    if (updateError) {
+      // Handle RLS policy violations
+      if (updateError.code === "42501") {
+        throw new Error("Cannot update work: insufficient permissions");
+      }
+      throw new Error(`Failed to update user work: ${updateError.message}`);
+    }
+
+    // Check if any row was actually updated (work must be attached)
+    if (!updatedRows || updatedRows.length === 0) {
+      return null;
+    }
+
+    // Fetch the updated data with full work and edition details
+    const userWorks = await this.fetchUserWorksWithDetails(userId, [workId]);
+
+    if (userWorks.length === 0) {
+      // This should not happen, but handle gracefully
+      return null;
+    }
+
+    return userWorks[0];
+  }
+
+  /**
+   * Bulk updates user works' status and/or availability in Legimi.
+   * Only updates works that are attached to the user (skips unattached works).
+   * Database trigger automatically updates status_updated_at when status changes.
+   *
+   * @param userId - User ID who owns the works
+   * @param workIds - Array of work IDs to update
+   * @param data - Update data (status and/or available_in_legimi) to apply to all works
+   * @returns Array of UserWorkItemDto for successfully updated works
+   * @throws Error if database operation fails
+   */
+  async bulkUpdateUserWorks(
+    userId: string,
+    workIds: string[],
+    data: UpdateUserWorkCommand
+  ): Promise<UserWorkItemDto[]> {
+    if (workIds.length === 0) {
+      return [];
+    }
+
+    // Build update object with only provided fields
+    const updateData: Partial<{
+      status: UserWorkStatus;
+      available_in_legimi: boolean | null;
+    }> = {};
+
+    if (data.status !== undefined) {
+      updateData.status = data.status;
+    }
+
+    if (data.available_in_legimi !== undefined) {
+      updateData.available_in_legimi = data.available_in_legimi;
+    }
+
+    // Bulk update all user_works records for the specified work IDs
+    const { data: updatedRows, error: updateError } = await this.supabase
+      .from("user_works")
+      .update(updateData)
+      .eq("user_id", userId)
+      .in("work_id", workIds)
+      .select("work_id");
+
+    if (updateError) {
+      // Handle RLS policy violations
+      if (updateError.code === "42501") {
+        throw new Error("Cannot update works: insufficient permissions");
+      }
+      throw new Error(`Failed to bulk update user works: ${updateError.message}`);
+    }
+
+    // Get the work IDs that were actually updated (only attached works)
+    const updatedWorkIds = updatedRows?.map((row) => row.work_id) || [];
+
+    if (updatedWorkIds.length === 0) {
+      return [];
+    }
+
+    // Fetch the updated data with full work and edition details
+    return await this.fetchUserWorksWithDetails(userId, updatedWorkIds);
   }
 
   private extractIdFromRpcResult(result: unknown, keys: string[]): string | null {
