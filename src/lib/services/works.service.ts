@@ -5,6 +5,7 @@ import type {
   WorkWithPrimaryEditionDto,
   PrimaryEditionSummaryDto,
   WorkListItemDto,
+  UserWorkStatus,
 } from "@/types";
 import type { CreateWorkCommand } from "@/types";
 
@@ -534,6 +535,162 @@ export class WorksService {
       items,
       total: Number.isFinite(total) ? total : 0,
     };
+  }
+
+  /**
+   * Verifies that all provided work IDs exist and are accessible to the user.
+   * Uses batch lookup with IN clause for efficiency.
+   * Respects RLS policies - only returns works accessible to the user.
+   *
+   * @param workIds - Array of work UUIDs to verify
+   * @returns Array of available work IDs (filtered by RLS)
+   * @throws Error if database query fails
+   */
+  async verifyWorksExist(workIds: string[]): Promise<string[]> {
+    if (workIds.length === 0) {
+      return [];
+    }
+
+    // Batch lookup all works at once
+    const { data: works, error } = await this.supabase.from("works").select("id").in("id", workIds);
+
+    if (error) {
+      throw new Error(`Failed to verify works: ${error.message}`);
+    }
+
+    // Return only accessible work IDs (RLS automatically filters)
+    return works?.map((w) => w.id) || [];
+  }
+
+  /**
+   * Finds existing user-work relationships for the given user and work IDs.
+   * Uses batch lookup with IN clause for efficiency.
+   * Respects RLS policies - only returns relationships accessible to the user.
+   *
+   * @param userId - User ID to check relationships for
+   * @param workIds - Array of work UUIDs to check
+   * @returns Array of work IDs that are already attached to the user
+   * @throws Error if database query fails
+   */
+  async findExistingUserWorks(userId: string, workIds: string[]): Promise<string[]> {
+    if (workIds.length === 0) {
+      return [];
+    }
+
+    // Batch lookup all existing relationships at once
+    const { data: userWorks, error } = await this.supabase
+      .from("user_works")
+      .select("work_id")
+      .eq("user_id", userId)
+      .in("work_id", workIds);
+
+    if (error) {
+      throw new Error(`Failed to find existing user works: ${error.message}`);
+    }
+
+    // Return work IDs that are already attached
+    return userWorks?.map((uw) => uw.work_id) || [];
+  }
+
+  /**
+   * Bulk attaches works to user's profile with deduplication and limit checking.
+   * Performs the following steps:
+   * 1. Verifies user work limit
+   * 2. Verifies works exist and are accessible (RLS)
+   * 3. Checks for duplicates (already attached works)
+   * 4. Validates limit after deduplication
+   * 5. Inserts new relationships
+   * 6. Returns lists of added and skipped work IDs
+   *
+   * @param userId - User ID to attach works to
+   * @param workIds - Array of work UUIDs to attach (should be deduplicated before calling)
+   * @param status - Initial status for newly attached works (default: "to_read")
+   * @returns Object with added and skipped work ID arrays
+   * @throws Error with appropriate message for various failure scenarios
+   */
+  async bulkAttachUserWorks(
+    userId: string,
+    workIds: string[],
+    status: UserWorkStatus = "to_read"
+  ): Promise<{ added: string[]; skipped: string[] }> {
+    if (workIds.length === 0) {
+      return { added: [], skipped: [] };
+    }
+
+    // Step 1: Check user work limit
+    const { workCount, maxWorks } = await this.checkUserWorkLimit(userId);
+
+    // Step 2: Verify works exist and are accessible (RLS)
+    const availableWorkIds = await this.verifyWorksExist(workIds);
+    const unavailableWorkIds = workIds.filter((id) => !availableWorkIds.includes(id));
+
+    // Step 3: Check for duplicates (already attached works)
+    const existingWorkIds = await this.findExistingUserWorks(userId, availableWorkIds);
+    const newWorkIds = availableWorkIds.filter((id) => !existingWorkIds.includes(id));
+
+    // Step 4: Verify limit after deduplication
+    const newWorksCount = newWorkIds.length;
+    if (workCount + newWorksCount > maxWorks) {
+      throw new Error(`Work limit reached (${maxWorks} works per user)`);
+    }
+
+    // Step 5: Insert new relationships
+    if (newWorkIds.length === 0) {
+      // All works are either unavailable or already attached
+      return {
+        added: [],
+        skipped: [...unavailableWorkIds, ...existingWorkIds],
+      };
+    }
+
+    const recordsToInsert = newWorkIds.map((workId) => ({
+      user_id: userId,
+      work_id: workId,
+      status,
+      available_in_legimi: null,
+    }));
+
+    const { data: insertedData, error: insertError } = await this.supabase
+      .from("user_works")
+      .insert(recordsToInsert)
+      .select("work_id");
+
+    if (insertError) {
+      const errorMessage = insertError.message;
+      const errorCode = insertError.code;
+
+      // Handle unique constraint violation (race condition - duplicate detected during insert)
+      if (errorCode === "23505") {
+        // Some works were added between our check and insert
+        // Re-check which ones were actually inserted
+        const actuallyInserted = await this.findExistingUserWorks(userId, newWorkIds);
+        const raceConditionSkipped = newWorkIds.filter((id) => !actuallyInserted.includes(id));
+
+        return {
+          added: actuallyInserted,
+          skipped: [...unavailableWorkIds, ...existingWorkIds, ...raceConditionSkipped],
+        };
+      }
+
+      // Handle trigger error (limit exceeded in database)
+      if (errorMessage.includes("work limit") || errorMessage.includes("max_works")) {
+        throw new Error(`Work limit reached (${maxWorks} works per user)`);
+      }
+
+      // Handle RLS violations
+      if (errorCode === "42501") {
+        throw new Error("Cannot attach works: insufficient permissions");
+      }
+
+      // Generic database error
+      throw new Error(`Failed to attach works: ${errorMessage}`);
+    }
+
+    // Step 6: Prepare response
+    const added = insertedData?.map((row) => row.work_id) || [];
+    const skipped = [...unavailableWorkIds, ...existingWorkIds];
+
+    return { added, skipped };
   }
 
   private extractIdFromRpcResult(result: unknown, keys: string[]): string | null {
