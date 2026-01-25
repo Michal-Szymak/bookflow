@@ -5,6 +5,7 @@ import type {
   WorkWithPrimaryEditionDto,
   PrimaryEditionSummaryDto,
   WorkListItemDto,
+  UserWorkItemDto,
   UserWorkStatus,
 } from "@/types";
 import type { CreateWorkCommand } from "@/types";
@@ -528,6 +529,135 @@ export class WorksService {
         updated_at: row.updated_at,
         primary_edition: primaryEdition,
         publish_year: row.publish_year === null ? null : Number(row.publish_year),
+      };
+    });
+
+    return {
+      items,
+      total: Number.isFinite(total) ? total : 0,
+    };
+  }
+
+  /**
+   * Finds user's works with pagination, filtering, sorting, and search.
+   * Returns works with their primary edition information and user-specific metadata.
+   * Used by GET /api/user/works endpoint.
+   *
+   * @param userId - User ID to find works for
+   * @param page - Page number (1-based, default: 1)
+   * @param status - Optional array of statuses to filter by
+   * @param available - Optional availability filter (true, false, or null)
+   * @param sort - Sort order: "published_desc" (default) or "title_asc"
+   * @param authorId - Optional author ID to filter by
+   * @param search - Optional search query for work title (case-insensitive, contains)
+   * @returns Object with items (UserWorkItemDto[]) and total count
+   * @throws Error if database query fails
+   */
+  async findUserWorks(
+    userId: string,
+    page = 1,
+    status?: UserWorkStatus[],
+    available?: boolean | null,
+    sort: "published_desc" | "title_asc" = "published_desc",
+    authorId?: string,
+    search?: string
+  ): Promise<{ items: UserWorkItemDto[]; total: number }> {
+    const pageSize = 20;
+    // Convert available to string format for RPC: 'true', 'false', 'null', or null (not specified)
+    let availableParam: string | null = null;
+    if (available !== undefined) {
+      if (available === true) {
+        availableParam = "true";
+      } else if (available === false) {
+        availableParam = "false";
+      } else {
+        availableParam = "null";
+      }
+    }
+
+    const { data, error } = await this.callRpc<UserWorksQueryRow[]>("get_user_works", {
+      p_user_id: userId,
+      p_page: page,
+      p_page_size: pageSize,
+      p_status: status && status.length > 0 ? status : null,
+      p_available: availableParam,
+      p_sort: sort,
+      p_author_id: authorId || null,
+      p_search: search && search.trim().length > 0 ? search.trim() : null,
+    });
+
+    if (error) {
+      throw new Error(`Failed to fetch user works: ${error.message}`);
+    }
+
+    // Transform the data to UserWorkItemDto format
+    interface UserWorksQueryRow {
+      user_id: string;
+      status: UserWorkStatus;
+      available_in_legimi: boolean | null;
+      status_updated_at: string | null;
+      created_at: string;
+      updated_at: string;
+      work_id: string;
+      work_title: string;
+      work_openlibrary_id: string | null;
+      work_first_publish_year: number | null;
+      work_primary_edition_id: string | null;
+      work_manual: boolean;
+      work_owner_user_id: string | null;
+      work_created_at: string;
+      work_updated_at: string;
+      primary_edition_id: string | null;
+      primary_edition_title: string | null;
+      primary_edition_openlibrary_id: string | null;
+      primary_edition_publish_year: number | null;
+      primary_edition_publish_date: string | null;
+      primary_edition_publish_date_raw: string | null;
+      primary_edition_isbn13: string | null;
+      primary_edition_cover_url: string | null;
+      primary_edition_language: string | null;
+      publish_year: number | string | null;
+      total_count: number | string | null;
+    }
+
+    const rows = (data as UserWorksQueryRow[] | null) ?? [];
+    const total = rows.length > 0 ? Number(rows[0].total_count ?? 0) : 0;
+
+    const items: UserWorkItemDto[] = rows.map((row) => {
+      const primaryEdition: PrimaryEditionSummaryDto | null = row.primary_edition_id
+        ? {
+            id: row.primary_edition_id,
+            title: row.primary_edition_title as EditionRow["title"],
+            openlibrary_id: row.primary_edition_openlibrary_id,
+            publish_year: row.primary_edition_publish_year,
+            publish_date: row.primary_edition_publish_date,
+            publish_date_raw: row.primary_edition_publish_date_raw,
+            isbn13: row.primary_edition_isbn13,
+            cover_url: row.primary_edition_cover_url,
+            language: row.primary_edition_language,
+          }
+        : null;
+
+      const workWithEdition: WorkWithPrimaryEditionDto = {
+        id: row.work_id,
+        title: row.work_title,
+        openlibrary_id: row.work_openlibrary_id,
+        first_publish_year: row.work_first_publish_year,
+        primary_edition_id: row.work_primary_edition_id,
+        manual: row.work_manual,
+        owner_user_id: row.work_owner_user_id,
+        created_at: row.work_created_at,
+        updated_at: row.work_updated_at,
+        primary_edition: primaryEdition,
+      };
+
+      return {
+        work: workWithEdition,
+        status: row.status,
+        available_in_legimi: row.available_in_legimi,
+        status_updated_at: row.status_updated_at,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
       };
     });
 
