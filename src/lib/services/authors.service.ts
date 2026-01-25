@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@/db/supabase.client";
-import type { AuthorRow } from "@/types";
+import type { AuthorRow, UserAuthorDto } from "@/types";
 import type { OpenLibraryAuthor } from "./openlibrary.service";
 
 /**
@@ -310,5 +310,102 @@ export class AuthorsService {
     if (!data || data.length === 0) {
       throw new Error("Author not found, not manual, or not owned by user");
     }
+  }
+
+  /**
+   * Finds authors attached to a user with pagination, search, and sorting.
+   * Uses JOIN between user_authors and authors tables.
+   * Respects RLS policies - only returns authors attached to the specified user.
+   *
+   * @param userId - User ID to find authors for
+   * @param page - Page number (1-based, default: 1)
+   * @param search - Optional search query for author name (case-insensitive, contains)
+   * @param sort - Sort order: "name_asc" (alphabetical) or "created_desc" (newest first)
+   * @returns Object with items array and total count
+   * @throws Error if database query fails
+   */
+  async findUserAuthors(
+    userId: string,
+    page = 1,
+    search?: string,
+    sort: "name_asc" | "created_desc" = "name_asc"
+  ): Promise<{ items: UserAuthorDto[]; total: number }> {
+    const pageSize = 20;
+
+    // Step 1: Get all user_authors for the user (for total count and filtering)
+    const { data: allUserAuthors, error: allUserAuthorsError } = await this.supabase
+      .from("user_authors")
+      .select("author_id, created_at")
+      .eq("user_id", userId);
+
+    if (allUserAuthorsError) {
+      throw new Error(`Failed to fetch user authors from database: ${allUserAuthorsError.message}`);
+    }
+
+    if (!allUserAuthors || allUserAuthors.length === 0) {
+      return {
+        items: [],
+        total: 0,
+      };
+    }
+
+    // Step 2: Get all authors for these IDs
+    const authorIds = allUserAuthors.map((ua) => ua.author_id);
+
+    let authorsQuery = this.supabase
+      .from("authors")
+      .select("id, name, openlibrary_id, manual, owner_user_id, ol_fetched_at, ol_expires_at, created_at, updated_at")
+      .in("id", authorIds);
+
+    // Apply search filter if provided
+    if (search && search.trim().length > 0) {
+      authorsQuery = authorsQuery.ilike("name", `%${search.trim()}%`);
+    }
+
+    const { data: authorsData, error: authorsError } = await authorsQuery;
+
+    if (authorsError) {
+      throw new Error(`Failed to fetch authors from database: ${authorsError.message}`);
+    }
+
+    // Step 3: Combine data and create map
+    const userAuthorsMap = new Map(allUserAuthors.map((ua) => [ua.author_id, { created_at: ua.created_at }]));
+
+    // Step 4: Build items array with filtering and sorting
+    const items: UserAuthorDto[] = [];
+
+    for (const author of authorsData || []) {
+      const userAuthor = userAuthorsMap.get(author.id);
+      if (userAuthor) {
+        items.push({
+          author: {
+            ...author,
+            owner_user_id: author.owner_user_id ?? null,
+          },
+          created_at: userAuthor.created_at,
+        });
+      }
+    }
+
+    // Step 5: Apply sorting
+    if (sort === "name_asc") {
+      items.sort((a, b) => a.author.name.localeCompare(b.author.name));
+    } else {
+      // created_desc - sort by user_authors.created_at
+      items.sort((a, b) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return dateB - dateA; // descending
+      });
+    }
+
+    // Step 6: Apply pagination
+    const offset = (page - 1) * pageSize;
+    const paginatedItems = items.slice(offset, offset + pageSize);
+
+    return {
+      items: paginatedItems,
+      total: items.length,
+    };
   }
 }

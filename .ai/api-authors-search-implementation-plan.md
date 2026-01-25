@@ -763,28 +763,28 @@ Upewnić się, że nie ma błędów typowania.
 
 **Test case 1: Basic search**
 ```bash
-curl "http://localhost:4321/api/authors/search?q=tolkien&limit=5"
+curl "http://localhost:3000/api/authors/search?q=tolkien&limit=5"
 ```
 Oczekiwany: 200, lista autorów
 
 **Test case 2: Missing query**
 ```bash
-curl "http://localhost:4321/api/authors/search"
+curl "http://localhost:3000/api/authors/search"
 ```
 Oczekiwany: 400, validation error
 
 **Test case 3: Invalid limit**
 ```bash
-curl "http://localhost:4321/api/authors/search?q=test&limit=100"
+curl "http://localhost:3000/api/authors/search?q=test&limit=100"
 ```
 Oczekiwany: 400, limit validation error
 
 **Test case 4: Cache behavior**
 ```bash
 # First request - should fetch from OL
-curl "http://localhost:4321/api/authors/search?q=asimov&limit=1"
+curl "http://localhost:3000/api/authors/search?q=asimov&limit=1"
 # Second request - should use cache (has 'id' field)
-curl "http://localhost:4321/api/authors/search?q=asimov&limit=1"
+curl "http://localhost:3000/api/authors/search?q=asimov&limit=1"
 ```
 
 ### Krok 8: Code Review Checklist
