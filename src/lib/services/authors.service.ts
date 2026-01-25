@@ -408,4 +408,28 @@ export class AuthorsService {
       total: items.length,
     };
   }
+
+  /**
+   * Checks if an author is already attached to a user's profile.
+   * Uses composite primary key (user_id, author_id) for efficient lookup.
+   *
+   * @param userId - User ID to check
+   * @param authorId - Author ID to check
+   * @returns true if author is attached, false otherwise
+   * @throws Error if database query fails
+   */
+  async isAuthorAttached(userId: string, authorId: string): Promise<boolean> {
+    const { data, error } = await this.supabase
+      .from("user_authors")
+      .select("user_id, author_id")
+      .eq("user_id", userId)
+      .eq("author_id", authorId)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to check if author is attached: ${error.message}`);
+    }
+
+    return data !== null;
+  }
 }
