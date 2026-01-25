@@ -823,6 +823,64 @@ export class WorksService {
     return { added, skipped };
   }
 
+  /**
+   * Checks if a work is already attached to a user's profile.
+   * Uses composite primary key (user_id, work_id) for efficient lookup.
+   *
+   * @param userId - User ID to check
+   * @param workId - Work ID to check
+   * @returns true if work is attached, false otherwise
+   * @throws Error if database query fails
+   */
+  async isWorkAttached(userId: string, workId: string): Promise<boolean> {
+    const { data, error } = await this.supabase
+      .from("user_works")
+      .select("user_id, work_id")
+      .eq("user_id", userId)
+      .eq("work_id", workId)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to check if work is attached: ${error.message}`);
+    }
+
+    return data !== null;
+  }
+
+  /**
+   * Detaches a work from a user's profile.
+   * Removes the user-work relationship from the user_works table.
+   * Database trigger automatically updates work_count in profiles.
+   *
+   * Note: The work itself is NOT deleted from the works table.
+   * Only the user-work relationship is removed.
+   *
+   * @param userId - User ID to detach work from
+   * @param workId - Work ID to detach
+   * @throws Error if work is not attached, RLS violation, or database operation fails
+   */
+  async detachUserWork(userId: string, workId: string): Promise<void> {
+    const { data, error } = await this.supabase
+      .from("user_works")
+      .delete()
+      .eq("user_id", userId)
+      .eq("work_id", workId)
+      .select();
+
+    if (error) {
+      // Handle RLS policy violations
+      if (error.code === "42501") {
+        throw new Error("Cannot detach work: insufficient permissions");
+      }
+      throw new Error(`Failed to detach work: ${error.message}`);
+    }
+
+    // Check if any row was actually deleted
+    if (!data || data.length === 0) {
+      throw new Error("Work is not attached to user profile");
+    }
+  }
+
   private extractIdFromRpcResult(result: unknown, keys: string[]): string | null {
     if (typeof result === "string") {
       return result;
