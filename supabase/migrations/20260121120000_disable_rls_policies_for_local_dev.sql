@@ -82,3 +82,6 @@ alter table public.author_works disable row level security;
 alter table public.user_authors disable row level security;
 alter table public.user_works disable row level security;
 
+
+
+

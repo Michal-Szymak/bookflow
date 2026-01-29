@@ -149,9 +149,31 @@
   - Responses: `200 { work(s) }`; `404` not attached; `400` invalid enum.
 
 - **DELETE** `/api/user/works/{workId}`
-  - Description: Detach a work from the user’s list (does not remove global work).
+  - Description: Detach a work from the user's list (does not remove global work).
   - Removes linkage; does not delete global work.
   - `204`; `404`.
+
+### User Profile
+
+- Purpose: manage user profile data and account lifecycle.
+
+- **GET** `/api/user/profile`
+  - Description: Fetch user profile with counters and limits for display in UI (e.g., global header).
+  - Returns `{ author_count, work_count, max_authors, max_works }` from `profiles` table.
+  - Uses RLS policy (user_id = auth.uid()); reads from `profiles(user_id)`.
+  - Responses: `200 { author_count, work_count, max_authors, max_works }`; `401` auth required; `404` profile not found.
+
+- **DELETE** `/api/user/account`
+  - Description: Delete user account and all associated data (server-side only, uses Supabase Admin API).
+  - Verifies authentication (same as other `/api/user/*` endpoints).
+  - Deletes user data in DB via cascade (or explicit RPC/SQL transaction):
+    - `profiles` row (cascades from `auth.users` deletion)
+    - `user_authors` entries (cascades to `user_works` for those authors)
+    - `user_works` entries
+    - Manual `authors`, `works`, `editions` where `owner_user_id = auth.uid()`
+  - Deletes user in Supabase Auth using service role (server-side only; UI never calls Supabase Admin API directly).
+  - Responses: `204` success; `401` auth required; `500` server error (auth deletion failure).
+  - Note: All cascades handled by DB constraints; auth deletion via Supabase Admin API with service role key.
 
 ### Analytics (server-emitted)
 
