@@ -1,0 +1,32 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { AuthorsListView } from "@/components/authors/AuthorsListView";
+
+// TODO: Add authentication check when middleware supports session management
+// For now, authentication is handled by API endpoints via Authorization header
+// Example:
+// const session = Astro.locals.session;
+// if (!session) {
+//   return Astro.redirect("/login");
+// }
+
+const title = "Autorzy - BookFlow";
+// const description = "Zarządzaj swoją listą obserwowanych autorów w BookFlow";
+---
+
+<Layout title={title}>
+  <main>
+    <!-- 
+      AuthorsListView is a React island that handles all interactivity.
+      client:load ensures it loads immediately on page load.
+    -->
+    <AuthorsListView client:load />
+  </main>
+</Layout>
+
+<style>
+  main {
+    width: 100%;
+    min-height: 100vh;
+  }
+</style>
