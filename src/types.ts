@@ -222,6 +222,17 @@ export interface EditionResponseDto {
   edition: EditionDto;
 }
 
+/**
+ * Response for GET /api/user/profile
+ * Contains user profile statistics: author count, work count, and limits.
+ */
+export interface ProfileResponseDto {
+  author_count: number;
+  work_count: number;
+  max_authors: number;
+  max_works: number;
+}
+
 // ============================================================================
 // QUERY PARAMETER DTOs (Command Models for GET requests)
 // ============================================================================
