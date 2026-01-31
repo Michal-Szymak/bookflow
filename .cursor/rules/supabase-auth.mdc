@@ -112,12 +112,15 @@ import { defineMiddleware } from 'astro:middleware';
 // Public paths - Auth API endpoints & Server-Rendered Astro Pages
 const PUBLIC_PATHS = [
   // Server-Rendered Astro Pages
-  "/auth/login",
-  "/auth/register",
-  "/auth/reset-password",
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
   // Auth API endpoints
   "/api/auth/login",
   "/api/auth/register",
+  "/api/auth/logout",
+  "/api/auth/forgot-password",
   "/api/auth/reset-password",
 ];
 
@@ -145,7 +148,7 @@ export const onRequest = defineMiddleware(
       };
     } else if (!PUBLIC_PATHS.includes(url.pathname)) {
       // Redirect to login for protected routes
-      return redirect('/auth/login');
+      return redirect('/login');
     }
 
     return next();
@@ -158,7 +161,7 @@ export const onRequest = defineMiddleware(
 Create the following endpoints in `src/pages/api/auth/`:
 
 ```typescript
-// src/pages/api/auth/login.ts
+// src/pages/api/login.ts
 import type { APIRoute } from 'astro';
 import { createSupabaseServerInstance } from '../../db/supabase.client.ts';
 
@@ -183,7 +186,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   });
 };
 
-// src/pages/api/auth/register.ts
+// src/pages/api/register.ts
 export const POST: APIRoute = async ({ request, cookies }) => {
   const { email, password } = await request.json();
 
@@ -231,7 +234,7 @@ In protected Astro pages:
 const { user } = Astro.locals;
 
 if (!user) {
-  return Astro.redirect('/auth/login');
+  return Astro.redirect('/login');
 }
 ---
 

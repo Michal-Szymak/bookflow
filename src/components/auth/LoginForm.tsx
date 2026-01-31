@@ -63,20 +63,31 @@ export function LoginForm() {
       });
 
       if (!response.ok) {
-        await response.json(); // Read response body to avoid memory leak
-        if (response.status === 400) {
-          setError("Błędne dane. Sprawdź wprowadzone informacje.");
-        } else if (response.status === 401) {
-          setError("Nieprawidłowy e-mail lub hasło");
-        } else {
-          setError("Wystąpił błąd. Spróbuj ponownie później.");
+        // Try to parse error message from response
+        let errorMessage = "Wystąpił błąd. Spróbuj ponownie później.";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          // If JSON parsing fails, use default message based on status
+          if (response.status === 400) {
+            errorMessage = "Błędne dane. Sprawdź wprowadzone informacje.";
+          } else if (response.status === 401) {
+            errorMessage = "Nieprawidłowy e-mail lub hasło";
+          }
         }
+        setError(errorMessage);
         setIsLoading(false);
         return;
       }
 
-      // Success - redirect will be handled by backend or client-side navigation
-      window.location.href = new URLSearchParams(window.location.search).get("redirect_to") || "/app/authors";
+      // Success - cookies are set by the endpoint
+      // Small delay to ensure cookies are saved before redirect
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Redirect to the target page or default to /app/authors
+      const redirectTo = new URLSearchParams(window.location.search).get("redirect_to") || "/app/authors";
+      window.location.href = redirectTo;
     } catch {
       setError("Wystąpił błąd. Spróbuj ponownie później.");
       setIsLoading(false);
