@@ -470,7 +470,7 @@ interface BulkAttachUserWorksResponseDto {
    - `error` dla błędów serwera z pełnym stack trace
 
 ### Krok 4: Testy manualne
-**Plik:** `.ai/api-user-works-post-manual-tests.md`
+**Plik:** `.ai/api/api-user-works-post-manual-tests.md`
 
 1. **Testy jednostkowe (opcjonalne, ale zalecane):**
    - Test schematu walidacji Zod (prawidłowe i nieprawidłowe dane)

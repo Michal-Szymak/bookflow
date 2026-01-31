@@ -409,7 +409,7 @@ HTTP/1.1 204 No Content
 
 ### Krok 4: Testowanie ręczne endpointu
 
-**Plik:** `.ai/api-user-authors-delete-manual-tests.md`
+**Plik:** `.ai/api/api-user-authors-delete-manual-tests.md`
 
 1. Przygotuj testy manualne dla wszystkich scenariuszy:
    - Sukces: odłączenie autora bez powiązanych dzieł

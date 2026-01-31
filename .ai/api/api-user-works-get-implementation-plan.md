@@ -372,7 +372,7 @@ Wszystkie błędy zwracają JSON w formacie:
    - Dodanie `export const prerender = false;` na początku pliku endpointu (wymagane dla API routes w Astro)
 
 6. **Testowanie ręczne:**
-**Plik:** `.ai/api-user-works-get-manual-tests.md`
+**Plik:** `.ai/api/api-user-works-get-manual-tests.md`
    - Testowanie z różnymi kombinacjami parametrów zapytania
    - Testowanie walidacji (nieprawidłowe wartości)
    - Testowanie uwierzytelnienia (brak tokenu, nieprawidłowy token)

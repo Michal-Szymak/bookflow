@@ -297,7 +297,7 @@ Alternatywnie, jeśli logika jest prosta, można wykonać zapytanie bezpośredni
    - Zwrócenie danych w formacie `ProfileResponseDto`
 
 9. **Testy manualne**
-Opisz testy manualne w pliku `.ai/api-user-profile-get-manual-tests.md`
+Opisz testy manualne w pliku `.ai/api/api-user-profile-get-manual-tests.md`
    - Test przypadku sukcesu (200) - użytkownik z istniejącym profilem
    - Test przypadku braku autoryzacji (401) - brak tokena lub nieprawidłowy token
    - Test przypadku braku profilu (404) - użytkownik bez profilu

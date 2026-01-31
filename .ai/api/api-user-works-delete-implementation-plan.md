@@ -313,7 +313,7 @@ Endpoint wymaga uwierzytelnienia i pozwala użytkownikowi usuwać tylko swoje w�
 
 ### Krok 5: Testowanie
 
-1. **Testy manualne**: (wypisać w pliku `.ai/api-user-works-delete-manual-tests.md`)
+1. **Testy manualne**: (wypisać w pliku `.ai/api/api-user-works-delete-manual-tests.md`)
    - Test sukcesu: odłączenie istniejącego dzieła
    - Test 400: nieprawidłowy format UUID
    - Test 401: brak uwierzytelnienia

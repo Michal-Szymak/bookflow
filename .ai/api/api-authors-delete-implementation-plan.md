@@ -312,7 +312,7 @@ Response ← Return 204 ← Delete Author ← Verify Ownership & Manual Flag ←
 6. Dodaj dokumentację JSDoc dla endpointu
 
 ### Krok 3: Testowanie ręczne endpointu
-**Plik:** `.ai/api-authors-delete-manual-tests.md`
+**Plik:** `.ai/api/api-authors-delete-manual-tests.md`
 
 1. Przygotuj testy manualne dla wszystkich scenariuszy:
    - Pomyślne usunięcie manualnego autora należącego do użytkownika

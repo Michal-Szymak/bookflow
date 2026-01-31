@@ -62,4 +62,4 @@ Endpoint zwraca szczegoly pojedynczego work wraz z podsumowaniem primary edition
 5. Wywolaj `findByIdWithPrimaryEdition` i obsluz `null` jako `404`.
 6. Zwracaj `WorkResponseDto` z `200` przy sukcesie.
 7. Upewnij sie, ze bledy DB zwracaja `500` i sa logowane.
-8. Przygotuj listę testów manualnych i zapisz w pliku .ai/api-works-get-manual-tests.md
+8. Przygotuj listę testów manualnych i zapisz w pliku .ai/api/api-works-get-manual-tests.md

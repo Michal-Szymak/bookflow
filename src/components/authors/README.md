@@ -561,7 +561,7 @@ useEffect(() => {
 
 ## Testing
 
-Zobacz: `.ai/app-authors-view-manual-tests.md`
+Zobacz: `.ai/ui/app-authors-view-manual-tests.md`
 
 ## Changelog
 

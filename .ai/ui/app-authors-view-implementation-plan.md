@@ -1804,7 +1804,7 @@ function useAuthorSearch() {
 4. Test recovery mechanisms (retry)
 
 ### Krok 12: Testy manualne
-** do zapisania w pliku `.ai/app-authors-view-manual-tests.md`
+** do zapisania w pliku `.ai/ui/app-authors-view-manual-tests.md`
 1. Happy path:
    - Załadowanie strony z autorami
    - Wyszukiwanie autora

@@ -548,7 +548,7 @@ Następujące indeksy są już zdefiniowane w schemacie bazy danych:
 - Logowanie kontekstu (userId, authorIds, workId) bez wrażliwych danych
 
 ### Krok 5: Testy manualne
-**Plik:** `.ai/api-works-create-manual-tests.md`
+**Plik:** `.ai/api/api-works-create-manual-tests.md`
 Przygotowanie przewodnika testów manualnych zawierającego scenariusze testowe do weryfikacji działania endpointu.
 
 ### Krok 6: Dokumentacja

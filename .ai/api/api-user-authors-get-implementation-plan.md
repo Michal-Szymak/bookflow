@@ -349,7 +349,7 @@ Request → Middleware (auth) → Extract Query Params → Validate (Zod)
 - Upewnić się, że komunikaty błędów są przyjazne dla użytkownika
 
 ### Krok 5: Testowanie
-Przygotować testy manualne według poniższych punktów. Opisać w pliku .ai/api-user-authors-get-manual-tests.md i przeprowadzić (zapytać o zgodę)
+Przygotować testy manualne według poniższych punktów. Opisać w pliku .ai/api/api-user-authors-get-manual-tests.md i przeprowadzić (zapytać o zgodę)
 
 - Przetestować endpoint z różnymi kombinacjami parametrów:
   - Bez parametrów (domyślne wartości)

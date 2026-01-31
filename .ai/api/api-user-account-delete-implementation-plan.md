@@ -252,7 +252,7 @@ Gdy wystąpi błąd podczas usuwania konta (np. błąd Supabase Admin API):
 3. Zweryfikuj, że wszystkie błędy są odpowiednio logowane
 
 ### Krok 6: Testy manualne
-**Plik `.ai/api-user-account-delete-manual-tests.md`**
+**Plik `.ai/api/api-user-account-delete-manual-tests.md`**
    - Test usunięcia konta z prawidłową autentykacją
    - Test usunięcia konta bez autentykacji (powinien zwrócić 401)
    - Test usunięcia konta z nieprawidłowym tokenem (powinien zwrócić 401)
@@ -285,6 +285,6 @@ Gdy wystąpi błąd podczas usuwania konta (np. błąd Supabase Admin API):
 2. Upewnij się, że kod jest zgodny z linterem (sprawdź błędy lintera)
 
 ### Krok 10: Aktualizacja dokumentacji API
-1. Zaktualizuj `.ai/api-plan.md` jeśli wymagane (endpoint jest już tam opisany)
+1. Zaktualizuj `.ai/api/api-plan.md` jeśli wymagane (endpoint jest już tam opisany)
 2. Dodaj informacje o endpoincie do głównej dokumentacji API (jeśli istnieje)
 

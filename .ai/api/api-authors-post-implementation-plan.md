@@ -436,7 +436,7 @@ try {
 - Kod jest czytelny i zgodny z zasadami projektu
 
 ### Krok 4: Testy manualne
-**Plik**: `.ai/api-authors-post-manual-tests.md` (opcjonalnie)
+**Plik**: `.ai/api/api-authors-post-manual-tests.md` (opcjonalnie)
 
 1. Przygotuj scenariusze testowe:
    - Pomyślne utworzenie autora

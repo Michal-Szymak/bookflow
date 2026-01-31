@@ -62,4 +62,4 @@ Celem endpointu jest zwrócenie listy wydań (editions) dla wskazanego worka, po
    - Nowa metoda np. `EditionsService.listByWorkId(workId)` zwracająca `EditionDto[]` posortowane `publish_year desc`.
 5. Zaimplementować obsługę błędów i logowanie analogicznie do istniejących endpointów GET.
 6. Zwrócić `EditionsListResponseDto` z kodem `200`.
-7. Opisać testy manualne (np. przypadki: poprawny `workId`, niepoprawny UUID, brak worka) w pliku .ai/api-works-editions-get-manual-tests.md
+7. Opisać testy manualne (np. przypadki: poprawny `workId`, niepoprawny UUID, brak worka) w pliku .ai/api/api-works-editions-get-manual-tests.md

@@ -534,7 +534,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
 ```
 
 ### Krok 4: Testy manualne
-**Plik:** `.ai/api-authors-get-manual-tests.md`
+**Plik:** `.ai/api/api-authors-get-manual-tests.md`
 
 1. **Test z poprawnym UUID autora globalnego:**
    - Wykonaj GET `/api/authors/{valid-global-author-id}`

@@ -88,7 +88,7 @@ Endpoint zwraca stronicowana liste prac (works) powiazanych z autorem. Kazdy ele
 5. Zbudowac odpowiedz `AuthorWorksListResponseDto` z `publish_year` i `primary_edition`.
 6. Dodac obsluge bledow zgodnie z kodami: 400, 401, 404, 500.
 7. Upewnic sie, ze korzystamy z `locals.supabase` oraz RLS.
-8. dopisac (w pliku .ai/api-authors-works-manual-tests.md) testy manualne dla:
+8. dopisac (w pliku .ai/api/api-authors-works-manual-tests.md) testy manualne dla:
    - poprawnych wynikow stronicowania i sortowania,
    - 400 dla blednych parametrow,
    - 404 dla niewidocznego autora,

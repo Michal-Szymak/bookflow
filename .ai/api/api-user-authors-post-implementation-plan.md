@@ -532,7 +532,7 @@ Warto śledzić:
 - 500: Błędy serwera
 
 ### Krok 6: Testy manualne
-**Plik:** `.ai/api-user-authors-post-manual-tests.md`
+**Plik:** `.ai/api/api-user-authors-post-manual-tests.md`
 
 **Scenariusze testowe:**
 - Przypisanie autora globalnego (OpenLibrary)

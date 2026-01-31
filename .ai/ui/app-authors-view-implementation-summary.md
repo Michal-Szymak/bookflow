@@ -41,9 +41,9 @@ Data ukończenia: **2026-01-30**
 #### Dokumentacja (5 plików)
 27. `src/components/authors/README.md` - Dokumentacja komponentów
 28. `.ai/error-handling-implementation.md` - Obsługa błędów
-29. `.ai/app-authors-view-manual-tests.md` - Plan testów
+29. `.ai/ui/app-authors-view-manual-tests.md` - Plan testów
 30. `.ai/implementation-summary.md` - To podsumowanie
-31. `.ai/app-authors-view-implementation-plan.md` - Oryginalny plan (już istniał)
+31. `.ai/ui/app-authors-view-implementation-plan.md` - Oryginalny plan (już istniał)
 
 ### Kod
 
@@ -406,8 +406,8 @@ npm run build
 - `src/components/authors/README.md` - pełna dokumentacja komponentów
 
 ### Plany i testy
-- `.ai/app-authors-view-implementation-plan.md` - oryginalny plan
-- `.ai/app-authors-view-manual-tests.md` - 13 test cases
+- `.ai/ui/app-authors-view-implementation-plan.md` - oryginalny plan
+- `.ai/ui/app-authors-view-manual-tests.md` - 13 test cases
 - `.ai/error-handling-implementation.md` - obsługa błędów
 
 ### API dokumentacja

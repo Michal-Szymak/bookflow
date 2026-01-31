@@ -464,7 +464,7 @@ try {
 - Logowanie błędów i operacji
 
 ### Krok 6: Testy manualne
-**Plik:** `.ai/api-openlibrary-import-author-manual-tests.md`
+**Plik:** `.ai/api/api-openlibrary-import-author-manual-tests.md`
 
 Przygotowanie szczegółowego przewodnika testów manualnych zawierającego scenariusze testowe do weryfikacji działania endpointu. Plik powinien zawierać:
 
