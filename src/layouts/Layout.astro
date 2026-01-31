@@ -1,12 +1,17 @@
 ---
 import "../styles/global.css";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 
 interface Props {
   title?: string;
   authMode?: boolean;
 }
 
-const { title = "BookFlow", authMode = false } = Astro.props;
+const { title = "BookFlow" } = Astro.props;
+
+// Get user from middleware (set in src/middleware/index.ts)
+const user = Astro.locals.user;
+const isAuthenticated = !!user;
 ---
 
 <!doctype html>
@@ -19,6 +24,19 @@ const { title = "BookFlow", authMode = false } = Astro.props;
     <title>{title}</title>
   </head>
   <body>
+    {
+      isAuthenticated && (
+        <header class="border-b bg-background">
+          <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <h1 class="text-lg font-semibold">{title}</h1>
+            <div class="flex items-center gap-4">
+              {user?.email && <span class="text-sm text-muted-foreground">{user.email}</span>}
+              <LogoutButton client:load />
+            </div>
+          </div>
+        </header>
+      )
+    }
     <slot />
   </body>
 </html>
