@@ -5,11 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PasswordInput } from "@/components/ui/password-input";
 import { RegisterSchema } from "@/lib/validation/auth/register.schema";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
 
 /**
  * Registration form component with email, password, and password confirmation fields.
  * Handles validation, API calls, and error display.
+ * Shows email confirmation message when required by Supabase.
  */
 export function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -20,6 +21,8 @@ export function RegisterForm() {
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
+  const [requiresEmailConfirmation, setRequiresEmailConfirmation] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -52,6 +55,8 @@ export function RegisterForm() {
     setEmailError(null);
     setPasswordError(null);
     setConfirmPasswordError(null);
+    setRequiresEmailConfirmation(false);
+    setRegisteredEmail(null);
 
     // Client-side validation
     const validation = RegisterSchema.safeParse({ email, password });
@@ -83,25 +88,71 @@ export function RegisterForm() {
       });
 
       if (!response.ok) {
-        await response.json(); // Read response body to avoid memory leak
-        if (response.status === 400) {
-          setError("Błędne dane. Sprawdź wprowadzone informacje.");
-        } else if (response.status === 409) {
-          setError("Konto z tym e-mailem już istnieje");
-        } else {
-          setError("Wystąpił błąd. Spróbuj ponownie później.");
+        let errorMessage = "Wystąpił błąd. Spróbuj ponownie później.";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          // If JSON parsing fails, use default message based on status
+          if (response.status === 400) {
+            errorMessage = "Błędne dane. Sprawdź wprowadzone informacje.";
+          } else if (response.status === 409) {
+            errorMessage = "Konto z tym e-mailem już istnieje";
+          }
         }
+        setError(errorMessage);
         setIsLoading(false);
         return;
       }
 
-      // Success - redirect will be handled by backend or client-side navigation
-      window.location.href = "/app/authors";
+      // Success - parse response to check if email confirmation is required
+      const data = await response.json();
+      const needsConfirmation = data.requiresEmailConfirmation === true;
+
+      if (needsConfirmation) {
+        // Show email confirmation message
+        setRequiresEmailConfirmation(true);
+        setRegisteredEmail(email);
+        // Clear form
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+      } else {
+        // No email confirmation required - redirect to app
+        window.location.href = "/app/authors";
+      }
+      setIsLoading(false);
     } catch {
       setError("Wystąpił błąd. Spróbuj ponownie później.");
       setIsLoading(false);
     }
   };
+
+  // Show success message if email confirmation is required
+  if (requiresEmailConfirmation && registeredEmail) {
+    return (
+      <div className="space-y-4">
+        <Alert>
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertDescription>
+            <div className="space-y-2">
+              <p className="font-medium">Rejestracja zakończona pomyślnie!</p>
+              <p className="text-sm">
+                Na adres <strong>{registeredEmail}</strong> został wysłany link do potwierdzenia konta. Sprawdź swoją
+                skrzynkę pocztową i kliknij w link, aby aktywować konto.
+              </p>
+              <p className="text-sm text-muted-foreground">Po potwierdzeniu konta będziesz mógł się zalogować.</p>
+            </div>
+          </AlertDescription>
+        </Alert>
+        <div className="text-center">
+          <a href="/login" className="text-primary hover:underline text-sm">
+            Przejdź do logowania
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
