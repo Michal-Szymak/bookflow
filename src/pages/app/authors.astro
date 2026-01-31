@@ -1,5 +1,5 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import AppLayout from "@/layouts/AppLayout.astro";
 import { AuthorsListView } from "@/components/authors/AuthorsListView";
 
 // User is already verified by middleware
@@ -10,19 +10,10 @@ const title = "Autorzy - BookFlow";
 // const description = "Zarządzaj swoją listą obserwowanych autorów w BookFlow";
 ---
 
-<Layout title={title}>
-  <main>
-    <!-- 
-      AuthorsListView is a React island that handles all interactivity.
-      client:load ensures it loads immediately on page load.
-    -->
-    <AuthorsListView client:load />
-  </main>
-</Layout>
-
-<style>
-  main {
-    width: 100%;
-    min-height: 100vh;
-  }
-</style>
+<AppLayout title={title}>
+  <!-- 
+    AuthorsListView is a React island that handles all interactivity.
+    client:load ensures it loads immediately on page load.
+  -->
+  <AuthorsListView client:load />
+</AppLayout>

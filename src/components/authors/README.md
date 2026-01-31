@@ -35,11 +35,13 @@ AuthorsListView (główny komponent React)
 ### Custom Hooks
 
 #### `useAuthorsList`
+
 **Lokalizacja**: `./hooks/useAuthorsList.ts`
 
 Główny hook zarządzający stanem całego widoku.
 
 **Zwraca:**
+
 ```typescript
 {
   // Data
@@ -71,25 +73,30 @@ Główny hook zarządzający stanem całego widoku.
 ```
 
 **Używa:**
+
 - `useUrlSearchParams` - zarządzanie URL jako źródłem prawdy
 - `useState` - lokalne stany UI
 - `useEffect` - fetch danych przy montowaniu i zmianach filtrów
 - `useMemo` - obliczenia limitStatus
 
 **API Endpoints:**
+
 - `GET /api/user/profile` - profil użytkownika
 - `GET /api/user/authors` - lista autorów (pagination, search, sort)
 - `DELETE /api/user/authors/{id}` - usuwanie autora
 
 #### `useAuthorSearch`
+
 **Lokalizacja**: `./hooks/useAuthorSearch.ts`
 
 Hook do wyszukiwania autorów w OpenLibrary i dodawania do profilu.
 
 **Parametry:**
+
 - `onAuthorAdded: () => void` - callback po sukcesie
 
 **Zwraca:**
+
 ```typescript
 {
   // Search state
@@ -110,19 +117,23 @@ Hook do wyszukiwania autorów w OpenLibrary i dodawania do profilu.
 ```
 
 **Flow dodawania:**
+
 1. Jeśli autor nie ma ID → `POST /api/openlibrary/import/author`
 2. `POST /api/user/authors` (attach)
 3. Wywołanie `onAuthorAdded()`
 
 #### `useManualAuthor`
+
 **Lokalizacja**: `./hooks/useManualAuthor.ts`
 
 Hook do ręcznego tworzenia autorów.
 
 **Parametry:**
+
 - `onAuthorAdded: () => void` - callback po sukcesie
 
 **Zwraca:**
+
 ```typescript
 {
   // Form state
@@ -141,21 +152,25 @@ Hook do ręcznego tworzenia autorów.
 ```
 
 **Walidacja:**
+
 - Min: 1 znak (po trim)
 - Max: 500 znaków
 - Required
 
 **Flow tworzenia:**
+
 1. `POST /api/authors` (manual: true)
 2. `POST /api/user/authors` (attach)
 3. Wywołanie `onAuthorAdded()`
 
 #### `useDebounce`
+
 **Lokalizacja**: `@/lib/hooks/useDebounce.ts`
 
 Generyczny hook do debounce wartości (delay 500ms).
 
 #### `useUrlSearchParams`
+
 **Lokalizacja**: `@/lib/hooks/useUrlSearchParams.ts`
 
 Hook do zarządzania URL search params (alternatywa dla react-router-dom).
@@ -165,9 +180,11 @@ Hook do zarządzania URL search params (alternatywa dla react-router-dom).
 ### Atomic Components
 
 #### `LimitIndicator`
+
 Wskaźnik limitu autorów z kolorowym statusem.
 
 **Props:**
+
 ```typescript
 {
   limitStatus: LimitStatus;
@@ -176,14 +193,17 @@ Wskaźnik limitu autorów z kolorowym statusem.
 ```
 
 **Kolory:**
+
 - Zielony: 0-70%
 - Żółty: 70-90%
 - Czerwony: 90-100%
 
 #### `SearchInput`
+
 Pole wyszukiwania z debounce i przyciskiem czyszczenia.
 
 **Props:**
+
 ```typescript
 {
   value: string;
@@ -195,15 +215,18 @@ Pole wyszukiwania z debounce i przyciskiem czyszczenia.
 ```
 
 **Features:**
+
 - Debounce 500ms
 - Max length validation
 - Clear button (X)
 - Character count przy > 80% limitu
 
 #### `SortSelect`
+
 Dropdown sortowania.
 
 **Props:**
+
 ```typescript
 {
   value: "name_asc" | "created_desc";
@@ -213,13 +236,16 @@ Dropdown sortowania.
 ```
 
 **Opcje:**
+
 - "name_asc" - Alfabetycznie (A-Z)
 - "created_desc" - Ostatnio dodane
 
 #### `AddAuthorButton`
+
 Przycisk CTA do dodawania autorów.
 
 **Props:**
+
 ```typescript
 {
   onClick: () => void;
@@ -230,13 +256,16 @@ Przycisk CTA do dodawania autorów.
 ```
 
 **Features:**
+
 - Tooltip gdy disabled
 - Icon (Plus)
 
 #### `AuthorRow`
+
 Wiersz pojedynczego autora.
 
 **Props:**
+
 ```typescript
 {
   author: UserAuthorDto;
@@ -246,6 +275,7 @@ Wiersz pojedynczego autora.
 ```
 
 **Wyświetla:**
+
 - Nazwa (link do szczegółów)
 - Data dodania
 - Badge: "OL" lub "Ręczny"
@@ -254,9 +284,11 @@ Wiersz pojedynczego autora.
 ### Molecules
 
 #### `PageHeader`
+
 Nagłówek strony z tytułem i wskaźnikiem limitu.
 
 **Props:**
+
 ```typescript
 {
   limitStatus: LimitStatus;
@@ -265,9 +297,11 @@ Nagłówek strony z tytułem i wskaźnikiem limitu.
 ```
 
 #### `AuthorsToolbar`
+
 Pasek narzędzi z filtrami i akcjami.
 
 **Props:**
+
 ```typescript
 {
   search: string;
@@ -281,13 +315,16 @@ Pasek narzędzi z filtrami i akcjami.
 ```
 
 **Layout:**
+
 - Mobile: stack (vertical)
 - Desktop: flex-row
 
 #### `AuthorsTable`
+
 Tabela/lista autorów.
 
 **Props:**
+
 ```typescript
 {
   authors: UserAuthorDto[];
@@ -297,9 +334,11 @@ Tabela/lista autorów.
 ```
 
 #### `AuthorsListContent`
+
 Warunkowe renderowanie contentu.
 
 **Props:**
+
 ```typescript
 {
   isLoading: boolean;
@@ -315,6 +354,7 @@ Warunkowe renderowanie contentu.
 ```
 
 **Renderuje:**
+
 - Loading → `AuthorsListSkeleton`
 - Error → `ErrorDisplay`
 - Empty + no filters → `EmptyState`
@@ -322,9 +362,11 @@ Warunkowe renderowanie contentu.
 - Success → `AuthorsTable`
 
 #### `AuthorsPagination`
+
 Kontrolki paginacji.
 
 **Props:**
+
 ```typescript
 {
   currentPage: number;
@@ -335,15 +377,18 @@ Kontrolki paginacji.
 ```
 
 **Features:**
+
 - Ukrywa się gdy totalPages <= 1
 - Disabled buttons na granicy
 
 ### Modals
 
 #### `AddAuthorModal`
+
 Modal z dwoma zakładkami: OL search i ręczne dodanie.
 
 **Props:**
+
 ```typescript
 {
   isOpen: boolean;
@@ -353,15 +398,18 @@ Modal z dwoma zakładkami: OL search i ręczne dodanie.
 ```
 
 **Features:**
+
 - ESC key closes
 - Body scroll lock
 - Backdrop click closes
 - Tab reset on close
 
 #### `DeleteAuthorDialog`
+
 Dialog potwierdzenia usunięcia.
 
 **Props:**
+
 ```typescript
 {
   isOpen: boolean;
@@ -376,11 +424,13 @@ Dialog potwierdzenia usunięcia.
 ### URL jako źródło prawdy
 
 Filtry są przechowywane w URL:
+
 - `?page=2` - numer strony
 - `?search=kowalski` - fraza wyszukiwania
 - `?sort=created_desc` - sortowanie
 
 **Korzyści:**
+
 - Shareable links
 - Browser back/forward działa
 - Refresh page zachowuje filtry
@@ -396,15 +446,15 @@ Filtry są przechowywane w URL:
 
 ### Mapowanie błędów HTTP
 
-| Status | Akcja |
-|--------|-------|
-| 401 | Redirect do `/login` |
-| 404 | Komunikat + refresh |
-| 409 (limit) | "Osiągnięto limit 500 autorów" |
-| 409 (duplikat) | "Autor już w profilu" |
-| 429 | "Odczekaj 60 sekund" |
-| 502 | "OpenLibrary niedostępne" |
-| 500 | "Błąd serwera" + retry |
+| Status         | Akcja                          |
+| -------------- | ------------------------------ |
+| 401            | Redirect do `/login`           |
+| 404            | Komunikat + refresh            |
+| 409 (limit)    | "Osiągnięto limit 500 autorów" |
+| 409 (duplikat) | "Autor już w profilu"          |
+| 429            | "Odczekaj 60 sekund"           |
+| 502            | "OpenLibrary niedostępne"      |
+| 500            | "Błąd serwera" + retry         |
 
 ### Recovery mechanisms
 
@@ -460,14 +510,17 @@ Filtry są przechowywane w URL:
 ### Adaptive layout
 
 **PageHeader:**
+
 - Mobile: stack
 - Desktop: flex-row
 
 **AuthorsToolbar:**
+
 - Mobile: stack (vertical)
 - Desktop: flex-row
 
 **Modals:**
+
 - Mobile: full width - margins
 - Desktop: max-width
 
@@ -476,6 +529,7 @@ Filtry są przechowywane w URL:
 ### Wymagane do pełnej funkcjonalności
 
 1. **Instalacja Sonner**
+
    ```bash
    npm install sonner
    ```
@@ -536,16 +590,19 @@ function MyComponent() {
 ### Common issues
 
 **Problem**: Search nie działa
+
 - Sprawdź debounce (poczekaj 500ms)
 - Sprawdź czy `setSearch` jest wywołany
 - Sprawdź URL params
 
 **Problem**: Modal nie zamyka się
+
 - Sprawdź `isOpen` state
 - Sprawdź ESC handler
 - Sprawdź body scroll lock cleanup
 
 **Problem**: Paginacja błędna
+
 - Sprawdź totalPages calculation
 - Sprawdź PAGE_SIZE constant (30)
 - Sprawdź URL param `page`
@@ -555,7 +612,7 @@ function MyComponent() {
 ```tsx
 // W useAuthorsList dodaj:
 useEffect(() => {
-  console.log('[DEBUG] State:', { authors, total, filters, limitStatus });
+  console.log("[DEBUG] State:", { authors, total, filters, limitStatus });
 }, [authors, total, filters, limitStatus]);
 ```
 
@@ -566,6 +623,7 @@ Zobacz: `.ai/ui/app-authors-view-manual-tests.md`
 ## Changelog
 
 ### v1.0.0 (2026-01-30)
+
 - Initial implementation
 - All 28 components
 - Full API integration
@@ -577,4 +635,3 @@ Zobacz: `.ai/ui/app-authors-view-manual-tests.md`
 **Maintainer**: BookFlow Team  
 **Last updated**: 2026-01-30  
 **Status**: ✅ Production ready (minus Sonner integration)
-

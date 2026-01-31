@@ -1,0 +1,65 @@
+---
+import "../styles/global.css";
+import { AppNavigation } from "@/components/app/AppNavigation";
+import { LogoutButton } from "@/components/auth/LogoutButton";
+import { Toaster } from "sonner";
+
+interface Props {
+  title?: string;
+}
+
+const { title = "BookFlow" } = Astro.props;
+
+// Get user from middleware (set in src/middleware/index.ts)
+// User is guaranteed to exist because middleware redirects to /login if not authenticated
+const user = Astro.locals.user;
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="border-b bg-background sticky top-0 z-50">
+      <div class="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3 sm:gap-6 min-w-0 flex-1">
+          <h1 class="text-base sm:text-lg font-semibold truncate">{title}</h1>
+          <AppNavigation client:load />
+        </div>
+        <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+          {
+            user?.email && (
+              <span class="text-xs sm:text-sm text-muted-foreground hidden sm:inline truncate max-w-[200px]">
+                {user.email}
+              </span>
+            )
+          }
+          <LogoutButton client:load />
+        </div>
+      </div>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <Toaster client:only="react" position="top-right" richColors />
+  </body>
+</html>
+
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  main {
+    width: 100%;
+    min-height: calc(100vh - 64px);
+  }
+</style>

@@ -1,9 +1,5 @@
 import { useState } from "react";
-import type {
-  CreateAuthorCommand,
-  AttachUserAuthorCommand,
-  AuthorResponseDto,
-} from "@/types";
+import type { CreateAuthorCommand, AttachUserAuthorCommand, AuthorResponseDto } from "@/types";
 
 /**
  * Hook for managing manual author creation in AddAuthorModal.
@@ -165,4 +161,3 @@ export function useManualAuthor(onAuthorAdded: () => void) {
     validateName,
   };
 }
-

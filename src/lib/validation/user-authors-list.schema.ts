@@ -40,4 +40,3 @@ export const UserAuthorsListQuerySchema = z.object({
  * Represents validated query parameters for user authors list.
  */
 export type UserAuthorsListQueryValidated = z.infer<typeof UserAuthorsListQuerySchema>;
-

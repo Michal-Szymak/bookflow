@@ -37,4 +37,3 @@ export class ProfileService {
     return data;
   }
 }
-
