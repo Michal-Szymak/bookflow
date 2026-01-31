@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { toast } from "sonner";
 import type {
   AuthorSearchResultDto,
   AuthorSearchResponseDto,
@@ -32,7 +33,7 @@ export function useAuthorSearch(onAuthorAdded: () => void) {
   // ============================================================================
   // DEBOUNCED SEARCH QUERY
   // ============================================================================
-  const debouncedQuery = useDebounce(query, 500);
+  const debouncedQuery = useDebounce(query, 300);
 
   // ============================================================================
   // SEARCH EFFECT
@@ -110,9 +111,13 @@ export function useAuthorSearch(onAuthorAdded: () => void) {
 
         if (!importResponse.ok) {
           if (importResponse.status === 502) {
-            throw new Error("OpenLibrary jest niedostępne. Spróbuj ponownie później.");
+            const errorMsg = "OpenLibrary jest niedostępne. Spróbuj ponownie później.";
+            toast.error(errorMsg);
+            throw new Error(errorMsg);
           }
-          throw new Error("Nie udało się zaimportować autora");
+          const errorMsg = "Nie udało się zaimportować autora";
+          toast.error(errorMsg);
+          throw new Error(errorMsg);
         }
 
         const importData = await importResponse.json();
@@ -142,21 +147,30 @@ export function useAuthorSearch(onAuthorAdded: () => void) {
 
         if (attachResponse.status === 409) {
           if (errorData.message.includes("limit")) {
-            throw new Error("Osiągnięto limit 500 autorów");
+            const errorMsg = "Osiągnięto limit 500 autorów";
+            toast.error(errorMsg);
+            throw new Error(errorMsg);
           }
           if (errorData.message.includes("already attached")) {
-            throw new Error("Autor jest już w Twoim profilu");
+            const errorMsg = "Autor jest już w Twoim profilu";
+            toast.error(errorMsg);
+            throw new Error(errorMsg);
           }
         }
 
         if (attachResponse.status === 429) {
-          throw new Error("Dodano zbyt wielu autorów. Odczekaj 60 sekund.");
+          const errorMsg = "Dodano zbyt wielu autorów. Odczekaj 60 sekund.";
+          toast.error(errorMsg);
+          throw new Error(errorMsg);
         }
 
-        throw new Error("Nie udało się dodać autora");
+        const errorMsg = "Nie udało się dodać autora";
+        toast.error(errorMsg);
+        throw new Error(errorMsg);
       }
 
       // Success - call callback to refresh list
+      toast.success("Autor został dodany do profilu");
       onAuthorAdded();
     } catch (err) {
       setAddError(err instanceof Error ? err.message : "Wystąpił błąd");

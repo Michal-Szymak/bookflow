@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Search, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthorSearch } from "./hooks/useAuthorSearch";
@@ -5,14 +6,24 @@ import { cn } from "@/lib/utils";
 
 export interface AuthorSearchTabProps {
   onAuthorAdded: () => void;
+  onResetRef?: (reset: () => void) => void;
+  searchInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 /**
  * Tab for searching authors in OpenLibrary.
  * Shows search input, results list, and add buttons.
  */
-export function AuthorSearchTab({ onAuthorAdded }: AuthorSearchTabProps) {
-  const { query, setQuery, results, isSearching, searchError, isAdding, addAuthor } = useAuthorSearch(onAuthorAdded);
+export function AuthorSearchTab({ onAuthorAdded, onResetRef, searchInputRef }: AuthorSearchTabProps) {
+  const { query, setQuery, results, isSearching, searchError, isAdding, addAuthor, resetSearch } =
+    useAuthorSearch(onAuthorAdded);
+
+  // Expose reset function to parent via ref callback
+  useEffect(() => {
+    if (onResetRef) {
+      onResetRef(resetSearch);
+    }
+  }, [onResetRef, resetSearch]);
 
   const handleAddAuthor = async (index: number) => {
     const author = results[index];
@@ -29,13 +40,15 @@ export function AuthorSearchTab({ onAuthorAdded }: AuthorSearchTabProps) {
     <div className="space-y-4">
       {/* Search input */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" aria-hidden="true" />
         <input
+          ref={searchInputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Wpisz nazwę autora..."
           maxLength={200}
+          aria-label="Wyszukaj autora"
           className={cn(
             "w-full h-10 pl-9 pr-3 rounded-md border bg-background text-sm",
             "placeholder:text-muted-foreground",
@@ -92,8 +105,18 @@ export function AuthorSearchTab({ onAuthorAdded }: AuthorSearchTabProps) {
                   <p className="text-sm font-medium truncate">{author.name}</p>
                   {author.id && <p className="text-xs text-muted-foreground">Już w katalogu</p>}
                 </div>
-                <Button size="sm" onClick={() => handleAddAuthor(index)} disabled={isAdding} className="shrink-0 gap-1">
-                  {isAdding ? <Loader2 className="size-3 animate-spin" /> : <Plus className="size-3" />}
+                <Button
+                  size="sm"
+                  onClick={() => handleAddAuthor(index)}
+                  disabled={isAdding}
+                  className="shrink-0 gap-1"
+                  aria-label={`Dodaj autora ${author.name}`}
+                >
+                  {isAdding ? (
+                    <Loader2 className="size-3 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Plus className="size-3" aria-hidden="true" />
+                  )}
                   <span>Dodaj</span>
                 </Button>
               </div>

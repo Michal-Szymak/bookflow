@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import type { CreateAuthorCommand, AttachUserAuthorCommand, AuthorResponseDto } from "@/types";
 
 /**
@@ -82,10 +83,22 @@ export function useManualAuthor(onAuthorAdded: () => void) {
         const errorData = await createResponse.json();
 
         if (createResponse.status === 400) {
-          throw new Error(errorData.message || "Niepoprawna nazwa autora");
+          const errorMsg = errorData.message || "Niepoprawna nazwa autora";
+          toast.error(errorMsg);
+          throw new Error(errorMsg);
         }
 
-        throw new Error("Nie udało się utworzyć autora");
+        if (createResponse.status === 409) {
+          if (errorData.message?.includes("limit")) {
+            const errorMsg = "Osiągnięto limit 500 autorów";
+            toast.error(errorMsg);
+            throw new Error(errorMsg);
+          }
+        }
+
+        const errorMsg = "Nie udało się utworzyć autora";
+        toast.error(errorMsg);
+        throw new Error(errorMsg);
       }
 
       const createData: AuthorResponseDto = await createResponse.json();
@@ -109,18 +122,30 @@ export function useManualAuthor(onAuthorAdded: () => void) {
 
         if (attachResponse.status === 409) {
           if (errorData.message.includes("limit")) {
-            throw new Error("Osiągnięto limit 500 autorów");
+            const errorMsg = "Osiągnięto limit 500 autorów";
+            toast.error(errorMsg);
+            throw new Error(errorMsg);
+          }
+          if (errorData.message.includes("already attached")) {
+            const errorMsg = "Autor jest już w Twoim profilu";
+            toast.error(errorMsg);
+            throw new Error(errorMsg);
           }
         }
 
         if (attachResponse.status === 429) {
-          throw new Error("Dodano zbyt wielu autorów. Odczekaj 60 sekund.");
+          const errorMsg = "Dodano zbyt wielu autorów. Odczekaj 60 sekund.";
+          toast.error(errorMsg);
+          throw new Error(errorMsg);
         }
 
-        throw new Error("Nie udało się dodać autora");
+        const errorMsg = "Nie udało się dodać autora";
+        toast.error(errorMsg);
+        throw new Error(errorMsg);
       }
 
       // Success - call callback to refresh list
+      toast.success("Autor został dodany do profilu");
       onAuthorAdded();
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : "Wystąpił błąd");

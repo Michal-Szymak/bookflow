@@ -1,18 +1,28 @@
 import { UserPlus, Loader2, Info } from "lucide-react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useManualAuthor } from "./hooks/useManualAuthor";
 import { cn } from "@/lib/utils";
 
 export interface ManualAuthorTabProps {
   onAuthorAdded: () => void;
+  onResetRef?: (reset: () => void) => void;
 }
 
 /**
  * Tab for manually adding an author.
  * Shows form with name input and submit button.
  */
-export function ManualAuthorTab({ onAuthorAdded }: ManualAuthorTabProps) {
-  const { name, setName, isCreating, createError, createManualAuthor, validateName } = useManualAuthor(onAuthorAdded);
+export function ManualAuthorTab({ onAuthorAdded, onResetRef }: ManualAuthorTabProps) {
+  const { name, setName, isCreating, createError, createManualAuthor, validateName, resetForm } =
+    useManualAuthor(onAuthorAdded);
+
+  // Expose reset function to parent via ref callback
+  useEffect(() => {
+    if (onResetRef) {
+      onResetRef(resetForm);
+    }
+  }, [onResetRef, resetForm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +64,10 @@ export function ManualAuthorTab({ onAuthorAdded }: ManualAuthorTabProps) {
           placeholder="np. Jan Kowalski"
           maxLength={500}
           disabled={isCreating}
+          aria-label="Nazwa autora"
+          aria-required="true"
+          aria-invalid={!!(validationError || createError)}
+          aria-describedby={validationError || createError ? "author-name-error" : undefined}
           className={cn(
             "w-full h-10 px-3 rounded-md border bg-background text-sm",
             "placeholder:text-muted-foreground",
@@ -64,10 +78,18 @@ export function ManualAuthorTab({ onAuthorAdded }: ManualAuthorTabProps) {
         />
 
         {/* Validation error */}
-        {validationError && <p className="text-xs text-destructive">{validationError}</p>}
+        {validationError && (
+          <p id="author-name-error" className="text-xs text-destructive" role="alert">
+            {validationError}
+          </p>
+        )}
 
         {/* Create error */}
-        {createError && !validationError && <p className="text-xs text-destructive">{createError}</p>}
+        {createError && !validationError && (
+          <p id="author-name-error" className="text-xs text-destructive" role="alert">
+            {createError}
+          </p>
+        )}
 
         {/* Character count hint */}
         {name.length > 400 && <p className="text-xs text-muted-foreground">{name.length} / 500 znaków</p>}
