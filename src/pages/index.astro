@@ -1,6 +1,15 @@
 ---
 import Welcome from "../components/Welcome.astro";
 import Layout from "../layouts/Layout.astro";
+
+// If user is logged in, redirect to /app/authors
+// User will be available from middleware via Astro.locals.user
+// For now, we'll check if user exists - backend will provide it later
+const user = Astro.locals.user;
+
+if (user) {
+  return Astro.redirect("/app/authors", 302);
+}
 ---
 
 <Layout>

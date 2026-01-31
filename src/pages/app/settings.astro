@@ -1,0 +1,16 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { AccountSettings } from "@/components/auth/AccountSettings";
+
+const title = "Ustawienia - BookFlow";
+
+// User will be available from middleware via Astro.locals.user
+// For now, we'll pass undefined - backend will provide it later
+const userEmail = Astro.locals.user?.email;
+---
+
+<Layout title={title}>
+  <div class="container mx-auto py-8 px-4 max-w-4xl">
+    <AccountSettings userEmail={userEmail} client:load />
+  </div>
+</Layout>

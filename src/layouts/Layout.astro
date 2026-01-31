@@ -3,9 +3,10 @@ import "../styles/global.css";
 
 interface Props {
   title?: string;
+  authMode?: boolean;
 }
 
-const { title = "10x Astro Starter" } = Astro.props;
+const { title = "BookFlow", authMode = false } = Astro.props;
 ---
 
 <!doctype html>
