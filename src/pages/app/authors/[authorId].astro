@@ -1,0 +1,15 @@
+---
+import AppLayout from "@/layouts/AppLayout.astro";
+import { AuthorWorksView } from "@/components/authors/works/AuthorWorksView";
+
+const { authorId } = Astro.params;
+const page = Astro.url.searchParams.get("page");
+const sort = Astro.url.searchParams.get("sort");
+
+const initialPage = page ? parseInt(page, 10) : undefined;
+const initialSort = sort === "title_asc" || sort === "published_desc" ? sort : undefined;
+---
+
+<AppLayout title={`Autor - Prace`}>
+  <AuthorWorksView client:load authorId={authorId || ""} initialPage={initialPage} initialSort={initialSort} />
+</AppLayout>
