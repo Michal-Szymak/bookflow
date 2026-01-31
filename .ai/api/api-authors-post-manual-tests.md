@@ -1,6 +1,7 @@
 # Manual Testing Guide: POST /api/authors
 
 ## Prerequisites
+
 - Dev server running: `npm run dev`
 - Supabase environment variables configured
 - Database with `authors` and `profiles` tables created
@@ -13,11 +14,13 @@
 This endpoint requires authentication. You need to obtain a valid session token.
 
 ### Option 1: Using Supabase Auth (Browser/Postman)
+
 1. Sign up or sign in via Supabase Auth UI or API
 2. The session cookie will be automatically set
 3. For curl, extract the session token from browser cookies or use `Authorization: Bearer <token>` header
 
 ### Option 2: Using curl with Session Cookie
+
 ```bash
 # First, sign in and get session cookie
 # Then use it in subsequent requests:
@@ -28,6 +31,7 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 ### Option 3: Using Bearer Token (if supported)
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -42,9 +46,11 @@ curl -X POST "http://localhost:3000/api/authors" \
 ## Test Cases
 
 ### Test 1: Successful Author Creation (Happy Path)
+
 **Description:** Create a manual author with valid data
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -56,6 +62,7 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 201 Created
 - JSON with `author` object containing:
   - `id`: UUID
@@ -70,6 +77,7 @@ curl -X POST "http://localhost:3000/api/authors" \
 - Header: `Location: /api/authors/{authorId}`
 
 **Example:**
+
 ```json
 {
   "author": {
@@ -89,9 +97,11 @@ curl -X POST "http://localhost:3000/api/authors" \
 ---
 
 ### Test 2: Missing Authentication (401 Unauthorized)
+
 **Description:** Attempt to create author without authentication
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -102,10 +112,12 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 401 Unauthorized
 - Error message about authentication required
 
 **Example:**
+
 ```json
 {
   "error": "Unauthorized",
@@ -116,9 +128,11 @@ curl -X POST "http://localhost:3000/api/authors" \
 ---
 
 ### Test 3: Missing Required Field 'name' (400 Bad Request)
+
 **Description:** Validation error when name is missing
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -129,10 +143,12 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error message about missing name
 
 **Example:**
+
 ```json
 {
   "error": "Validation error",
@@ -149,9 +165,11 @@ curl -X POST "http://localhost:3000/api/authors" \
 ---
 
 ### Test 4: Empty Name (400 Bad Request)
+
 **Description:** Validation error when name is empty or only whitespace
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -163,10 +181,12 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error about empty name
 
 **Example:**
+
 ```json
 {
   "error": "Validation error",
@@ -176,6 +196,7 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Also test with whitespace only:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -189,9 +210,11 @@ curl -X POST "http://localhost:3000/api/authors" \
 ---
 
 ### Test 5: Name Too Long (400 Bad Request)
+
 **Description:** Validation error when name exceeds 500 characters
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -203,15 +226,18 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error about name length exceeding 500 characters
 
 ---
 
 ### Test 6: Missing 'manual' Field (400 Bad Request)
+
 **Description:** Validation error when manual is missing
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -222,15 +248,18 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error about missing manual field
 
 ---
 
 ### Test 7: 'manual' Not True (400 Bad Request)
+
 **Description:** Validation error when manual is not true
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -242,10 +271,12 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error message: "Manual must be true for manual authors"
 
 **Example:**
+
 ```json
 {
   "error": "Validation error",
@@ -257,9 +288,11 @@ curl -X POST "http://localhost:3000/api/authors" \
 ---
 
 ### Test 8: Invalid 'openlibrary_id' (400 Bad Request)
+
 **Description:** Validation error when openlibrary_id is provided but not null
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -272,15 +305,18 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error message: "openlibrary_id must be null for manual authors"
 
 ---
 
 ### Test 9: Valid 'openlibrary_id' as Null
+
 **Description:** Should accept openlibrary_id as null (optional field)
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -293,15 +329,18 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 201 Created
 - Author created successfully (same as Test 1)
 
 ---
 
 ### Test 10: Invalid JSON Body (400 Bad Request)
+
 **Description:** Validation error when request body is not valid JSON
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -310,18 +349,22 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error message: "Invalid JSON in request body"
 
 ---
 
 ### Test 11: Author Limit Exceeded (409 Conflict)
+
 **Description:** Error when user has reached the maximum number of authors (500)
 
 **Prerequisites:**
+
 - User must have `author_count >= max_authors` (typically 500) in `profiles` table
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -333,10 +376,12 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 409 Conflict
 - Error message about author limit reached
 
 **Example:**
+
 ```json
 {
   "error": "Conflict",
@@ -345,21 +390,25 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Note:** To test this, you may need to manually update the `profiles` table:
+
 ```sql
-UPDATE profiles 
-SET author_count = max_authors 
+UPDATE profiles
+SET author_count = max_authors
 WHERE user_id = '<your-user-id>';
 ```
 
 ---
 
 ### Test 12: Profile Not Found (500 Internal Server Error)
+
 **Description:** Error when user profile doesn't exist (should not happen in normal flow)
 
 **Prerequisites:**
+
 - User exists in `auth.users` but profile is missing from `profiles` table
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -371,6 +420,7 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 500 Internal Server Error
 - Error message about profile not found
 
@@ -379,9 +429,11 @@ curl -X POST "http://localhost:3000/api/authors" \
 ---
 
 ### Test 13: Name with Special Characters
+
 **Description:** Verify that names with special characters are handled correctly
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -393,15 +445,18 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 201 Created
 - Author created with special characters preserved
 
 ---
 
 ### Test 14: Name with Leading/Trailing Whitespace
+
 **Description:** Verify that name is trimmed before saving
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/authors" \
   -H "Content-Type: application/json" \
@@ -413,15 +468,18 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 201 Created
 - Author created with trimmed name: "John Doe" (whitespace removed)
 
 ---
 
 ### Test 15: Multiple Authors with Same Name
+
 **Description:** Verify that multiple authors can have the same name (no uniqueness constraint on name)
 
 **Request:**
+
 ```bash
 # Create first author
 curl -X POST "http://localhost:3000/api/authors" \
@@ -443,6 +501,7 @@ curl -X POST "http://localhost:3000/api/authors" \
 ```
 
 **Expected Response:**
+
 - Status: 201 Created for both requests
 - Both authors created successfully (different IDs)
 - Same name is allowed for manual authors
@@ -476,6 +535,7 @@ Before considering the endpoint complete, verify:
 1. **Authentication**: Make sure you have a valid Supabase session before testing. The easiest way is to sign in through the Supabase Auth UI and copy the session cookie.
 
 2. **Profile Creation**: Ensure your test user has a profile in the `profiles` table. If not, create one manually:
+
    ```sql
    INSERT INTO profiles (user_id, author_count, work_count, max_authors, max_works)
    VALUES ('<user-id>', 0, 0, 500, 5000);
@@ -486,4 +546,3 @@ Before considering the endpoint complete, verify:
 4. **Port**: Default Astro dev server runs on port 4321. Adjust the URL if your server runs on a different port.
 
 5. **Error Messages**: Verify that error messages are user-friendly and don't expose internal implementation details.
-

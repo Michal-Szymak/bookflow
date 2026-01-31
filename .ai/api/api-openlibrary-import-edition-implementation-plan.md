@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: POST /api/openlibrary/import/edition
 
 ## 1. Przegląd punktu końcowego
+
 Endpoint importuje lub odświeża wydanie (edition) z OpenLibrary i wiąże je z istniejącym dziełem (`work_id`). Operacja korzysta z RPC `SECURITY DEFINER` do zapisu w globalnym katalogu (`manual = false`, `owner_user_id = null`) i aktualizuje metadane cache (`ol_fetched_at`, `ol_expires_at`) zgodnie ze specyfikacją. Odpowiedź zwraca `EditionResponseDto`.
 
 ## 2. Szczegóły żądania
+
 - Metoda HTTP: `POST`
 - Struktura URL: `/api/openlibrary/import/edition`
 - Autoryzacja: wymagana (session token)
@@ -22,6 +24,7 @@ Endpoint importuje lub odświeża wydanie (edition) z OpenLibrary i wiąże je z
   - Reguły: `openlibrary_id` nie może zaczynać się od `/books/` ani `/`, musi być przycięty i niepusty; `work_id` musi być poprawnym UUID.
 
 ## 3. Szczegóły odpowiedzi
+
 - Sukces:
   - `200 OK` z `EditionResponseDto` (`{ edition: EditionDto }`)
   - Zwracamy `200` niezależnie od tego, czy rekord został utworzony czy tylko odświeżony (operacja idempotentna).
@@ -33,6 +36,7 @@ Endpoint importuje lub odświeża wydanie (edition) z OpenLibrary i wiąże je z
   - `502` – błąd po stronie OpenLibrary (timeout/5xx)
 
 ## 4. Przepływ danych
+
 1. Uwierzytelnienie użytkownika przez `locals.supabase.auth.getUser()`; brak sesji → `401`.
 2. Parsowanie JSON body, walidacja `ImportEditionSchema`; błędy → `400`.
 3. Sprawdzenie istnienia i dostępności `work_id` (RLS) przez `WorksService.findById`; brak → `404`.
@@ -45,6 +49,7 @@ Endpoint importuje lub odświeża wydanie (edition) z OpenLibrary i wiąże je z
 8. Zwrócenie `EditionResponseDto` z rekordem z bazy.
 
 ## 5. Względy bezpieczeństwa
+
 - Wymagana autoryzacja (jak w imporcie dzieła), aby ograniczyć operację do użytkownika mającego dostęp do wskazanego `work_id`.
 - Wykorzystanie `locals.supabase` i RLS; brak dostępu do `work_id` zwraca `404` (bez ujawniania istnienia zasobu).
 - Stosowanie RPC `SECURITY DEFINER` do zapisu w globalnym katalogu.
@@ -52,6 +57,7 @@ Endpoint importuje lub odświeża wydanie (edition) z OpenLibrary i wiąże je z
 - Logowanie błędów przez `logger` bez ujawniania wrażliwych danych w odpowiedziach.
 
 ## 6. Obsługa błędów
+
 - `400` – invalid JSON; walidacja Zod; puste lub złe `openlibrary_id`; niepoprawny `work_id`.
 - `401` – brak sesji użytkownika.
 - `404` – `work_id` nie istnieje lub nie jest dostępne; OpenLibrary zwraca 404 dla wydania.
@@ -60,12 +66,14 @@ Endpoint importuje lub odświeża wydanie (edition) z OpenLibrary i wiąże je z
 - Rejestrowanie błędów: brak osobnej tabeli błędów w schemacie; użyć `logger` z kontekstem (userId, workId, openlibrary_id).
 
 ## 7. Wydajność
+
 - Cache po `openlibrary_id` z TTL (`ol_expires_at`) ogranicza liczbę wywołań OpenLibrary.
 - RPC `upsert_edition_from_ol` jest idempotentny i minimalizuje liczbę round-tripów do DB.
 - Indeksy unikalne na `openlibrary_id` i `isbn13` ograniczają duplikaty i przyspieszają lookup.
 - Unikać pobierania zbędnych pól; zwracać tylko niezbędne dane w `EditionResponseDto`.
 
 ## 8. Kroki implementacji
+
 1. Dodaj walidację: `src/lib/validation/import-edition.schema.ts` (wzorzec jak `import-work.schema.ts`) oraz typ `ImportEditionCommandValidated`.
 2. Rozszerz `OpenLibraryService` o `fetchEditionByOpenLibraryId` oraz parser odpowiedzi `/books/{id}.json` do `OpenLibraryEdition`.
 3. Dodaj metodę serwisową do wyszukiwania wydania po `openlibrary_id` (np. w `WorksService` lub nowym `EditionsService`), uwzględniając `ol_expires_at`.

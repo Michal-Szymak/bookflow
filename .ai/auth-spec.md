@@ -32,6 +32,7 @@ Niniejszy dokument opisuje szczegółową architekturę modułu rejestracji, log
 #### 2.1.1. Strony publiczne (non-auth)
 
 **`/src/pages/login.astro`**
+
 - **Cel**: Strona logowania użytkownika
 - **Typ**: Astro page (SSR)
 - **Layout**: `Layout.astro` z modyfikacją dla trybu auth (uproszczony header/footer)
@@ -43,6 +44,7 @@ Niniejszy dokument opisuje szczegółową architekturę modułu rejestracji, log
 - **Stylowanie**: Tailwind 4, komponenty Shadcn/ui (Input, Button, Label, Alert)
 
 **`/src/pages/register.astro`**
+
 - **Cel**: Strona rejestracji nowego użytkownika
 - **Typ**: Astro page (SSR)
 - **Layout**: `Layout.astro` z modyfikacją dla trybu auth
@@ -54,6 +56,7 @@ Niniejszy dokument opisuje szczegółową architekturę modułu rejestracji, log
 - **Stylowanie**: Tailwind 4, komponenty Shadcn/ui
 
 **`/src/pages/forgot-password.astro`**
+
 - **Cel**: Strona inicjacji odzyskiwania hasła
 - **Typ**: Astro page (SSR)
 - **Layout**: `Layout.astro` z modyfikacją dla trybu auth
@@ -65,6 +68,7 @@ Niniejszy dokument opisuje szczegółową architekturę modułu rejestracji, log
 - **Stylowanie**: Tailwind 4, komponenty Shadcn/ui
 
 **`/src/pages/reset-password.astro`**
+
 - **Cel**: Strona resetu hasła (dostępna przez link z e-maila)
 - **Typ**: Astro page (SSR)
 - **Layout**: `Layout.astro` z modyfikacją dla trybu auth
@@ -76,8 +80,9 @@ Niniejszy dokument opisuje szczegółową architekturę modułu rejestracji, log
 - **Stylowanie**: Tailwind 4, komponenty Shadcn/ui
 
 **`/src/pages/index.astro`**
+
 - **Cel**: Strona główna (landing page)
-- **Modyfikacja**: 
+- **Modyfikacja**:
   - Jeśli użytkownik zalogowany → redirect do `/app/authors`
   - Jeśli nie zalogowany → wyświetlenie strony powitalnej z linkami do logowania/rejestracji
 - **Komponenty**: `Welcome.astro` (można rozszerzyć o CTA do rejestracji)
@@ -85,11 +90,13 @@ Niniejszy dokument opisuje szczegółową architekturę modułu rejestracji, log
 #### 2.1.2. Strony chronione (auth-required)
 
 **`/src/pages/app/*.astro`** (wszystkie strony w `/app`)
+
 - **Ochrona**: Middleware sprawdza autentykację przed renderowaniem
 - **Logika**: Jeśli brak sesji → redirect do `/login?redirect_to=/app/...`
 - **Przykład**: `/src/pages/app/authors.astro` (już istnieje, wymaga aktualizacji)
 
 **`/src/pages/app/settings.astro`**
+
 - **Cel**: Strona ustawień konta użytkownika
 - **Typ**: Astro page (SSR)
 - **Layout**: `Layout.astro`
@@ -107,6 +114,7 @@ Niniejszy dokument opisuje szczegółową architekturę modułu rejestracji, log
 #### 2.2.1. `LoginForm` (`/src/components/auth/LoginForm.tsx`)
 
 **Odpowiedzialność**:
+
 - Renderowanie formularza logowania
 - Walidacja pól (e-mail, hasło)
 - Wywołanie API `/api/auth/login`
@@ -114,6 +122,7 @@ Niniejszy dokument opisuje szczegółową architekturę modułu rejestracji, log
 - Przekierowanie po sukcesie
 
 **Stan komponentu**:
+
 - `email: string` - wartość pola e-mail
 - `password: string` - wartość pola hasło
 - `isLoading: boolean` - stan ładowania podczas żądania
@@ -121,31 +130,36 @@ Niniejszy dokument opisuje szczegółową architekturę modułu rejestracji, log
 - `showPassword: boolean` - widoczność hasła (opcjonalnie)
 
 **Walidacja**:
+
 - E-mail: format e-mail (regex lub HTML5 validation)
 - Hasło: minimum 6 znaków (zgodnie z wymaganiami Supabase)
 - Walidacja po stronie klienta przed wysłaniem żądania
 
 **Akcje**:
+
 - `handleSubmit(e: FormEvent)` - obsługa submit formularza
 - `handleEmailChange(e: ChangeEvent)` - aktualizacja stanu e-mail
 - `handlePasswordChange(e: ChangeEvent)` - aktualizacja stanu hasło
 - `handleTogglePassword()` - przełączanie widoczności hasła
 
 **Integracja z API**:
+
 ```typescript
-const response = await fetch('/api/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email, password })
+const response = await fetch("/api/auth/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ email, password }),
 });
 ```
 
 **Obsługa błędów**:
+
 - 400: Błędne dane (wyświetlenie komunikatu walidacji)
 - 401: Nieprawidłowe dane logowania (komunikat: "Nieprawidłowy e-mail lub hasło")
 - 500: Błąd serwera (komunikat: "Wystąpił błąd. Spróbuj ponownie później.")
 
 **UI**:
+
 - Użycie komponentów Shadcn/ui: `Input`, `Button`, `Label`, `Alert`
 - Link do `/forgot-password` pod formularzem
 - Link do `/register` pod formularzem ("Nie masz konta? Zarejestruj się")
@@ -153,6 +167,7 @@ const response = await fetch('/api/auth/login', {
 #### 2.2.2. `RegisterForm` (`/src/components/auth/RegisterForm.tsx`)
 
 **Odpowiedzialność**:
+
 - Renderowanie formularza rejestracji
 - Walidacja pól (e-mail, hasło, potwierdzenie hasła)
 - Wywołanie API `/api/auth/register`
@@ -160,6 +175,7 @@ const response = await fetch('/api/auth/login', {
 - Przekierowanie po sukcesie
 
 **Stan komponentu**:
+
 - `email: string`
 - `password: string`
 - `confirmPassword: string`
@@ -169,12 +185,14 @@ const response = await fetch('/api/auth/login', {
 - `showConfirmPassword: boolean`
 
 **Walidacja**:
+
 - E-mail: format e-mail
 - Hasło: minimum 6 znaków
 - Potwierdzenie hasła: musi być identyczne z hasłem
 - Walidacja w czasie rzeczywistym (onChange) i przy submit
 
 **Akcje**:
+
 - `handleSubmit(e: FormEvent)`
 - `handleEmailChange(e: ChangeEvent)`
 - `handlePasswordChange(e: ChangeEvent)`
@@ -183,20 +201,23 @@ const response = await fetch('/api/auth/login', {
 - `handleToggleConfirmPassword()`
 
 **Integracja z API**:
+
 ```typescript
-const response = await fetch('/api/auth/register', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email, password })
+const response = await fetch("/api/auth/register", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ email, password }),
 });
 ```
 
 **Obsługa błędów**:
+
 - 400: Błędne dane (walidacja)
 - 409: Konto już istnieje (komunikat: "Konto z tym e-mailem już istnieje")
 - 500: Błąd serwera
 
 **UI**:
+
 - Komponenty Shadcn/ui
 - Link do `/login` pod formularzem ("Masz już konto? Zaloguj się")
 - Komunikat o wymaganiach hasła (minimum 6 znaków)
@@ -204,50 +225,59 @@ const response = await fetch('/api/auth/register', {
 #### 2.2.3. `ForgotPasswordForm` (`/src/components/auth/ForgotPasswordForm.tsx`)
 
 **Odpowiedzialność**:
+
 - Renderowanie formularza z polem e-mail
 - Wywołanie API `/api/auth/forgot-password`
 - Wyświetlenie komunikatu sukcesu (nawet jeśli e-mail nie istnieje)
 
 **Stan komponentu**:
+
 - `email: string`
 - `isLoading: boolean`
 - `isSuccess: boolean` - czy e-mail został wysłany
 - `error: string | null`
 
 **Walidacja**:
+
 - E-mail: format e-mail
 
 **Akcje**:
+
 - `handleSubmit(e: FormEvent)`
 - `handleEmailChange(e: ChangeEvent)`
 
 **Integracja z API**:
+
 ```typescript
-const response = await fetch('/api/auth/forgot-password', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email })
+const response = await fetch("/api/auth/forgot-password", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ email }),
 });
 ```
 
 **Obsługa błędów**:
+
 - 400: Błędny format e-mail
 - 500: Błąd serwera
 - **Uwaga**: Zawsze wyświetlamy komunikat sukcesu (bezpieczeństwo)
 
 **UI**:
+
 - Po sukcesie: komunikat "Jeśli konto z tym e-mailem istnieje, otrzymasz link do resetu hasła"
 - Link do `/login` pod formularzem
 
 #### 2.2.4. `ResetPasswordForm` (`/src/components/auth/ResetPasswordForm.tsx`)
 
 **Odpowiedzialność**:
+
 - Renderowanie formularza resetu hasła
 - Walidacja tokenu z URL
 - Wywołanie API `/api/auth/reset-password`
 - Przekierowanie po sukcesie
 
 **Stan komponentu**:
+
 - `password: string`
 - `confirmPassword: string`
 - `isLoading: boolean`
@@ -257,11 +287,13 @@ const response = await fetch('/api/auth/forgot-password', {
 - `token: string | null` - token z URL
 
 **Walidacja**:
+
 - Hasło: minimum 6 znaków
 - Potwierdzenie hasła: musi być identyczne
 - Token: musi być obecny w URL
 
 **Akcje**:
+
 - `handleSubmit(e: FormEvent)`
 - `handlePasswordChange(e: ChangeEvent)`
 - `handleConfirmPasswordChange(e: ChangeEvent)`
@@ -269,62 +301,72 @@ const response = await fetch('/api/auth/forgot-password', {
 - `handleToggleConfirmPassword()`
 
 **Integracja z API**:
+
 ```typescript
-const response = await fetch('/api/auth/reset-password', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ token, password })
+const response = await fetch("/api/auth/reset-password", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ token, password }),
 });
 ```
 
 **Obsługa błędów**:
+
 - 400: Błędne dane lub nieprawidłowy token
 - 401: Token wygasł lub jest nieprawidłowy
 - 500: Błąd serwera
 
 **UI**:
+
 - Komponenty Shadcn/ui
 - Link do `/login` pod formularzem
 
 #### 2.2.5. `DeleteAccountDialog` (`/src/components/auth/DeleteAccountDialog.tsx`)
 
 **Odpowiedzialność**:
+
 - Renderowanie dialogu potwierdzenia usunięcia konta
 - Wywołanie API `/api/user/account` (DELETE)
 - Obsługa błędów i komunikatów
 - Przekierowanie po sukcesie
 
 **Stan komponentu**:
+
 - `isOpen: boolean` - czy dialog jest otwarty
 - `isLoading: boolean` - stan ładowania podczas żądania
 - `error: string | null` - komunikat błędu
 - `confirmText: string` - tekst potwierdzenia (np. "USUŃ" dla walidacji)
 
 **Walidacja**:
+
 - Wymagane wpisanie tekstu potwierdzenia (np. "USUŃ") przed aktywacją przycisku
 - Ostrzeżenie o nieodwracalności operacji
 
 **Akcje**:
+
 - `handleConfirm()` - obsługa potwierdzenia i wywołanie API
 - `handleCancel()` - zamknięcie dialogu
 - `handleConfirmTextChange(e: ChangeEvent)` - aktualizacja tekstu potwierdzenia
 
 **Integracja z API**:
+
 ```typescript
-const response = await fetch('/api/user/account', {
-  method: 'DELETE',
-  headers: { 
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  }
+const response = await fetch("/api/user/account", {
+  method: "DELETE",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
 });
 ```
 
 **Obsługa błędów**:
+
 - 401: Brak autoryzacji (komunikat: "Sesja wygasła. Zaloguj się ponownie.")
 - 500: Błąd serwera (komunikat: "Wystąpił błąd podczas usuwania konta. Spróbuj ponownie później.")
 
 **UI**:
+
 - Użycie komponentów Shadcn/ui: `AlertDialog`, `Button`, `Alert`
 - Ostrzeżenie o nieodwracalności operacji
 - Pole tekstowe do wpisania tekstu potwierdzenia
@@ -333,23 +375,27 @@ const response = await fetch('/api/user/account', {
 #### 2.2.6. `AccountSettings` (`/src/components/auth/AccountSettings.tsx`)
 
 **Odpowiedzialność**:
+
 - Renderowanie sekcji ustawień konta
 - Wyświetlenie informacji o koncie (e-mail)
 - Przycisk wylogowania
 - Sekcja usuwania konta z przyciskiem otwierającym dialog
 
 **Stan komponentu**:
+
 - `user: User | null` - dane użytkownika
 - `isDeleteDialogOpen: boolean` - stan dialogu usuwania konta
 - `isLoggingOut: boolean` - stan podczas wylogowania
 
 **Akcje**:
+
 - `handleLogout()` - wywołanie `/api/auth/logout` i przekierowanie
 - `handleDeleteClick()` - otwarcie dialogu usuwania konta
 - `handleDeleteConfirm()` - obsługa potwierdzenia usunięcia (przekazana do dialogu)
 - `handleDeleteCancel()` - zamknięcie dialogu
 
 **UI**:
+
 - Sekcja "Konto" z e-mailem użytkownika
 - Przycisk "Wyloguj"
 - Sekcja "Usuń konto" z ostrzeżeniem i przyciskiem otwierającym dialog
@@ -357,10 +403,12 @@ const response = await fetch('/api/user/account', {
 #### 2.2.7. `AuthLayout` (`/src/components/auth/AuthLayout.tsx`) - opcjonalnie
 
 **Odpowiedzialność**:
+
 - Wspólny layout dla stron autentykacji (centrowanie, styling)
 - Można użyć zamiast modyfikacji `Layout.astro`
 
 **Props**:
+
 - `title: string` - tytuł strony
 - `children: ReactNode` - zawartość formularza
 
@@ -369,11 +417,13 @@ const response = await fetch('/api/user/account', {
 #### 2.3.1. `Layout.astro` - rozszerzenie
 
 **Modyfikacje**:
+
 - Dodanie warunkowego renderowania dla trybu auth
 - Props: `authMode?: boolean` - czy strona jest w trybie autentykacji
 - W trybie auth: uproszczony header/footer lub brak nawigacji
 
 **Przykład**:
+
 ```astro
 ---
 interface Props {
@@ -402,11 +452,13 @@ const { title = "BookFlow", authMode = false } = Astro.props;
 **Cel**: Layout dla stron w `/app/*` z nawigacją i headerem użytkownika
 
 **Zawartość**:
+
 - Header z nawigacją (Autorzy, Książki, Ustawienia)
 - Menu użytkownika (dropdown z opcją wylogowania)
 - Breadcrumbs (opcjonalnie)
 
 **Komponenty React**:
+
 - `UserMenu` (client:load) - menu użytkownika z opcją wylogowania i linkiem do ustawień
 
 ### 2.4. Komponenty pomocnicze
@@ -416,6 +468,7 @@ const { title = "BookFlow", authMode = false } = Astro.props;
 **Cel**: Reużywalny komponent pola hasła z przyciskiem pokaż/ukryj
 
 **Funkcjonalność**:
+
 - Input typu password/text z przełączaniem
 - Ikona oka (pokazuje/ukrywa hasło)
 - Integracja z Shadcn/ui Input
@@ -425,6 +478,7 @@ const { title = "BookFlow", authMode = false } = Astro.props;
 **Cel**: Wrapper dla pola formularza z etykietą i komunikatem błędu
 
 **Funkcjonalność**:
+
 - Label
 - Input (dowolny typ)
 - Komunikat błędu (opcjonalnie)
@@ -435,41 +489,45 @@ const { title = "BookFlow", authMode = false } = Astro.props;
 #### 2.5.1. Schematy walidacji (Zod)
 
 **`/src/lib/validation/auth/login.schema.ts`**
+
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 export const LoginSchema = z.object({
-  email: z.string().email('Nieprawidłowy format e-mail'),
-  password: z.string().min(6, 'Hasło musi mieć minimum 6 znaków'),
+  email: z.string().email("Nieprawidłowy format e-mail"),
+  password: z.string().min(6, "Hasło musi mieć minimum 6 znaków"),
 });
 ```
 
 **`/src/lib/validation/auth/register.schema.ts`**
+
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 export const RegisterSchema = z.object({
-  email: z.string().email('Nieprawidłowy format e-mail'),
-  password: z.string().min(6, 'Hasło musi mieć minimum 6 znaków'),
+  email: z.string().email("Nieprawidłowy format e-mail"),
+  password: z.string().min(6, "Hasło musi mieć minimum 6 znaków"),
 });
 ```
 
 **`/src/lib/validation/auth/forgot-password.schema.ts`**
+
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 export const ForgotPasswordSchema = z.object({
-  email: z.string().email('Nieprawidłowy format e-mail'),
+  email: z.string().email("Nieprawidłowy format e-mail"),
 });
 ```
 
 **`/src/lib/validation/auth/reset-password.schema.ts`**
+
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 export const ResetPasswordSchema = z.object({
-  token: z.string().min(1, 'Token jest wymagany'),
-  password: z.string().min(6, 'Hasło musi mieć minimum 6 znaków'),
+  token: z.string().min(1, "Token jest wymagany"),
+  password: z.string().min(6, "Hasło musi mieć minimum 6 znaków"),
 });
 ```
 
@@ -484,17 +542,20 @@ export const ResetPasswordSchema = z.object({
 #### 2.6.1. Hook `useAuth` (`/src/lib/hooks/useAuth.ts`)
 
 **Odpowiedzialność**:
+
 - Zarządzanie stanem autentykacji w React
 - Sprawdzanie czy użytkownik jest zalogowany
 - Pobieranie danych użytkownika
 - Funkcje: `login`, `logout`, `register`, `deleteAccount`
 
 **Stan**:
+
 - `user: User | null` - dane użytkownika
 - `isLoading: boolean` - stan ładowania
 - `isAuthenticated: boolean` - czy użytkownik jest zalogowany
 
 **Funkcje**:
+
 - `login(email: string, password: string): Promise<void>`
 - `logout(): Promise<void>`
 - `register(email: string, password: string): Promise<void>`
@@ -503,6 +564,7 @@ export const ResetPasswordSchema = z.object({
 - `getAccessToken(): Promise<string | null>` - pobranie tokenu dostępu dla żądań API
 
 **Implementacja**:
+
 - Użycie Supabase client po stronie klienta (`supabaseClient`)
 - Przechowywanie sesji w localStorage (domyślnie Supabase)
 - Subskrypcja zmian sesji (`supabase.auth.onAuthStateChange`)
@@ -510,10 +572,12 @@ export const ResetPasswordSchema = z.object({
 #### 2.6.2. Context `AuthContext` (`/src/lib/contexts/AuthContext.tsx`)
 
 **Odpowiedzialność**:
+
 - Globalny context dla stanu autentykacji
 - Udostępnienie `useAuth` dla wszystkich komponentów
 
 **Provider**:
+
 - `AuthProvider` - wrapper dla aplikacji
 - Inicjalizacja sesji przy starcie aplikacji
 
@@ -527,6 +591,7 @@ export const ResetPasswordSchema = z.object({
 #### 2.7.2. Mapowanie błędów API na komunikaty użytkownika
 
 **Błędy Supabase Auth**:
+
 - `invalid_credentials` → "Nieprawidłowy e-mail lub hasło"
 - `email_not_confirmed` → "Potwierdź swój e-mail przed zalogowaniem" (jeśli włączone)
 - `user_already_registered` → "Konto z tym e-mailem już istnieje"
@@ -535,6 +600,7 @@ export const ResetPasswordSchema = z.object({
 - `invalid_token` → "Nieprawidłowy link. Sprawdź czy link jest kompletny."
 
 **Ogólne błędy**:
+
 - 400 → "Błędne dane. Sprawdź wprowadzone informacje."
 - 401 → "Brak autoryzacji. Zaloguj się ponownie."
 - 500 → "Wystąpił błąd serwera. Spróbuj ponownie później."
@@ -611,6 +677,7 @@ export const ResetPasswordSchema = z.object({
 **Cel**: Rejestracja nowego użytkownika
 
 **Request Body**:
+
 ```typescript
 {
   email: string;
@@ -619,10 +686,12 @@ export const ResetPasswordSchema = z.object({
 ```
 
 **Walidacja**:
+
 - Użycie `RegisterSchema` (Zod)
 - Sprawdzenie czy e-mail jest unikalny (Supabase zwraca błąd jeśli istnieje)
 
 **Logika**:
+
 1. Walidacja danych wejściowych
 2. Wywołanie `supabase.auth.signUp({ email, password })`
 3. Po sukcesie: automatyczne logowanie (Supabase zwraca sesję)
@@ -630,26 +699,29 @@ export const ResetPasswordSchema = z.object({
 5. Zwrócenie danych użytkownika i tokenu sesji
 
 **Response (200)**:
+
 ```typescript
 {
   user: {
     id: string;
     email: string;
-  };
+  }
   session: {
     access_token: string;
     refresh_token: string;
     expires_at: number;
-  };
+  }
 }
 ```
 
 **Błędy**:
+
 - 400: Błędne dane (walidacja)
 - 409: Konto już istnieje (`user_already_registered`)
 - 500: Błąd serwera
 
 **Bezpieczeństwo**:
+
 - Hasło nie jest logowane
 - Rate limiting (opcjonalnie, przez Supabase)
 
@@ -658,6 +730,7 @@ export const ResetPasswordSchema = z.object({
 **Cel**: Logowanie użytkownika
 
 **Request Body**:
+
 ```typescript
 {
   email: string;
@@ -666,34 +739,39 @@ export const ResetPasswordSchema = z.object({
 ```
 
 **Walidacja**:
+
 - Użycie `LoginSchema` (Zod)
 
 **Logika**:
+
 1. Walidacja danych wejściowych
 2. Wywołanie `supabase.auth.signInWithPassword({ email, password })`
 3. Po sukcesie: zwrócenie danych użytkownika i tokenu sesji
 
 **Response (200)**:
+
 ```typescript
 {
   user: {
     id: string;
     email: string;
-  };
+  }
   session: {
     access_token: string;
     refresh_token: string;
     expires_at: number;
-  };
+  }
 }
 ```
 
 **Błędy**:
+
 - 400: Błędne dane
 - 401: Nieprawidłowe dane logowania (`invalid_credentials`)
 - 500: Błąd serwera
 
 **Bezpieczeństwo**:
+
 - Rate limiting przez Supabase
 - Hasło nie jest logowane
 
@@ -702,14 +780,17 @@ export const ResetPasswordSchema = z.object({
 **Cel**: Wylogowanie użytkownika
 
 **Request Headers**:
+
 - `Authorization: Bearer <token>` (opcjonalnie, jeśli sesja jest w cookie)
 
 **Logika**:
+
 1. Sprawdzenie autentykacji (jeśli token w headerze)
 2. Wywołanie `supabase.auth.signOut()`
 3. Usunięcie sesji po stronie klienta (przez Supabase client)
 
 **Response (200)**:
+
 ```typescript
 {
   message: "Wylogowano pomyślnie";
@@ -717,6 +798,7 @@ export const ResetPasswordSchema = z.object({
 ```
 
 **Błędy**:
+
 - 401: Brak autoryzacji (opcjonalnie)
 - 500: Błąd serwera
 
@@ -725,6 +807,7 @@ export const ResetPasswordSchema = z.object({
 **Cel**: Inicjacja procesu odzyskiwania hasła
 
 **Request Body**:
+
 ```typescript
 {
   email: string;
@@ -732,14 +815,17 @@ export const ResetPasswordSchema = z.object({
 ```
 
 **Walidacja**:
+
 - Użycie `ForgotPasswordSchema` (Zod)
 
 **Logika**:
+
 1. Walidacja danych wejściowych
 2. Wywołanie `supabase.auth.resetPasswordForEmail(email, { redirectTo: '/reset-password' })`
 3. Zawsze zwracamy sukces (bezpieczeństwo - nie ujawniamy czy e-mail istnieje)
 
 **Response (200)**:
+
 ```typescript
 {
   message: "Jeśli konto z tym e-mailem istnieje, otrzymasz link do resetu hasła";
@@ -747,10 +833,12 @@ export const ResetPasswordSchema = z.object({
 ```
 
 **Błędy**:
+
 - 400: Błędny format e-mail
 - 500: Błąd serwera
 
 **Konfiguracja Supabase**:
+
 - URL przekierowania: `https://yourdomain.com/reset-password`
 - Template e-mail: można dostosować w Supabase Dashboard
 
@@ -759,6 +847,7 @@ export const ResetPasswordSchema = z.object({
 **Cel**: Reset hasła użytkownika
 
 **Request Body**:
+
 ```typescript
 {
   token: string;
@@ -767,15 +856,18 @@ export const ResetPasswordSchema = z.object({
 ```
 
 **Walidacja**:
+
 - Użycie `ResetPasswordSchema` (Zod)
 
 **Logika**:
+
 1. Walidacja danych wejściowych
 2. Wywołanie `supabase.auth.updateUser({ password })` z tokenem w sesji
 3. **Uwaga**: Supabase wymaga, aby użytkownik był zalogowany przez link z e-maila (sesja recovery)
 4. Alternatywnie: użycie `supabase.auth.verifyOtp({ token, type: 'recovery' })` i następnie `updateUser`
 
 **Response (200)**:
+
 ```typescript
 {
   message: "Hasło zostało zresetowane pomyślnie";
@@ -783,11 +875,12 @@ export const ResetPasswordSchema = z.object({
     access_token: string;
     refresh_token: string;
     expires_at: number;
-  };
+  }
 }
 ```
 
 **Błędy**:
+
 - 400: Błędne dane
 - 401: Token wygasł lub jest nieprawidłowy
 - 500: Błąd serwera
@@ -799,9 +892,11 @@ export const ResetPasswordSchema = z.object({
 **Cel**: Trwałe usunięcie konta użytkownika i wszystkich powiązanych danych
 
 **Request Headers**:
+
 - `Authorization: Bearer <token>` - wymagany token dostępu użytkownika
 
 **Logika**:
+
 1. Sprawdzenie autentykacji użytkownika (`supabase.auth.getUser()`)
 2. Jeśli brak autoryzacji → zwrócenie 401
 3. Utworzenie `AccountService` z kluczem service role
@@ -816,14 +911,17 @@ export const ResetPasswordSchema = z.object({
    - `editions` z `owner_user_id = user.id` (FK: owner_user_id → auth.users)
 
 **Response (204)**:
+
 - Status: `204 No Content`
 - Body: Brak (pusty)
 
 **Błędy**:
+
 - 401: Brak autoryzacji (komunikat: "Authentication required")
 - 500: Błąd serwera (komunikat: "Failed to delete user account")
 
 **Bezpieczeństwo**:
+
 - Wymaga pełnej autentykacji użytkownika
 - Użycie Supabase Admin API (service role key) do usunięcia z `auth.users`
 - Operacja nieodwracalna
@@ -836,14 +934,17 @@ export const ResetPasswordSchema = z.object({
 **Cel**: Sprawdzenie aktualnej sesji użytkownika
 
 **Request Headers**:
+
 - `Authorization: Bearer <token>` (opcjonalnie)
 
 **Logika**:
+
 1. Sprawdzenie tokenu w headerze lub cookie
 2. Wywołanie `supabase.auth.getUser()`
 3. Zwrócenie danych użytkownika jeśli zalogowany
 
 **Response (200)**:
+
 ```typescript
 {
   user: {
@@ -854,6 +955,7 @@ export const ResetPasswordSchema = z.object({
 ```
 
 **Błędy**:
+
 - 401: Brak sesji (zwraca `user: null`)
 
 ### 3.2. Serwisy (Services)
@@ -863,6 +965,7 @@ export const ResetPasswordSchema = z.object({
 **Odpowiedzialność**: Logika biznesowa autentykacji
 
 **Metody**:
+
 - `register(email: string, password: string): Promise<{ user, session }>`
 - `login(email: string, password: string): Promise<{ user, session }>`
 - `logout(): Promise<void>`
@@ -875,9 +978,11 @@ export const ResetPasswordSchema = z.object({
 **Odpowiedzialność**: Logika biznesowa usuwania konta użytkownika
 
 **Metody**:
+
 - `deleteAccount(userId: string): Promise<void>` - usuwa konto użytkownika z Supabase Auth
 
 **Implementacja**:
+
 - Użycie Supabase Admin API (service role key) do usunięcia użytkownika z `auth.users`
 - Usunięcie z `auth.users` automatycznie wyzwala kaskadowe usunięcie wszystkich powiązanych danych w bazie danych
 - Obsługa błędów i logowanie operacji
@@ -885,11 +990,13 @@ export const ResetPasswordSchema = z.object({
 **Uwaga**: Serwis już istnieje w `/src/lib/services/account.service.ts`.
 
 **Implementacja**:
+
 - Użycie Supabase client z `locals.supabase` (server-side)
 - Obsługa błędów Supabase i mapowanie na błędy aplikacji
 - Logowanie błędów (przez `logger`)
 
 **Przykład**:
+
 ```typescript
 export class AuthService {
   constructor(private supabase: SupabaseClient) {}
@@ -922,6 +1029,7 @@ export class AuthService {
 #### 3.3.2. Walidacja w endpointach
 
 **Wzorzec**:
+
 ```typescript
 const validation = LoginSchema.safeParse(body);
 if (!validation.success) {
@@ -941,6 +1049,7 @@ if (!validation.success) {
 #### 3.4.1. Mapowanie błędów Supabase
 
 **Błędy Supabase Auth**:
+
 - `invalid_credentials` → 401 Unauthorized
 - `user_already_registered` → 409 Conflict
 - `email_not_confirmed` → 403 Forbidden (jeśli włączone)
@@ -965,34 +1074,41 @@ if (!validation.success) {
 #### 3.5.1. Middleware (`/src/middleware/index.ts`)
 
 **Aktualizacja**:
+
 - Sprawdzanie sesji użytkownika z cookie/header
 - Ochrona tras `/app/*` - redirect do `/login` jeśli brak sesji
 - Przekazywanie sesji do `context.locals` dla użycia w stronach Astro
 
 **Implementacja**:
+
 ```typescript
 export const onRequest = defineMiddleware(async (context, next) => {
   // ... existing code (tworzenie Supabase client) ...
 
   // Sprawdzenie sesji dla tras chronionych
-  if (context.url.pathname.startsWith('/app')) {
-    const { data: { user }, error } = await supabase.auth.getUser();
-    
+  if (context.url.pathname.startsWith("/app")) {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
     if (!user || error) {
       const redirectUrl = `/login?redirect_to=${encodeURIComponent(context.url.pathname)}`;
       return context.redirect(redirectUrl);
     }
-    
+
     // Przekazanie użytkownika do locals
     context.locals.user = user;
   }
 
   // Sprawdzenie czy użytkownik jest zalogowany na stronach auth
-  if (['/login', '/register', '/forgot-password'].includes(context.url.pathname)) {
-    const { data: { user } } = await supabase.auth.getUser();
-    
+  if (["/login", "/register", "/forgot-password"].includes(context.url.pathname)) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (user) {
-      return context.redirect('/app/authors');
+      return context.redirect("/app/authors");
     }
   }
 
@@ -1003,6 +1119,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 #### 3.5.2. Aktualizacja `env.d.ts`
 
 **Dodanie typu dla `locals.user`**:
+
 ```typescript
 declare global {
   namespace App {
@@ -1020,6 +1137,7 @@ declare global {
 #### 3.5.3. Użycie w stronach Astro
 
 **Przykład w `/src/pages/app/authors.astro`**:
+
 ```astro
 ---
 import Layout from "@/layouts/Layout.astro";
@@ -1047,16 +1165,19 @@ const title = "Autorzy - BookFlow";
 #### 4.1.1. Ustawienia w Supabase Dashboard
 
 **Email Auth**:
+
 - Włączone: Email/Password authentication
 - Wyłączone (MVP): Email confirmation (opcjonalnie można włączyć)
 - Wyłączone (MVP): Magic link (nie używamy w MVP)
 
 **Password Reset**:
+
 - Włączone: Password reset via email
 - Redirect URL: `https://yourdomain.com/reset-password`
 - Template e-mail: można dostosować (język polski)
 
 **Session Management**:
+
 - JWT expiry: 3600 sekund (1 godzina) - domyślne
 - Refresh token rotation: włączone (domyślnie)
 - Refresh token reuse interval: 10 sekund (domyślnie)
@@ -1064,6 +1185,7 @@ const title = "Autorzy - BookFlow";
 #### 4.1.2. Konfiguracja w `supabase/config.toml` (lokalnie)
 
 **Ustawienia**:
+
 ```toml
 [auth]
 enabled = true
@@ -1079,11 +1201,13 @@ refresh_token_reuse_interval = 10
 #### 4.2.1. Server-side (middleware i API routes)
 
 **Tworzenie Supabase client**:
+
 - Użycie `createClient` z `@supabase/supabase-js`
 - Konfiguracja: `persistSession: false`, `autoRefreshToken: false` (server-side)
 - Przekazywanie tokenu przez header `Authorization: Bearer <token>`
 
 **Sprawdzanie sesji**:
+
 - `supabase.auth.getUser()` - weryfikacja tokenu i pobranie użytkownika
 - `supabase.auth.signUp()` - rejestracja
 - `supabase.auth.signInWithPassword()` - logowanie
@@ -1094,17 +1218,20 @@ refresh_token_reuse_interval = 10
 #### 4.2.2. Client-side (React components)
 
 **Tworzenie Supabase client**:
+
 - Użycie `supabaseClient` z `/src/db/supabase.client.ts`
 - Konfiguracja: domyślna (persistSession: true, autoRefreshToken: true)
 
 **Zarządzanie sesją**:
+
 - Sesja przechowywana w localStorage (domyślnie Supabase)
 - Automatyczne odświeżanie tokenu
 - Subskrypcja zmian: `supabase.auth.onAuthStateChange()`
 
 **Przykład w `useAuth`**:
+
 ```typescript
-import { supabaseClient } from '@/db/supabase.client';
+import { supabaseClient } from "@/db/supabase.client";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -1116,11 +1243,11 @@ export function useAuth() {
     });
 
     // Subskrypcja zmian
-    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -1134,28 +1261,34 @@ export function useAuth() {
 #### 4.3.1. Przechowywanie tokenu
 
 **Server-side**:
+
 - Token przekazywany przez header `Authorization: Bearer <token>`
 - Brak przechowywania w cookie (opcjonalnie można dodać)
 
 **Client-side**:
+
 - Token przechowywany w localStorage przez Supabase
 - Automatyczne dołączanie do żądań API (jeśli używamy Supabase client)
 
 #### 4.3.2. Odświeżanie tokenu
 
 **Automatyczne** (client-side):
+
 - Supabase automatycznie odświeża token przed wygaśnięciem
 - Użycie refresh token
 
 **Manualne** (jeśli potrzebne):
+
 - `supabase.auth.refreshSession()`
 
 #### 4.3.3. Wylogowanie
 
 **Server-side**:
+
 - `supabase.auth.signOut()` - wylogowanie użytkownika
 
 **Client-side**:
+
 - `supabaseClient.auth.signOut()` - usunięcie sesji z localStorage
 - Redirect do `/login`
 
@@ -1164,39 +1297,47 @@ export function useAuth() {
 #### 4.4.1. Ochrona przed atakami
 
 **SQL Injection**:
+
 - Użycie Supabase Client zapewnia parametryzowane zapytania
 - Brak bezpośrednich zapytań SQL
 
 **XSS**:
+
 - Dane wyjściowe są zwracane jako JSON
 - React automatycznie escapuje wartości w JSX
 
 **CSRF**:
+
 - Astro automatycznie obsługuje ochronę CSRF dla endpointów API
 - Token w headerze `Authorization` (nie w cookie) zmniejsza ryzyko CSRF
 
 **Rate Limiting**:
+
 - Supabase Auth ma wbudowane rate limiting
 - Dodatkowo można dodać własny rate limiting (np. przez `RateLimitService`)
 
 #### 4.4.2. Walidacja haseł
 
 **Wymagania Supabase**:
+
 - Minimum 6 znaków (domyślnie)
 - Można dostosować w konfiguracji Supabase
 
 **Walidacja po stronie klienta**:
+
 - Sprawdzenie minimum 6 znaków przed wysłaniem
 - Opcjonalnie: sprawdzenie siły hasła (duże/małe litery, cyfry, znaki specjalne)
 
 #### 4.4.3. Ochrona tras
 
 **Middleware**:
+
 - Sprawdzanie sesji przed renderowaniem stron `/app/*`
 - Redirect do `/login` jeśli brak sesji
 - Przekazywanie `redirect_to` w URL
 
 **API Routes**:
+
 - Sprawdzanie autoryzacji w każdym endpoincie chronionym
 - Zwracanie 401 jeśli brak autoryzacji
 
@@ -1205,12 +1346,17 @@ export function useAuth() {
 #### 4.5.1. Kompatybilność z istniejącymi endpointami
 
 **Istniejące endpointy** (`/api/user/*`, `/api/authors/*`, etc.):
+
 - Używają już `supabase.auth.getUser()` do weryfikacji
 - Nie wymagają zmian - działają z nowym systemem autentykacji
 
 **Przykład** (`/src/pages/api/user/profile.ts`):
+
 ```typescript
-const { data: { user }, error: authError } = await supabase.auth.getUser();
+const {
+  data: { user },
+  error: authError,
+} = await supabase.auth.getUser();
 if (authError || !user) {
   return new Response(/* 401 */);
 }
@@ -1219,24 +1365,26 @@ if (authError || !user) {
 #### 4.5.2. Aktualizacja komponentów React
 
 **Komponenty używające API** (np. `AuthorsListView`):
+
 - Muszą dołączać token w headerze `Authorization: Bearer <token>`
 - Użycie `useAuth` hook do pobrania tokenu
 - Obsługa 401 - redirect do `/login`
 
 **Przykład**:
+
 ```typescript
 const { user, getAccessToken } = useAuth();
 
 const fetchAuthors = async () => {
   const token = await getAccessToken();
-  const response = await fetch('/api/user/authors', {
+  const response = await fetch("/api/user/authors", {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
-  
+
   if (response.status === 401) {
-    window.location.href = '/login';
+    window.location.href = "/login";
     return;
   }
   // ...
@@ -1246,6 +1394,7 @@ const fetchAuthors = async () => {
 #### 4.5.3. Aktualizacja middleware
 
 **Obecny middleware** (`/src/middleware/index.ts`):
+
 - Już tworzy Supabase client
 - Już obsługuje token w headerze `Authorization`
 - Wymaga rozszerzenia o:
@@ -1260,6 +1409,7 @@ const fetchAuthors = async () => {
 ### 5.1. Nowe pliki do utworzenia
 
 #### Frontend (React/Astro):
+
 - `/src/pages/login.astro`
 - `/src/pages/register.astro`
 - `/src/pages/forgot-password.astro`
@@ -1278,6 +1428,7 @@ const fetchAuthors = async () => {
 - `/src/lib/contexts/AuthContext.tsx` (opcjonalnie)
 
 #### Backend (API):
+
 - `/src/pages/api/auth/register.ts`
 - `/src/pages/api/auth/login.ts`
 - `/src/pages/api/auth/logout.ts`
@@ -1304,6 +1455,7 @@ const fetchAuthors = async () => {
 ### 5.3. Zależności do zainstalowania
 
 **Jeśli nie są już zainstalowane**:
+
 - `zod` - walidacja schematów (prawdopodobnie już zainstalowane)
 - Komponenty Shadcn/ui: `input`, `label`, `alert` (jeśli nie są już zainstalowane)
 
@@ -1316,6 +1468,7 @@ const fetchAuthors = async () => {
 ### 5.5. Testowanie
 
 #### Scenariusze testowe:
+
 1. Rejestracja nowego użytkownika
 2. Logowanie istniejącego użytkownika
 3. Próba logowania z nieprawidłowymi danymi

@@ -1,6 +1,7 @@
 # Manual Testing Guide: POST /api/editions
 
 ## Prerequisites
+
 - Dev server running: `npm run dev`
 - Supabase environment variables configured
 - Database tables: `works`, `editions`
@@ -12,6 +13,7 @@
 This endpoint **requires authentication**.
 
 ### Using curl with Authorization header
+
 ```bash
 curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
@@ -20,6 +22,7 @@ curl -X POST "http://localhost:3000/api/editions" \
 ```
 
 ### Using curl with Session Cookie
+
 ```bash
 curl -X POST "http://localhost:3000/api/editions" \
   -H "Cookie: sb-<project-ref>-auth-token=<session-token>" \
@@ -34,9 +37,11 @@ curl -X POST "http://localhost:3000/api/editions" \
 ## Test Cases
 
 ### Test 1: Successful Manual Edition Creation
+
 **Description:** Create a manual edition with minimal required fields.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
@@ -49,6 +54,7 @@ curl -X POST "http://localhost:3000/api/editions" \
 ```
 
 **Expected Response:**
+
 - Status: 201 Created
 - JSON with `edition`
 - `edition.manual = true`
@@ -57,9 +63,11 @@ curl -X POST "http://localhost:3000/api/editions" \
 ---
 
 ### Test 2: Validation Error - Invalid Payload
+
 **Description:** Use invalid fields (e.g., missing title, invalid UUID).
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
@@ -71,15 +79,18 @@ curl -X POST "http://localhost:3000/api/editions" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error message about invalid `work_id` or missing `title`
 
 ---
 
 ### Test 3: Unauthorized Request
+
 **Description:** Call endpoint without authentication.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/editions" \
   -H "Content-Type: application/json" \
@@ -91,15 +102,18 @@ curl -X POST "http://localhost:3000/api/editions" \
 ```
 
 **Expected Response:**
+
 - Status: 401 Unauthorized
 - Message: "Authentication required"
 
 ---
 
 ### Test 4: Work Not Found or Not Accessible
+
 **Description:** Use a `work_id` that does not exist or is blocked by RLS.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
@@ -112,15 +126,18 @@ curl -X POST "http://localhost:3000/api/editions" \
 ```
 
 **Expected Response:**
+
 - Status: 404 Not Found
 - Message: "Work not found or not accessible"
 
 ---
 
 ### Test 5: ISBN Conflict
+
 **Description:** Create two editions with the same `isbn13`.
 
 **Request 1:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
@@ -134,6 +151,7 @@ curl -X POST "http://localhost:3000/api/editions" \
 ```
 
 **Request 2:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/editions" \
   -H "Authorization: Bearer <access_token>" \
@@ -147,8 +165,7 @@ curl -X POST "http://localhost:3000/api/editions" \
 ```
 
 **Expected Response:**
+
 - Request 1: 201 Created
 - Request 2: 409 Conflict
 - Message about ISBN conflict or constraint violation
-
-

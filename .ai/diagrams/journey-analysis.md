@@ -1,4 +1,5 @@
 <user_journey_analysis>
+
 ## Ścieżki użytkownika (z PRD i auth-spec)
 
 - Wejście na stronę główną jako niezalogowany użytkownik
@@ -36,4 +37,4 @@
 - Odzyskiwanie/Reset: odzyskanie dostępu do konta
 - Aplikacja: korzystanie z głównej funkcjonalności po zalogowaniu
 - Ustawienia konta: zarządzanie sesją i kontem (wylogowanie, usunięcie)
-</user_journey_analysis>
+  </user_journey_analysis>

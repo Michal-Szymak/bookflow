@@ -7,16 +7,19 @@
 #### 1. Obsługa błędów HTTP w hookach
 
 **useAuthorsList:**
+
 - ✅ 401 Unauthorized → redirect do `/login`
 - ✅ 404 Not Found → komunikat błędu + refresh listy
 - ✅ Generyczne błędy → wyświetlenie komunikatu
 - ✅ Network errors → wyświetlenie komunikatu
 
 **useAuthorSearch:**
+
 - ✅ 502 Bad Gateway → komunikat "OpenLibrary niedostępne" + sugestia ręcznego dodania
 - ✅ Generyczne błędy → wyświetlenie w UI
 
 **useManualAuthor:**
+
 - ✅ 400 Validation Error → wyświetlenie komunikatu walidacji
 - ✅ 409 Conflict → rozróżnienie limitu vs duplikatu
 - ✅ 429 Rate Limit → komunikat z czasem oczekiwania
@@ -45,6 +48,7 @@
 ### 🔶 TODO - Wymaga instalacji Sonner
 
 **System toastów:**
+
 ```bash
 npm install sonner
 ```
@@ -52,6 +56,7 @@ npm install sonner
 **Lokalizacje gdzie należy dodać toasty:**
 
 1. **AuthorsListView.tsx** (po zainstalowaniu Sonner):
+
 ```typescript
 import { toast } from "sonner";
 
@@ -63,6 +68,7 @@ toast.error(err.message || "Nie udało się usunąć autora");
 ```
 
 2. **useAuthorSearch.ts** (opcjonalnie, jeśli toast ma być w hooku):
+
 ```typescript
 // Po sukcesie addAuthor:
 // toast.success("Autor został dodany do profilu");
@@ -72,6 +78,7 @@ toast.error(err.message || "Nie udało się usunąć autora");
 ```
 
 3. **useManualAuthor.ts** (opcjonalnie):
+
 ```typescript
 // Po sukcesie:
 // toast.success("Autor został utworzony i dodany do profilu");
@@ -79,18 +86,18 @@ toast.error(err.message || "Nie udało się usunąć autora");
 
 ## Mapowanie błędów API → Komunikaty użytkownika
 
-| Status | Endpoint | Hook | Komunikat |
-|--------|----------|------|-----------|
-| 401 | Wszystkie | useAuthorsList | Redirect do `/login` |
-| 400 | GET /api/user/authors | useAuthorsList | "Niepoprawne parametry wyszukiwania" |
-| 404 | DELETE /api/user/authors/{id} | useAuthorsList | "Autor nie jest dołączony do profilu" |
-| 409 (limit) | POST /api/user/authors | useAuthorSearch, useManualAuthor | "Osiągnięto limit 500 autorów" |
-| 409 (duplikat) | POST /api/user/authors | useAuthorSearch | "Autor jest już w Twoim profilu" |
-| 429 | POST /api/user/authors | useAuthorSearch, useManualAuthor | "Dodano zbyt wielu autorów. Odczekaj 60 sekund." |
-| 502 | GET /api/authors/search | useAuthorSearch | "OpenLibrary jest niedostępne. Dodaj autora ręcznie." |
-| 502 | POST /api/openlibrary/import/author | useAuthorSearch | "Nie można zaimportować autora. Spróbuj ponownie." |
-| 500 | Wszystkie | Wszystkie | "Wystąpił błąd serwera. Spróbuj ponownie później." |
-| Network Error | Wszystkie | Wszystkie | "Brak połączenia z internetem" |
+| Status         | Endpoint                            | Hook                             | Komunikat                                             |
+| -------------- | ----------------------------------- | -------------------------------- | ----------------------------------------------------- |
+| 401            | Wszystkie                           | useAuthorsList                   | Redirect do `/login`                                  |
+| 400            | GET /api/user/authors               | useAuthorsList                   | "Niepoprawne parametry wyszukiwania"                  |
+| 404            | DELETE /api/user/authors/{id}       | useAuthorsList                   | "Autor nie jest dołączony do profilu"                 |
+| 409 (limit)    | POST /api/user/authors              | useAuthorSearch, useManualAuthor | "Osiągnięto limit 500 autorów"                        |
+| 409 (duplikat) | POST /api/user/authors              | useAuthorSearch                  | "Autor jest już w Twoim profilu"                      |
+| 429            | POST /api/user/authors              | useAuthorSearch, useManualAuthor | "Dodano zbyt wielu autorów. Odczekaj 60 sekund."      |
+| 502            | GET /api/authors/search             | useAuthorSearch                  | "OpenLibrary jest niedostępne. Dodaj autora ręcznie." |
+| 502            | POST /api/openlibrary/import/author | useAuthorSearch                  | "Nie można zaimportować autora. Spróbuj ponownie."    |
+| 500            | Wszystkie                           | Wszystkie                        | "Wystąpił błąd serwera. Spróbuj ponownie później."    |
+| Network Error  | Wszystkie                           | Wszystkie                        | "Brak połączenia z internetem"                        |
 
 ## Edge cases obsługiwane
 
@@ -113,12 +120,14 @@ toast.error(err.message || "Nie udało się usunąć autora");
 ## Walidacja kliencka vs serwerowa
 
 ### Kliencka (frontend)
+
 - Search query: max 200 znaków
 - Manual author name: 1-500 znaków, trimmed
 - Page: >= 1
 - Sort: enum validation
 
 ### Serwerowa (backend - już zaimplementowana)
+
 - Wszystkie parametry walidowane przez Zod schemas
 - RLS security
 - Rate limiting (10 requests/min na attach)
@@ -127,6 +136,7 @@ toast.error(err.message || "Nie udało się usunąć autora");
 ## Testowanie błędów
 
 Po zainstalowaniu Sonner, należy przetestować:
+
 - [ ] Toast sukcesu po dodaniu autora
 - [ ] Toast sukcesu po usunięciu autora
 - [ ] Toast błędu przy rate limit (429)
@@ -135,4 +145,3 @@ Po zainstalowaniu Sonner, należy przetestować:
 - [ ] Toast błędu przy OL down (502)
 - [ ] Komunikat przy braku internetu
 - [ ] Retry mechanism działanie
-

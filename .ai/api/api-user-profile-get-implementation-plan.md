@@ -5,6 +5,7 @@
 Endpoint `GET /api/user/profile` służy do pobierania danych profilu zalogowanego użytkownika, w szczególności liczników autorów i dzieł oraz limitów maksymalnych. Endpoint jest przeznaczony do wyświetlania informacji o profilu użytkownika w interfejsie użytkownika (np. w globalnym nagłówku). Jest to prosty endpoint odczytowy, który nie przyjmuje żadnych parametrów i zwraca podstawowe statystyki profilu użytkownika.
 
 **Główne funkcjonalności:**
+
 - Pobieranie danych profilu użytkownika z tabeli `profiles`
 - Zwracanie liczników: `author_count`, `work_count`
 - Zwracanie limitów: `max_authors` (domyślnie 500), `max_works` (domyślnie 5000)
@@ -12,6 +13,7 @@ Endpoint `GET /api/user/profile` służy do pobierania danych profilu zalogowane
 - Obsługa przypadku braku profilu (404)
 
 **Wykorzystywane zasoby bazy danych:**
+
 - Tabela `profiles` (PK: `user_id` uuid, FK do `auth.users`)
 - RLS policy: `profiles_select_authenticated` (user_id = auth.uid())
 - Indeks: `profiles(user_id)` (primary key)
@@ -29,6 +31,7 @@ Endpoint `GET /api/user/profile` służy do pobierania danych profilu zalogowane
 **Wymagana autoryzacja:** Tak (Bearer token w nagłówku Authorization)
 
 **Przykładowe żądanie:**
+
 ```http
 GET /api/user/profile HTTP/1.1
 Host: example.com
@@ -64,6 +67,7 @@ Brak - endpoint nie przyjmuje danych wejściowych do walidacji.
 ### Sukces (200 OK)
 
 **Struktura odpowiedzi:**
+
 ```json
 {
   "author_count": 42,
@@ -74,18 +78,21 @@ Brak - endpoint nie przyjmuje danych wejściowych do walidacji.
 ```
 
 **Opis pól:**
+
 - **author_count** (number, wymagany): Liczba autorów przypisanych do użytkownika (0-500)
 - **work_count** (number, wymagany): Liczba dzieł przypisanych do użytkownika (0-5000)
 - **max_authors** (number, wymagany): Maksymalna liczba autorów dozwolona dla użytkownika (domyślnie 500)
 - **max_works** (number, wymagany): Maksymalna liczba dzieł dozwolona dla użytkownika (domyślnie 5000)
 
 **Nagłówki odpowiedzi:**
+
 - `Content-Type: application/json`
 - `Cache-Control: private, no-cache` (opcjonalnie, jeśli profil może się zmieniać często)
 
 ### Błąd autoryzacji (401 Unauthorized)
 
 **Struktura odpowiedzi:**
+
 ```json
 {
   "error": "Unauthorized",
@@ -98,6 +105,7 @@ Brak - endpoint nie przyjmuje danych wejściowych do walidacji.
 ### Profil nie znaleziony (404 Not Found)
 
 **Struktura odpowiedzi:**
+
 ```json
 {
   "error": "Not Found",
@@ -106,12 +114,14 @@ Brak - endpoint nie przyjmuje danych wejściowych do walidacji.
 ```
 
 **Scenariusz:** Profil użytkownika nie istnieje w tabeli `profiles`. Może się zdarzyć, jeśli:
+
 - Profil nie został utworzony podczas rejestracji (edge case)
 - Profil został usunięty (np. podczas testów)
 
 ### Błąd serwera (500 Internal Server Error)
 
 **Struktura odpowiedzi:**
+
 ```json
 {
   "error": "Internal Server Error",
@@ -150,8 +160,9 @@ Brak - endpoint nie przyjmuje danych wejściowych do walidacji.
    - Zwrócenie odpowiedzi JSON z kodem 200
 
 ### Diagram przepływu:
+
 ```
-Request → Middleware (auth) → Verify User → Fetch Profile (RLS) 
+Request → Middleware (auth) → Verify User → Fetch Profile (RLS)
 → Check Exists → Map to DTO → Return Response (200)
 ```
 
@@ -160,6 +171,7 @@ Request → Middleware (auth) → Verify User → Fetch Profile (RLS)
 Należy rozważyć utworzenie nowego serwisu `src/lib/services/profile.service.ts`:
 
 **ProfileService:**
+
 - Metoda `getProfile(userId: string): Promise<ProfileRow | null>`
   - Pobiera profil użytkownika z bazy danych
   - Wykorzystuje RLS do automatycznej filtracji
@@ -171,21 +183,25 @@ Alternatywnie, jeśli logika jest prosta, można wykonać zapytanie bezpośredni
 ## 6. Względy bezpieczeństwa
 
 ### Autoryzacja
+
 - **Wymagana**: Endpoint wymaga zalogowanego użytkownika
 - **Mechanizm**: Bearer token w nagłówku `Authorization`
 - **Weryfikacja**: `supabase.auth.getUser()` weryfikuje token i zwraca dane użytkownika
 - **Brak autoryzacji**: Zwraca 401 Unauthorized
 
 ### Autoryzacja danych
+
 - **RLS (Row Level Security)**: Supabase automatycznie filtruje wyniki zgodnie z policy `profiles_select_authenticated`
 - **Policy**: `user_id = auth.uid()` - użytkownik może odczytać tylko swój własny profil
 - **Zapytanie używa `user_id` z sesji/tokena**: Brak możliwości odczytania profilu innego użytkownika
 - **Brak parametrów wejściowych**: Endpoint nie przyjmuje żadnych parametrów, więc nie ma ryzyka manipulacji
 
 ### Walidacja danych wejściowych
+
 - Brak danych wejściowych do walidacji (endpoint GET bez parametrów)
 
 ### Ochrona przed atakami
+
 - **SQL Injection**: Użycie Supabase Client zapewnia parametryzowane zapytania
 - **XSS**: Dane wyjściowe są zwracane jako JSON, nie są renderowane bezpośrednio w HTML
 - **CSRF**: Astro automatycznie obsługuje ochronę CSRF dla endpointów API
@@ -297,7 +313,7 @@ Alternatywnie, jeśli logika jest prosta, można wykonać zapytanie bezpośredni
    - Zwrócenie danych w formacie `ProfileResponseDto`
 
 9. **Testy manualne**
-Opisz testy manualne w pliku `.ai/api/api-user-profile-get-manual-tests.md`
+   Opisz testy manualne w pliku `.ai/api/api-user-profile-get-manual-tests.md`
    - Test przypadku sukcesu (200) - użytkownik z istniejącym profilem
    - Test przypadku braku autoryzacji (401) - brak tokena lub nieprawidłowy token
    - Test przypadku braku profilu (404) - użytkownik bez profilu

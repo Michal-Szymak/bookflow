@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: POST /api/editions
 
 ## 1. Przegląd punktu końcowego
+
 Endpoint służy do tworzenia manualnej edycji (edition) przypisanej do istniejącego dzieła (work). Wymaga uwierzytelnienia użytkownika i zapisu rekordu w tabeli `editions` z `manual=true`, `owner_user_id` ustawionym na użytkownika oraz bez `openlibrary_id`.
 
 ## 2. Szczegóły żądania
+
 - Metoda HTTP: `POST`
 - Struktura URL: `/api/editions`
 - Parametry:
@@ -37,6 +39,7 @@ Endpoint służy do tworzenia manualnej edycji (edition) przypisanej do istniej�
   - `EditionResponseDto` (response)
 
 ## 3. Szczegóły odpowiedzi
+
 - `201 Created`:
   - Body: `{ "edition": EditionDto }`
   - Nagłówek `Location: /api/editions/{editionId}` (spójnie z innymi endpointami)
@@ -52,6 +55,7 @@ Endpoint służy do tworzenia manualnej edycji (edition) przypisanej do istniej�
   - Nieoczekiwany błąd po stronie serwera
 
 ## 4. Przepływ danych
+
 1. Endpoint (`src/pages/api/editions/index.ts`) pobiera `supabase` z `locals`.
 2. Weryfikacja sesji użytkownika (`supabase.auth.getUser()`).
 3. Parsowanie JSON body i walidacja Zod (`CreateEditionSchema`).
@@ -61,6 +65,7 @@ Endpoint służy do tworzenia manualnej edycji (edition) przypisanej do istniej�
 7. Zwrócenie `EditionResponseDto` z kodem `201`.
 
 ## 5. Względy bezpieczeństwa
+
 - Wymagana autoryzacja: brak sesji → `401`.
 - RLS: dostęp do `works` i `editions` realizowany przez Supabase; `work_id` niewidoczny dla użytkownika → `404`.
 - Walidacja wejścia Zod: wymuszenie `manual: true`, poprawnych typów i formatów.
@@ -68,6 +73,7 @@ Endpoint służy do tworzenia manualnej edycji (edition) przypisanej do istniej�
 - Sanitizacja danych: `title` trimowany; blokada pustych wartości po trimie.
 
 ## 6. Obsługa błędów
+
 - `400`: nieprawidłowy JSON, błędy walidacji, niepoprawne pola (np. `publish_date`, `isbn13`, `cover_url`).
 - `401`: brak `user` lub błąd `auth`.
 - `404`: brak dostępu do `work_id` (RLS) lub rekord nie istnieje.
@@ -76,6 +82,7 @@ Endpoint służy do tworzenia manualnej edycji (edition) przypisanej do istniej�
 - Logowanie: użycie `logger.warn/error` analogicznie do `POST /api/authors` i `POST /api/works`. Brak dedykowanej tabeli błędów → logowanie aplikacyjne.
 
 ## 7. Wydajność
+
 - Minimalizacja zapytań:
   - Jedno zapytanie sprawdzające `work_id`.
   - Jedno zapytanie insertujące edycję.
@@ -84,6 +91,7 @@ Endpoint służy do tworzenia manualnej edycji (edition) przypisanej do istniej�
 - Unikanie dodatkowych fetchy po insercie: użycie `.select().single()` w insert, tak jak w istniejących serwisach.
 
 ## 8. Kroki implementacji
+
 1. Dodaj nowy schemat Zod `CreateEditionSchema` w `src/lib/validation/create-edition.schema.ts` (pattern jak `CreateWorkSchema`).
 2. Utwórz/rozszerz serwis:
    - Opcja A: nowy `src/lib/services/editions.service.ts` z metodą `createManualEdition`.

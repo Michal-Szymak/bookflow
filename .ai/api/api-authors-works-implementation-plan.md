@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: GET /api/authors/{authorId}/works
 
 ## 1. Przeglad punktu koncowego
+
 Endpoint zwraca stronicowana liste prac (works) powiazanych z autorem. Kazdy element zawiera podsumowanie primary edition oraz wyliczony `publish_year` jako `COALESCE(works.first_publish_year, editions.publish_year)`. Opcjonalny `forceRefresh` pozwala odswiezyc dane autora z OpenLibrary, jesli autor pochodzi z OL i jest to dozwolone.
 
 ## 2. Szczegoly zadania
+
 - Metoda HTTP: GET
 - Struktura URL: `/api/authors/{authorId}/works`
 - Parametry:
@@ -16,6 +18,7 @@ Endpoint zwraca stronicowana liste prac (works) powiazanych z autorem. Kazdy ele
 - Request Body: brak
 
 ## 3. Wykorzystywane typy
+
 - DTO:
   - `AuthorWorksListResponseDto`
   - `WorkListItemDto`
@@ -28,12 +31,14 @@ Endpoint zwraca stronicowana liste prac (works) powiazanych z autorem. Kazdy ele
   - `AuthorRow`, `WorkRow`, `EditionRow`
 
 ## 4. Szczegoly odpowiedzi
+
 - `200 OK`: `{ items, page, total }`
   - `items`: lista `WorkListItemDto` z `primary_edition` (lub `null`) i `publish_year`
   - `page`: numer strony
   - `total`: liczba wszystkich wynikow dla autora
 
 ## 5. Przeplyw danych
+
 1. Odczyt i walidacja `authorId` (path).
 2. Odczyt i walidacja query (`page`, `sort`, `forceRefresh`), ustawienie domyslnych wartosci.
 3. Uzycie `locals.supabase` (nie importowac klienta bezposrednio).
@@ -51,6 +56,7 @@ Endpoint zwraca stronicowana liste prac (works) powiazanych z autorem. Kazdy ele
 7. Zbudowanie odpowiedzi `AuthorWorksListResponseDto` i zwrot `200`.
 
 ## 6. Wzgledy bezpieczenstwa
+
 - RLS: widocznosc rekordow kontrolowana przez `owner_user_id is null OR owner_user_id = auth.uid()`.
 - Autoryzacja: korzystac z `locals.supabase`, aby RLS dzialal na sesji uzytkownika.
 - `forceRefresh`:
@@ -60,6 +66,7 @@ Endpoint zwraca stronicowana liste prac (works) powiazanych z autorem. Kazdy ele
 - Ochrona przed enumeracja ID: brak ujawniania, czy autor istnieje poza RLS (404 zamiast 403).
 
 ## 7. Obsluga bledow
+
 - `400`: nieprawidlowy `authorId` lub query (`page`, `sort`, `forceRefresh`).
 - `401`: brak uprawnien, jesli endpoint zostanie zabezpieczony lub `forceRefresh` wymaga autoryzacji.
 - `404`: autor nie istnieje lub jest niewidoczny przez RLS.
@@ -69,12 +76,14 @@ Endpoint zwraca stronicowana liste prac (works) powiazanych z autorem. Kazdy ele
   - Brak zdefiniowanej tabeli bledow w DB planie; jesli pojawi sie `error_logs`, dodac zapis w serwisie.
 
 ## 8. Rozwazania dotyczace wydajnosci
+
 - Indeksy: `author_works(author_id)`, `works(title)`, `works(first_publish_year)`, `editions(work_id)`.
 - Stronicowanie z limitem strony (np. 20) i `range` na zapytaniu.
 - `count: "exact"` moze byc kosztowny; rozwazyc cache lub `estimated` przy duzej skali.
 - `forceRefresh` powinien byc rzadki (cache TTL 7 dni); w razie potrzeby limitowac czestotliwosc.
 
 ## 9. Etapy wdrozenia
+
 1. Zidentyfikowac lub dodac schematy Zod:
    - `AuthorIdParamSchema` dla `authorId`;
    - `AuthorWorksListQuerySchema` dla query.

@@ -5,6 +5,7 @@
 Endpoint `GET /api/user/works` służy do pobierania stronicowanej listy dzieł (works) przypisanych do profilu zalogowanego użytkownika z możliwością filtrowania i sortowania. Endpoint zwraca dzieła wraz z ich podstawowymi informacjami, podsumowaniem primary edition, statusem użytkownika oraz dostępnością w Legimi.
 
 **Główne funkcjonalności:**
+
 - Stronicowana lista dzieł przypisanych do użytkownika
 - Filtrowanie po statusie (multi-select: `to_read`, `in_progress`, `read`, `hidden`)
 - Filtrowanie po dostępności w Legimi (`true`, `false`, `null`)
@@ -15,6 +16,7 @@ Endpoint `GET /api/user/works` służy do pobierania stronicowanej listy dzieł 
 - Obliczanie `publish_year` jako `COALESCE(works.first_publish_year, editions.publish_year)`
 
 **Wykorzystywane zasoby bazy danych:**
+
 - Tabela `user_works` (relacja użytkownik-dzieło, composite PK: user_id, work_id)
 - Tabela `works` (katalog dzieł z tytułem, rokiem publikacji, primary_edition_id)
 - Tabela `editions` (szczegóły primary edition: tytuł, rok publikacji, okładka, ISBN, język)
@@ -31,10 +33,12 @@ Endpoint `GET /api/user/works` służy do pobierania stronicowanej listy dzieł 
 **Struktura URL:** `/api/user/works`
 
 **Nagłówki:**
+
 - Wymagane: `Authorization: Bearer <token>` (uwierzytelnienie przez Supabase Auth)
 - Opcjonalne: standardowe nagłówki HTTP
 
 **Query Parameters:**
+
 - `page` (opcjonalne, domyślnie `1`): Numer strony (minimum 1, integer)
 - `status` (opcjonalne): Tablica statusów dzieł (`to_read`, `in_progress`, `read`, `hidden`). Może być przekazana wielokrotnie w URL jako `?status=to_read&status=in_progress` lub jako tablica w parserze
 - `available` (opcjonalne): Dostępność w Legimi (`true`, `false`, `null`). Wartość `null` oznacza nieoznaczone
@@ -45,6 +49,7 @@ Endpoint `GET /api/user/works` służy do pobierania stronicowanej listy dzieł 
 **Request Body:** Brak (GET request)
 
 **Przykłady żądań:**
+
 - `GET /api/user/works` - wszystkie dzieła użytkownika, pierwsza strona, sortowanie domyślne
 - `GET /api/user/works?page=2&status=to_read&status=in_progress` - druga strona, tylko dzieła do przeczytania i w trakcie
 - `GET /api/user/works?available=true&sort=title_asc&search=harry` - dostępne w Legimi, sortowanie po tytule, wyszukiwanie "harry"
@@ -53,6 +58,7 @@ Endpoint `GET /api/user/works` służy do pobierania stronicowanej listy dzieł 
 ## 3. Wykorzystywane typy
 
 **DTO (Data Transfer Objects):**
+
 - `UserWorksListResponseDto` - typ odpowiedzi (zdefiniowany w `src/types.ts`)
 - `UserWorkItemDto` - pojedynczy element listy (zdefiniowany w `src/types.ts`)
 - `WorkWithPrimaryEditionDto` - dzieło z informacją o primary edition (zdefiniowany w `src/types.ts`)
@@ -60,21 +66,25 @@ Endpoint `GET /api/user/works` służy do pobierania stronicowanej listy dzieł 
 - `PaginatedResponseDto<T>` - generyczny wrapper dla stronicowanych odpowiedzi (zdefiniowany w `src/types.ts`)
 
 **Query/Command modele (dla GET):**
+
 - `UserWorksListQueryDto` - typ parametrów zapytania (zdefiniowany w `src/types.ts`)
 - `UserWorksListQueryValidated` - zwalidowane parametry zapytania (będzie wywnioskowany z Zod schema)
 
 **Typy encji pomocniczo:**
+
 - `UserWorkRow` - wiersz z tabeli `user_works`
 - `WorkRow` - wiersz z tabeli `works`
 - `EditionRow` - wiersz z tabeli `editions`
 - `UserWorkStatus` - enum statusu dzieła (`to_read | in_progress | read | hidden`)
 
 **Schemat walidacji:**
+
 - `UserWorksListQuerySchema` - Zod schema do walidacji parametrów zapytania (do utworzenia w `src/lib/validation/user-works-list.schema.ts`)
 
 ## 4. Szczegóły odpowiedzi
 
 **Sukces - 200 OK:**
+
 ```json
 {
   "items": [
@@ -114,6 +124,7 @@ Endpoint `GET /api/user/works` służy do pobierania stronicowanej listy dzieł 
 ```
 
 **Błędy:**
+
 - `400 Bad Request`: Błąd walidacji parametrów zapytania
   ```json
   {
@@ -138,6 +149,7 @@ Endpoint `GET /api/user/works` służy do pobierania stronicowanej listy dzieł 
   ```
 
 **Uwagi dotyczące odpowiedzi:**
+
 - `items` - tablica `UserWorkItemDto`, maksymalnie 20 elementów na stronę
 - `page` - aktualny numer strony (1-based)
 - `total` - całkowita liczba dzieł spełniających kryteria filtrowania
@@ -185,7 +197,7 @@ Endpoint `GET /api/user/works` służy do pobierania stronicowanej listy dzieł 
      - `published_desc`: `ORDER BY COALESCE(works.first_publish_year, editions.publish_year) DESC NULLS LAST, works.title ASC, works.id ASC`
      - `title_asc`: `ORDER BY works.title ASC, works.id ASC`
    - Aplikowanie paginacji: `LIMIT 20 OFFSET (page - 1) * 20`
-   - Pobranie całkowitej liczby wyników (COUNT(*) OVER())
+   - Pobranie całkowitej liczby wyników (COUNT(\*) OVER())
 
 6. **Transformacja danych:**
    - Mapowanie wyników zapytania na `UserWorkItemDto`
@@ -198,6 +210,7 @@ Endpoint `GET /api/user/works` służy do pobierania stronicowanej listy dzieł 
 
 **Alternatywne podejście (RPC function):**
 Zamiast budowania złożonego zapytania w serwisie, można utworzyć funkcję RPC w PostgreSQL (`get_user_works`) podobną do `get_author_works`, która:
+
 - Przyjmuje parametry: `p_user_id`, `p_page`, `p_page_size`, `p_status[]`, `p_available`, `p_sort`, `p_author_id`, `p_search`
 - Wykonuje złożone JOIN-y i filtrowanie
 - Zwraca wyniki z `total_count` w każdym wierszu
@@ -241,6 +254,7 @@ Zamiast budowania złożonego zapytania w serwisie, można utworzyć funkcję RP
 ## 7. Obsługa błędów
 
 **Błędy walidacji (400 Bad Request):**
+
 - Nieprawidłowy format `page` (nie integer, < 1, nie finite)
 - Nieprawidłowe wartości `status` (nie z enum)
 - Nieprawidłowy format `available` (nie boolean/null)
@@ -250,23 +264,27 @@ Zamiast budowania złożonego zapytania w serwisie, można utworzyć funkcję RP
 - Logowanie: poziom `warn` z szczegółami walidacji
 
 **Błędy uwierzytelnienia (401 Unauthorized):**
+
 - Brak tokenu uwierzytelniającego
 - Nieprawidłowy lub wygasły token
 - Błąd podczas pobierania użytkownika z Supabase Auth
 - Logowanie: poziom `warn` z informacją o błędzie
 
 **Błędy bazy danych (500 Internal Server Error):**
+
 - Błąd podczas wykonywania zapytania do bazy danych
 - Błąd podczas pobierania primary edition
 - Błąd podczas transformacji danych
 - Logowanie: poziom `error` z pełnym stack trace i kontekstem (userId, parametry zapytania)
 
 **Błędy nieoczekiwane (500 Internal Server Error):**
+
 - Wyjątki nieobsłużone w try-catch
 - Błędy podczas parsowania JSON (nie powinno się zdarzyć dla GET)
 - Logowanie: poziom `error` z pełnym stack trace
 
 **Obsługa edge cases:**
+
 - Pusta lista wyników → zwróć `{ items: [], page: 1, total: 0 }` (200 OK)
 - Strona poza zakresem (np. page=100 gdy total=10) → zwróć `{ items: [], page: 100, total: 10 }` (200 OK)
 - `author_id` wskazuje na autora, który nie ma przypisanych dzieł użytkownika → zwróć pustą listę (200 OK)
@@ -275,6 +293,7 @@ Zamiast budowania złożonego zapytania w serwisie, można utworzyć funkcję RP
 
 **Struktura odpowiedzi błędów:**
 Wszystkie błędy zwracają JSON w formacie:
+
 ```json
 {
   "error": "Error Type",
@@ -372,7 +391,7 @@ Wszystkie błędy zwracają JSON w formacie:
    - Dodanie `export const prerender = false;` na początku pliku endpointu (wymagane dla API routes w Astro)
 
 6. **Testowanie ręczne:**
-**Plik:** `.ai/api/api-user-works-get-manual-tests.md`
+   **Plik:** `.ai/api/api-user-works-get-manual-tests.md`
    - Testowanie z różnymi kombinacjami parametrów zapytania
    - Testowanie walidacji (nieprawidłowe wartości)
    - Testowanie uwierzytelnienia (brak tokenu, nieprawidłowy token)

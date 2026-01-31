@@ -5,6 +5,7 @@
 Endpoint `POST /api/openlibrary/import/author` służy do importowania lub odświeżania autora z katalogu OpenLibrary do wspólnego katalogu aplikacji. Endpoint implementuje mechanizm cache z czasem wygaśnięcia (TTL) wynoszącym 7 dni, co oznacza, że dane autora są przechowywane lokalnie i odświeżane tylko wtedy, gdy cache wygasł lub autor nie istnieje w bazie danych.
 
 **Kluczowe funkcjonalności:**
+
 - Import autora z OpenLibrary na podstawie `openlibrary_id`
 - Automatyczne odświeżanie cache, jeśli dane wygasły (sprawdzenie `ol_expires_at`)
 - Zapis do wspólnego katalogu (global catalog) z `owner_user_id = null` i `manual = false`
@@ -17,14 +18,17 @@ Endpoint jest częścią systemu zarządzania autorami, który pozwala użytkown
 ## 2. Szczegóły żądania
 
 ### Metoda HTTP
+
 `POST`
 
 ### Struktura URL
+
 ```
 /api/openlibrary/import/author
 ```
 
 ### Request Body
+
 ```typescript
 {
   "openlibrary_id": string  // Wymagane, format: "OL23919A"
@@ -32,9 +36,11 @@ Endpoint jest częścią systemu zarządzania autorami, który pozwala użytkown
 ```
 
 **Parametry:**
+
 - `openlibrary_id` (wymagane): Identyfikator autora w systemie OpenLibrary w formacie skróconym (`OL23919A`). Powinien być znormalizowany przed użyciem.
 
 **Przykładowe żądanie:**
+
 ```json
 {
   "openlibrary_id": "/authors/OL23919A"
@@ -42,12 +48,14 @@ Endpoint jest częścią systemu zarządzania autorami, który pozwala użytkown
 ```
 
 ### Headers
+
 - `Content-Type: application/json` (wymagane)
 - `Authorization: Bearer <access_token>` (opcjonalne, ale zalecane dla lepszego logowania)
 
 ## 3. Wykorzystywane typy
 
 ### Command Model (Request Body)
+
 ```typescript
 // src/types.ts
 export interface ImportAuthorCommand {
@@ -56,14 +64,16 @@ export interface ImportAuthorCommand {
 ```
 
 ### Response DTO
+
 ```typescript
 // src/types.ts
 export interface AuthorResponseDto {
-  author: AuthorDto;  // AuthorDto = AuthorRow
+  author: AuthorDto; // AuthorDto = AuthorRow
 }
 ```
 
 ### Typy pomocnicze
+
 ```typescript
 // src/types.ts
 export type AuthorDto = AuthorRow;
@@ -71,6 +81,7 @@ export type AuthorRow = Tables<"authors">;
 ```
 
 ### Typy z OpenLibrary Service
+
 ```typescript
 // src/lib/services/openlibrary.service.ts
 export interface OpenLibraryAuthor {
@@ -82,9 +93,11 @@ export interface OpenLibraryAuthor {
 ## 4. Szczegóły odpowiedzi
 
 ### Sukces (200 OK)
+
 Zwraca zaktualizowany lub nowo utworzony rekord autora.
 
 **Struktura odpowiedzi:**
+
 ```json
 {
   "author": {
@@ -104,6 +117,7 @@ Zwraca zaktualizowany lub nowo utworzony rekord autora.
 ### Błędy
 
 #### 400 Bad Request
+
 Nieprawidłowa struktura żądania lub walidacja nie powiodła się.
 
 ```json
@@ -120,6 +134,7 @@ Nieprawidłowa struktura żądania lub walidacja nie powiodła się.
 ```
 
 #### 404 Not Found
+
 Autor o podanym `openlibrary_id` nie został znaleziony w OpenLibrary.
 
 ```json
@@ -130,6 +145,7 @@ Autor o podanym `openlibrary_id` nie został znaleziony w OpenLibrary.
 ```
 
 #### 502 Bad Gateway
+
 OpenLibrary API jest niedostępne lub zwróciło błąd.
 
 ```json
@@ -140,6 +156,7 @@ OpenLibrary API jest niedostępne lub zwróciło błąd.
 ```
 
 #### 500 Internal Server Error
+
 Nieoczekiwany błąd serwera.
 
 ```json
@@ -202,12 +219,14 @@ Nieoczekiwany błąd serwera.
 ### Interakcje z zewnętrznymi serwisami
 
 **OpenLibrary API:**
+
 - Endpoint: `https://openlibrary.org/authors/{openlibrary_id}.json`
 - Metoda: GET
 - Timeout: 10 sekund
 - Obsługa błędów: 404 (autor nie znaleziony), timeout, błędy sieciowe
 
 **Supabase Database:**
+
 - Tabela: `authors`
 - RPC: `upsert_author_from_ol` (do utworzenia) lub `upsert_authors_cache` (istniejące)
 - Polityki RLS: RPC używa SECURITY DEFINER do obejścia RLS dla wpisów globalnego katalogu
@@ -215,15 +234,18 @@ Nieoczekiwany błąd serwera.
 ## 6. Względy bezpieczeństwa
 
 ### Uwierzytelnianie
+
 - Endpoint nie wymaga uwierzytelniania (anonimowy dostęp), ale zalecane jest logowanie dla lepszego śledzenia użycia
 - Middleware zapewnia dostęp do `locals.supabase` z kontekstem sesji (jeśli dostępna)
 
 ### Autoryzacja
+
 - Endpoint modyfikuje tylko wpisy globalnego katalogu (`owner_user_id = null`)
 - RPC SECURITY DEFINER zapewnia, że tylko autoryzowane operacje mogą modyfikować globalny katalog
 - RLS blokuje bezpośrednie modyfikacje wpisów globalnego katalogu przez użytkowników
 
 ### Walidacja danych wejściowych
+
 - **Zod schema**: Walidacja typu i formatu `openlibrary_id`
 - **Normalizacja**: Usunięcie potencjalnie niebezpiecznych znaków i normalizacja formatu
 - **Sanityzacja**: Sprawdzenie długości i formatu przed wysłaniem do OpenLibrary API
@@ -231,19 +253,23 @@ Nieoczekiwany błąd serwera.
 ### Ochrona przed atakami
 
 **SQL Injection:**
+
 - Użycie parametrówzowanych zapytań przez Supabase Client
 - RPC funkcje używają typowanych parametrów JSONB
 
 **DoS (Denial of Service):**
+
 - Timeout na wywołania OpenLibrary API (10 sekund)
 - Cache zmniejsza obciążenie zewnętrznego API
 - Rate limiting może być dodany w przyszłości (obecnie nie jest wymagany w specyfikacji)
 
 **Data Validation:**
+
 - Walidacja formatu `openlibrary_id` przed wysłaniem do OpenLibrary
 - Obsługa nieprawidłowych odpowiedzi z OpenLibrary API
 
 ### Logowanie i monitoring
+
 - Logowanie wszystkich wywołań endpointu (debug level)
 - Logowanie błędów OpenLibrary API (error level)
 - Logowanie nieudanych operacji bazy danych (error level)
@@ -254,13 +280,16 @@ Nieoczekiwany błąd serwera.
 ### Scenariusze błędów i odpowiedzi
 
 #### 1. Nieprawidłowe dane wejściowe (400 Bad Request)
+
 **Przyczyna:** Brak `openlibrary_id` lub nieprawidłowy format.
 
 **Obsługa:**
+
 - Walidacja przez Zod schema
 - Zwrócenie szczegółowego komunikatu błędu z informacją o polu, które nie przeszło walidacji
 
 **Przykład:**
+
 ```typescript
 if (!validation.success) {
   return new Response(
@@ -275,14 +304,17 @@ if (!validation.success) {
 ```
 
 #### 2. Autor nie znaleziony w OpenLibrary (404 Not Found)
+
 **Przyczyna:** OpenLibrary API zwróciło 404 lub autor nie istnieje w odpowiedzi.
 
 **Obsługa:**
+
 - Sprawdzenie statusu odpowiedzi z OpenLibrary API
 - Sprawdzenie, czy odpowiedź zawiera wymagane pola (`name`, `key`)
 - Zwrócenie przyjaznego komunikatu błędu
 
 **Przykład:**
+
 ```typescript
 if (response.status === 404) {
   return new Response(
@@ -296,15 +328,18 @@ if (response.status === 404) {
 ```
 
 #### 3. OpenLibrary API niedostępne (502 Bad Gateway)
+
 **Przyczyna:** Timeout, błąd sieciowy, lub OpenLibrary API zwróciło błąd 5xx.
 
 **Obsługa:**
+
 - Przechwycenie wyjątków z `OpenLibraryService`
 - Rozróżnienie między timeout a innymi błędami
 - Zwrócenie przyjaznego komunikatu dla użytkownika
 - Logowanie szczegółów błędu dla debugowania
 
 **Przykład:**
+
 ```typescript
 try {
   olAuthor = await olService.fetchAuthorByOpenLibraryId(openlibrary_id);
@@ -321,15 +356,18 @@ try {
 ```
 
 #### 4. Błąd bazy danych (500 Internal Server Error)
+
 **Przyczyna:** Błąd podczas upsertu do bazy danych, problem z RPC, lub naruszenie constraintów.
 
 **Obsługa:**
+
 - Przechwycenie błędów z `AuthorsService` lub RPC
 - Sprawdzenie kodów błędów PostgreSQL (np. constraint violations)
 - Logowanie szczegółów błędu
 - Zwrócenie ogólnego komunikatu błędu (nie ujawnianie szczegółów implementacji)
 
 **Przykład:**
+
 ```typescript
 try {
   await authorsService.upsertAuthorFromOpenLibrary(olAuthor, fetchedAt, expiresAt);
@@ -346,9 +384,11 @@ try {
 ```
 
 #### 5. Nieoczekiwany błąd (500 Internal Server Error)
+
 **Przyczyna:** Nieprzewidziany wyjątek w kodzie.
 
 **Obsługa:**
+
 - Try-catch na najwyższym poziomie handlera
 - Logowanie pełnego stack trace
 - Zwrócenie ogólnego komunikatu błędu
@@ -364,16 +404,19 @@ try {
 ## 8. Rozważania dotyczące wydajności
 
 ### Cache i TTL
+
 - **7-dniowy TTL**: Dane autora są cache'owane na 7 dni, co zmniejsza obciążenie OpenLibrary API
 - **Sprawdzenie cache przed wywołaniem API**: Jeśli cache jest ważny, pomijamy wywołanie do OpenLibrary
 - **Background refresh**: Możliwość odświeżania cache w tle (obecnie nie jest wymagane w specyfikacji)
 
 ### Optymalizacje bazy danych
+
 - **Indeks na `openlibrary_id`**: Częściowy unikalny indeks na `authors.openlibrary_id WHERE openlibrary_id IS NOT NULL` zapewnia szybkie wyszukiwanie
 - **Batch operations**: Użycie RPC do batch upsert (obecnie używamy pojedynczego elementu, ale RPC wspiera batch)
 - **RLS policies**: Polityki RLS są zoptymalizowane dla odczytu globalnego katalogu
 
 ### Optymalizacje API
+
 - **Timeout handling**: 10-sekundowy timeout zapobiega długim oczekiwaniom
 - **AbortController**: Użycie AbortController do anulowania długotrwałych żądań
 - **Connection pooling**: Supabase Client zarządza pulą połączeń automatycznie
@@ -396,6 +439,7 @@ try {
    - **Monitoring**: Monitorowanie rozmiaru odpowiedzi
 
 ### Metryki do monitorowania
+
 - Czas odpowiedzi endpointu (p50, p95, p99)
 - Czas odpowiedzi OpenLibrary API
 - Czas wykonania RPC
@@ -406,6 +450,7 @@ try {
 ## 9. Etapy wdrożenia
 
 ### Krok 1: Utworzenie schematu walidacji Zod
+
 **Plik:** `src/lib/validation/import-author.schema.ts`
 
 - Utworzenie schematu `ImportAuthorSchema` z walidacją `openlibrary_id`
@@ -413,6 +458,7 @@ try {
 - Eksport typu `ImportAuthorCommandValidated` z `z.infer`
 
 ### Krok 2: Rozszerzenie OpenLibraryService
+
 **Plik:** `src/lib/services/openlibrary.service.ts`
 
 - Dodanie metody `fetchAuthorByOpenLibraryId(openlibrary_id: string): Promise<OpenLibraryAuthor>`
@@ -423,6 +469,7 @@ try {
 - Walidacja wymaganych pól w odpowiedzi (`name`, `key`)
 
 ### Krok 3: Rozszerzenie AuthorsService
+
 **Plik:** `src/lib/services/authors.service.ts`
 
 - Dodanie metody `findByOpenLibraryId(openlibrary_id: string): Promise<AuthorRow | null>`
@@ -435,6 +482,7 @@ try {
   - Obsługa błędów bazy danych
 
 ### Krok 4: Utworzenie migracji bazy danych (jeśli potrzebne)
+
 **Plik:** `supabase/migrations/YYYYMMDDHHMMSS_add_upsert_author_from_ol_rpc.sql`
 
 - Sprawdzenie, czy istnieje RPC `upsert_author_from_ol`
@@ -447,6 +495,7 @@ try {
 - Jeśli użyjemy istniejącego `upsert_authors_cache`, pomijamy ten krok
 
 ### Krok 5: Utworzenie endpointu API
+
 **Plik:** `src/pages/api/openlibrary/import/author.ts`
 
 - Import wymaganych zależności (types, services, validation, logger)
@@ -464,11 +513,13 @@ try {
 - Logowanie błędów i operacji
 
 ### Krok 6: Testy manualne
+
 **Plik:** `.ai/api/api-openlibrary-import-author-manual-tests.md`
 
 Przygotowanie szczegółowego przewodnika testów manualnych zawierającego scenariusze testowe do weryfikacji działania endpointu. Plik powinien zawierać:
 
 **Struktura pliku:**
+
 1. **Prerequisites** - Wymagania wstępne (uruchomiony dev server, skonfigurowane zmienne środowiskowe, dostęp do bazy danych)
 2. **Authentication Setup** (jeśli wymagane) - Instrukcje dotyczące uwierzytelniania (endpoint jest anonimowy, ale może być przydatne do logowania)
 3. **Test Cases** - Szczegółowe scenariusze testowe:
@@ -503,6 +554,7 @@ Przygotowanie szczegółowego przewodnika testów manualnych zawierającego scen
      - Weryfikacja braku duplikatów w bazie danych
 
 **Format każdego test case:**
+
 - **Description** - Opis scenariusza
 - **Request** - Przykładowe żądanie (curl, Postman, lub inny format)
 - **Expected Response** - Oczekiwana odpowiedź (status code, body)
@@ -510,16 +562,19 @@ Przygotowanie szczegółowego przewodnika testów manualnych zawierającego scen
 - **Notes** - Dodatkowe uwagi lub edge cases
 
 **Narzędzia do testowania:**
+
 - curl commands dla każdego scenariusza
 - Instrukcje dotyczące sprawdzania bazy danych (Supabase dashboard lub SQL queries)
 
 ### Krok 7: Dokumentacja i code review
+
 - Aktualizacja dokumentacji API (jeśli istnieje)
 - Code review zgodnie z zasadami projektu
 - Sprawdzenie zgodności z regułami implementacji
 - Sprawdzenie obsługi błędów i logowania
 
 ### Zależności między krokami
+
 1. Krok 1 (Zod schema) → niezależny, można zacząć od razu
 2. Krok 2 (OpenLibraryService) → niezależny, można zacząć równolegle z krokiem 1
 3. Krok 3 (AuthorsService) → może wymagać kroku 4 (RPC), jeśli używamy nowego RPC
@@ -529,6 +584,7 @@ Przygotowanie szczegółowego przewodnika testów manualnych zawierającego scen
 7. Krok 7 (Dokumentacja i code review) → wymaga ukończenia kroków 1-6
 
 ### Uwagi implementacyjne
+
 - Użycie istniejącego `upsert_authors_cache` z pojedynczym elementem może być prostsze niż tworzenie nowego RPC
 - Normalizacja `openlibrary_id` powinna być spójna z innymi endpointami (sprawdź `search.ts`)
 - Logowanie powinno używać `logger` z `@/lib/logger` zgodnie z istniejącym kodem

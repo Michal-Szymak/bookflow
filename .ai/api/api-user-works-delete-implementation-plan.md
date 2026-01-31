@@ -2,9 +2,10 @@
 
 ## 1. Przegląd punktu końcowego
 
-Endpoint `DELETE /api/user/works/{workId}` służy do odłączenia (detach) dzieła z listy użytkownika. Operacja usuwa tylko powiązanie między użytkownikiem a dziełem w tabeli `user_works`, nie usuwa samego dzieła z globalnego katalogu w tabeli `works`. 
+Endpoint `DELETE /api/user/works/{workId}` służy do odłączenia (detach) dzieła z listy użytkownika. Operacja usuwa tylko powiązanie między użytkownikiem a dziełem w tabeli `user_works`, nie usuwa samego dzieła z globalnego katalogu w tabeli `works`.
 
 Po usunięciu powiązania:
+
 - Rekord w tabeli `user_works` jest usuwany
 - Trigger bazy danych automatycznie zmniejsza licznik `profiles.work_count`
 - Dzieło pozostaje w globalnym katalogu i może być nadal używane przez innych użytkowników
@@ -51,6 +52,7 @@ Endpoint wymaga uwierzytelnienia i pozwala użytkownikowi usuwać tylko swoje w�
 ### Błędy
 
 - **400 Bad Request**: Nieprawidłowy format UUID lub brakujący parametr `workId`
+
   ```json
   {
     "error": "Validation error",
@@ -60,6 +62,7 @@ Endpoint wymaga uwierzytelnienia i pozwala użytkownikowi usuwać tylko swoje w�
   ```
 
 - **401 Unauthorized**: Brak uwierzytelnienia lub nieprawidłowa sesja
+
   ```json
   {
     "error": "Unauthorized",
@@ -68,6 +71,7 @@ Endpoint wymaga uwierzytelnienia i pozwala użytkownikowi usuwać tylko swoje w�
   ```
 
 - **403 Forbidden**: Naruszenie polityki RLS (użytkownik próbuje usunąć powiązanie, do którego nie ma dostępu)
+
   ```json
   {
     "error": "Forbidden",
@@ -76,6 +80,7 @@ Endpoint wymaga uwierzytelnienia i pozwala użytkownikowi usuwać tylko swoje w�
   ```
 
 - **404 Not Found**: Dzieło nie jest przypisane do profilu użytkownika
+
   ```json
   {
     "error": "Not Found",
@@ -119,7 +124,7 @@ Endpoint wymaga uwierzytelnienia i pozwala użytkownikowi usuwać tylko swoje w�
 1. Wywołaj metodę `detachUserWork(user.id, workId)` na `WorksService`
 2. Metoda powinna wykonać następującą operację:
    ```sql
-   DELETE FROM user_works 
+   DELETE FROM user_works
    WHERE user_id = userId AND work_id = workId
    ```
 3. Trigger bazy danych `user_works_decrement_count` automatycznie zmniejszy `profiles.work_count`

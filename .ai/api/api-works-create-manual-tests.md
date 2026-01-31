@@ -1,6 +1,7 @@
 # Manual Testing Guide: POST /api/works
 
 ## Prerequisites
+
 - Dev server running: `npm run dev`
 - Supabase environment variables configured
 - Database tables: `works`, `authors`, `author_works`, `profiles`
@@ -12,6 +13,7 @@
 This endpoint **requires authentication**. Use an access token or session cookie.
 
 ### Using curl with Authorization header
+
 ```bash
 curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
@@ -20,6 +22,7 @@ curl -X POST "http://localhost:3000/api/works" \
 ```
 
 ### Using curl with Session Cookie
+
 ```bash
 curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
@@ -34,9 +37,11 @@ curl -X POST "http://localhost:3000/api/works" \
 ## Test Cases
 
 ### Test 1: Successful Work Creation (Single Author)
+
 **Description:** Create a manual work with a valid title and a single author ID.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
@@ -49,6 +54,7 @@ curl -X POST "http://localhost:3000/api/works" \
 ```
 
 **Expected Response:**
+
 - Status: 201 Created
 - JSON with `work` object containing:
   - `id`: UUID
@@ -59,15 +65,18 @@ curl -X POST "http://localhost:3000/api/works" \
   - `primary_edition`: null
 
 **Verification Steps:**
+
 1. Check `works` table for the new work.
 2. Check `author_works` table for the author-work link.
 
 ---
 
 ### Test 2: Successful Work Creation (Multiple Authors)
+
 **Description:** Create a manual work linked to multiple authors.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
@@ -80,18 +89,22 @@ curl -X POST "http://localhost:3000/api/works" \
 ```
 
 **Expected Response:**
+
 - Status: 201 Created
 - `work` returned with `primary_edition` null
 
 **Verification Steps:**
+
 1. Check `author_works` table: two rows for the new work.
 
 ---
 
 ### Test 3: Successful Work Creation with `first_publish_year`
+
 **Description:** Create a work with a valid `first_publish_year`.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
@@ -105,15 +118,18 @@ curl -X POST "http://localhost:3000/api/works" \
 ```
 
 **Expected Response:**
+
 - Status: 201 Created
 - `work.first_publish_year` equals `1998`
 
 ---
 
 ### Test 4: Invalid `primary_edition_id`
+
 **Description:** Provide a `primary_edition_id` that does not belong to the created work.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
@@ -127,19 +143,23 @@ curl -X POST "http://localhost:3000/api/works" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error message indicating invalid `primary_edition_id`
 
 **Notes:**
+
 - A successful `primary_edition_id` scenario requires an edition already linked to the newly created work.
 - If needed, validate this via direct DB setup or by setting primary edition later with `POST /api/works/{workId}/primary-edition`.
 
 ---
 
 ### Test 5: Validation Error - Empty Title
+
 **Description:** Provide an empty title.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
@@ -152,15 +172,18 @@ curl -X POST "http://localhost:3000/api/works" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error message about title validation
 
 ---
 
 ### Test 6: Validation Error - Empty `author_ids`
+
 **Description:** Provide an empty array of authors.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
@@ -173,15 +196,18 @@ curl -X POST "http://localhost:3000/api/works" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error message about author_ids validation
 
 ---
 
 ### Test 7: Unauthorized Request
+
 **Description:** Omit authentication.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
@@ -193,14 +219,17 @@ curl -X POST "http://localhost:3000/api/works" \
 ```
 
 **Expected Response:**
+
 - Status: 401 Unauthorized
 
 ---
 
 ### Test 8: Author Not Found
+
 **Description:** Provide a non-existent author ID.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
@@ -213,15 +242,18 @@ curl -X POST "http://localhost:3000/api/works" \
 ```
 
 **Expected Response:**
+
 - Status: 404 Not Found
 - Error message listing invalid author IDs
 
 ---
 
 ### Test 9: Work Limit Exceeded
+
 **Description:** Force user profile to reach `max_works` and attempt creation.
 
 **Setup (example SQL):**
+
 ```sql
 UPDATE profiles
 SET work_count = max_works
@@ -229,6 +261,7 @@ WHERE user_id = '<user_uuid>';
 ```
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/works" \
   -H "Content-Type: application/json" \
@@ -241,6 +274,6 @@ curl -X POST "http://localhost:3000/api/works" \
 ```
 
 **Expected Response:**
+
 - Status: 409 Conflict
 - Error message about work limit reached
-

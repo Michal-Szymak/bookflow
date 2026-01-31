@@ -1,4 +1,5 @@
 <authentication_analysis>
+
 ## Przepływy autentykacji (z PRD i auth-spec)
 
 - Rejestracja e-mail/hasło (US-001)
@@ -36,4 +37,4 @@
 - Odzyskiwanie hasła: formularz → API → Supabase Auth → komunikat sukcesu
 - Reset hasła: link recovery → ustawienie sesji recovery → zmiana hasła → sesja
 - Usunięcie konta: potwierdzenie → API → weryfikacja → admin delete → sesja znika
-</authentication_analysis>
+  </authentication_analysis>

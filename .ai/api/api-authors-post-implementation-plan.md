@@ -5,6 +5,7 @@
 Endpoint **POST `/api/authors`** umożliwia zalogowanemu użytkownikowi utworzenie ręcznego (manual) autora w katalogu globalnym. Utworzony autor jest przypisany do użytkownika (`owner_user_id`) i podlega limitowi 500 autorów na użytkownika. Endpoint wymaga autoryzacji i waliduje wszystkie ograniczenia bazy danych oraz reguły biznesowe przed utworzeniem rekordu.
 
 **Kluczowe funkcjonalności:**
+
 - Tworzenie ręcznego autora z przypisaniem do aktualnego użytkownika
 - Walidacja limitu autorów na użytkownika (≤500)
 - Wymuszanie ograniczeń bazy danych (`authors_manual_owner`, `authors_manual_or_ol`)
@@ -14,19 +15,23 @@ Endpoint **POST `/api/authors`** umożliwia zalogowanemu użytkownikowi utworzen
 ## 2. Szczegóły żądania
 
 ### Metoda HTTP
+
 **POST**
 
 ### Struktura URL
+
 ```
 /api/authors
 ```
 
 ### Wymagana autoryzacja
+
 - Endpoint wymaga zalogowanego użytkownika
 - Sesja Supabase musi być aktywna (Authorization header lub cookie)
 - Brak autoryzacji zwraca `401 Unauthorized`
 
 ### Request Body
+
 ```typescript
 {
   "name": string,        // Wymagane, niepuste, max 500 znaków
@@ -36,11 +41,13 @@ Endpoint **POST `/api/authors`** umożliwia zalogowanemu użytkownikowi utworzen
 ```
 
 **Szczegóły pól:**
+
 - `name` (wymagane): Nazwa autora, string niepusty po trimowaniu, maksymalnie 500 znaków
 - `manual` (wymagane): Musi być `true` dla ręcznych autorów
 - `openlibrary_id` (opcjonalne): Jeśli podane, musi być `null` (dla ręcznych autorów)
 
 **Przykład żądania:**
+
 ```json
 {
   "name": "John Doe",
@@ -49,6 +56,7 @@ Endpoint **POST `/api/authors`** umożliwia zalogowanemu użytkownikowi utworzen
 ```
 
 ### Parametry zapytania
+
 Brak
 
 ## 3. Wykorzystywane typy
@@ -56,6 +64,7 @@ Brak
 ### DTOs (Data Transfer Objects)
 
 **Request DTO:**
+
 - `CreateAuthorCommand` (z `src/types.ts`):
   ```typescript
   type CreateAuthorCommand = Pick<AuthorRow, "name"> & {
@@ -65,6 +74,7 @@ Brak
   ```
 
 **Response DTO:**
+
 - `AuthorResponseDto` (z `src/types.ts`):
   ```typescript
   interface AuthorResponseDto {
@@ -73,18 +83,22 @@ Brak
   ```
 
 **Entity Types:**
+
 - `AuthorRow` - typ wiersza z tabeli `authors`
 - `ProfileRow` - typ wiersza z tabeli `profiles` (dla sprawdzenia limitów)
 
 ### Command Model
+
 - `CreateAuthorCommand` - reprezentuje walidowane dane wejściowe
 
 ## 4. Szczegóły odpowiedzi
 
 ### Sukces (201 Created)
+
 Zwraca utworzony autor w formacie `AuthorResponseDto`.
 
 **Struktura odpowiedzi:**
+
 ```json
 {
   "author": {
@@ -102,15 +116,18 @@ Zwraca utworzony autor w formacie `AuthorResponseDto`.
 ```
 
 **Nagłówki:**
+
 - `Content-Type: application/json`
 - `Location: /api/authors/{authorId}` (opcjonalnie)
 
 ### Błędy
 
 #### 400 Bad Request
+
 Walidacja danych wejściowych nie powiodła się.
 
 **Przykłady:**
+
 ```json
 {
   "error": "Validation error",
@@ -125,12 +142,14 @@ Walidacja danych wejściowych nie powiodła się.
 ```
 
 **Scenariusze:**
+
 - `name` jest puste lub nieprawidłowe
 - `manual` nie jest `true`
 - `openlibrary_id` jest podane i nie jest `null`
 - Brak wymaganych pól
 
 #### 401 Unauthorized
+
 Użytkownik nie jest zalogowany lub sesja jest nieprawidłowa.
 
 ```json
@@ -141,6 +160,7 @@ Użytkownik nie jest zalogowany lub sesja jest nieprawidłowa.
 ```
 
 #### 403 Forbidden
+
 Próba utworzenia autora z `manual=true` bez przypisania do aktualnego użytkownika (teoretycznie nie powinno wystąpić, ale może być wynikiem naruszenia RLS).
 
 ```json
@@ -151,9 +171,11 @@ Próba utworzenia autora z `manual=true` bez przypisania do aktualnego użytkown
 ```
 
 #### 409 Conflict
+
 Konflikt unikalności lub naruszenie ograniczeń bazy danych.
 
 **Scenariusze:**
+
 - Naruszenie ograniczenia `authors_manual_owner` (próba ustawienia `manual=false` z `owner_user_id`)
 - Naruszenie ograniczenia `authors_manual_or_ol` (próba utworzenia autora bez `manual=true` i bez `openlibrary_id`)
 - Przekroczenie limitu autorów (author_count >= max_authors)
@@ -176,6 +198,7 @@ lub
 ```
 
 #### 500 Internal Server Error
+
 Nieoczekiwany błąd serwera.
 
 ```json
@@ -188,11 +211,13 @@ Nieoczekiwany błąd serwera.
 ## 5. Przepływ danych
 
 ### Krok 1: Walidacja autoryzacji
+
 1. Pobierz sesję użytkownika z Supabase (`supabase.auth.getUser()`)
 2. Jeśli brak sesji → zwróć `401 Unauthorized`
 3. Pobierz `user.id` z sesji
 
 ### Krok 2: Walidacja danych wejściowych
+
 1. Parsuj i waliduj body żądania używając Zod schema
 2. Sprawdź:
    - `name` jest niepustym stringiem (po trimowaniu, max 500 znaków)
@@ -201,16 +226,18 @@ Nieoczekiwany błąd serwera.
 3. Jeśli walidacja nie powiodła się → zwróć `400 Bad Request` z szczegółami
 
 ### Krok 3: Sprawdzenie limitu użytkownika
+
 1. Pobierz profil użytkownika z tabeli `profiles`:
    ```sql
-   SELECT author_count, max_authors 
-   FROM profiles 
+   SELECT author_count, max_authors
+   FROM profiles
    WHERE user_id = $1
    ```
 2. Jeśli `author_count >= max_authors` → zwróć `409 Conflict`
 3. Jeśli profil nie istnieje → utwórz go (z domyślnymi wartościami) lub zwróć błąd
 
 ### Krok 4: Przygotowanie danych do wstawienia
+
 1. Przygotuj obiekt autora:
    ```typescript
    {
@@ -224,6 +251,7 @@ Nieoczekiwany błąd serwera.
    ```
 
 ### Krok 5: Wstawienie do bazy danych
+
 1. Wykonaj INSERT do tabeli `authors`:
    ```sql
    INSERT INTO authors (name, manual, owner_user_id, openlibrary_id)
@@ -236,11 +264,13 @@ Nieoczekiwany błąd serwera.
    - **Inne błędy DB** → zaloguj i zwróć `500 Internal Server Error`
 
 ### Krok 6: Zwrócenie odpowiedzi
+
 1. Zwróć utworzony autor w formacie `AuthorResponseDto`
 2. Status: `201 Created`
 3. Content-Type: `application/json`
 
 ### Diagram przepływu
+
 ```
 Request → Auth Check → Validation → Limit Check → DB Insert → Response
    ↓           ↓            ↓            ↓            ↓          ↓
@@ -250,27 +280,32 @@ Request → Auth Check → Validation → Limit Check → DB Insert → Response
 ## 6. Względy bezpieczeństwa
 
 ### Autoryzacja
+
 - **Wymagana**: Endpoint wymaga aktywnej sesji Supabase
 - **Implementacja**: Użyj `supabase.auth.getUser()` w middleware lub w route handlerze
 - **RLS**: Row Level Security w Supabase zapewnia, że użytkownik może tworzyć tylko autorów z `owner_user_id = auth.uid()`
 
 ### Walidacja danych wejściowych
+
 - **Sanityzacja**: Trimowanie `name` przed zapisem
 - **Długość**: Maksymalna długość `name` to 500 znaków (zgodnie z typem bazy danych)
 - **Typy**: Walidacja typu dla wszystkich pól (Zod schema)
 - **Ograniczenia biznesowe**: Wymuszanie `manual=true` i `openlibrary_id=null` dla ręcznych autorów
 
 ### Ochrona przed nadużyciami
+
 - **Limity użytkownika**: Sprawdzenie `author_count < max_authors` przed wstawieniem
 - **RLS Policies**: Baza danych automatycznie wymusza, że `owner_user_id = auth.uid()` dla manual authors
 - **Database Constraints**: Ograniczenia `authors_manual_owner` i `authors_manual_or_ol` zapewniają spójność danych
 
 ### Bezpieczeństwo bazy danych
+
 - **SQL Injection**: Użycie Supabase client (parametryzowane zapytania)
 - **RLS**: Wszystkie operacje są filtrowane przez Row Level Security
 - **Cascade Deletes**: Usunięcie użytkownika automatycznie usuwa jego autorów (ON DELETE CASCADE)
 
 ### Logowanie
+
 - Loguj wszystkie błędy walidacji i bazy danych
 - Nie loguj wrażliwych danych (np. pełnych obiektów użytkownika)
 - Używaj strukturalnego logowania dla łatwiejszej analizy
@@ -280,36 +315,39 @@ Request → Auth Check → Validation → Limit Check → DB Insert → Response
 ### Kategorie błędów
 
 #### Błędy walidacji (400)
+
 - **Przyczyna**: Nieprawidłowe dane wejściowe
 - **Obsługa**: Zwróć szczegółowe komunikaty z Zod validation errors
 - **Przykład**: Puste `name`, `manual !== true`, `openlibrary_id !== null`
 
 #### Błędy autoryzacji (401)
+
 - **Przyczyna**: Brak sesji lub nieprawidłowy token
 - **Obsługa**: Zwróć ogólny komunikat (nie ujawniaj szczegółów bezpieczeństwa)
 - **Implementacja**: Sprawdź `supabase.auth.getUser()` na początku handlera
 
 #### Błędy autoryzacji (403)
+
 - **Przyczyna**: Naruszenie RLS policy (próba utworzenia autora bez ownership)
 - **Obsługa**: Zwróć komunikat o braku uprawnień
 - **Uwaga**: Teoretycznie nie powinno wystąpić, jeśli `owner_user_id` jest ustawione poprawnie
 
 #### Błędy konfliktów (409)
+
 - **Przyczyna 1**: Przekroczenie limitu autorów
   - Sprawdzenie: `author_count >= max_authors`
   - Komunikat: "Author limit reached (500 authors per user)"
-  
 - **Przyczyna 2**: Naruszenie constraint `authors_manual_owner`
   - Sprawdzenie: Database constraint violation
   - Komunikat: "Database constraint violation: authors_manual_owner"
-  
 - **Przyczyna 3**: Naruszenie constraint `authors_manual_or_ol`
   - Sprawdzenie: Database constraint violation
   - Komunikat: "Database constraint violation: authors_manual_or_ol"
 
 #### Błędy serwera (500)
+
 - **Przyczyna**: Nieoczekiwane błędy bazy danych lub aplikacji
-- **Obsługa**: 
+- **Obsługa**:
   - Zaloguj pełny błąd (dla debugowania)
   - Zwróć ogólny komunikat użytkownikowi
   - Nie ujawniaj szczegółów implementacji
@@ -328,16 +366,19 @@ Request → Auth Check → Validation → Limit Check → DB Insert → Response
 try {
   // Operacja bazy danych
 } catch (error) {
-  if (error.code === '23505') { // Unique violation
+  if (error.code === "23505") {
+    // Unique violation
     return new Response(/* 409 */);
   }
-  if (error.code === '23514') { // Check constraint violation
+  if (error.code === "23514") {
+    // Check constraint violation
     return new Response(/* 409 */);
   }
-  if (error.code === '42501') { // Insufficient privilege (RLS)
+  if (error.code === "42501") {
+    // Insufficient privilege (RLS)
     return new Response(/* 403 */);
   }
-  console.error('Unexpected error:', error);
+  console.error("Unexpected error:", error);
   return new Response(/* 500 */);
 }
 ```
@@ -346,7 +387,7 @@ try {
 
 ### Optymalizacje zapytań
 
-1. **Sprawdzenie limitu**: 
+1. **Sprawdzenie limitu**:
    - Użyj pojedynczego zapytania do `profiles` z SELECT tylko potrzebnych kolumn
    - Rozważ cache profilu użytkownika (jeśli często używane)
    - Indeks na `profiles(user_id)` jest kluczowy (PK)
@@ -357,7 +398,7 @@ try {
 
 ### Potencjalne wąskie gardła
 
-1. **Sprawdzenie limitu**: 
+1. **Sprawdzenie limitu**:
    - Jeśli profil nie istnieje, może wymagać INSERT (rzadko)
    - Rozwiązanie: Upewnij się, że profil jest tworzony podczas rejestracji
 
@@ -377,6 +418,7 @@ try {
 ## 9. Etapy wdrożenia
 
 ### Krok 1: Utworzenie schematu walidacji Zod
+
 **Plik**: `src/lib/validation/create-author.schema.ts`
 
 1. Utwórz schemat Zod dla `CreateAuthorCommand`:
@@ -387,11 +429,13 @@ try {
 3. Dodaj odpowiednie komunikaty błędów
 
 **Kryteria akceptacji:**
+
 - Schema waliduje wszystkie wymagane pola
 - Komunikaty błędów są czytelne
 - Typ jest zgodny z `CreateAuthorCommand` z `src/types.ts`
 
 ### Krok 2: Rozszerzenie AuthorsService
+
 **Plik**: `src/lib/services/authors.service.ts`
 
 1. Dodaj metodę `createManualAuthor(userId: string, name: string): Promise<AuthorRow>`
@@ -406,11 +450,13 @@ try {
    - Obsługuje przypadek braku profilu (opcjonalnie tworzy)
 
 **Kryteria akceptacji:**
+
 - Metody używają Supabase client z kontekstu
 - Obsługa błędów jest kompletna
 - Metody są testowalne (dependency injection)
 
 ### Krok 3: Utworzenie endpointu API
+
 **Plik**: `src/pages/api/authors/index.ts`
 
 1. Utwórz handler `POST`:
@@ -430,12 +476,14 @@ try {
    - 500: Nieoczekiwane błędy
 
 **Kryteria akceptacji:**
+
 - Wszystkie scenariusze błędów są obsłużone
 - Odpowiedzi mają poprawne kody HTTP
 - Logowanie błędów jest strukturalne
 - Kod jest czytelny i zgodny z zasadami projektu
 
 ### Krok 4: Testy manualne
+
 **Plik**: `.ai/api/api-authors-post-manual-tests.md` (opcjonalnie)
 
 1. Przygotuj scenariusze testowe:
@@ -448,11 +496,13 @@ try {
 2. Wykonaj testy używając curl/Postman/Thunder Client
 
 **Kryteria akceptacji:**
+
 - Wszystkie scenariusze są przetestowane
 - Odpowiedzi są zgodne ze specyfikacją
 - Błędy są obsłużone poprawnie
 
 ### Krok 5: Code Review i Refaktoryzacja
+
 1. Przejrzyj kod pod kątem:
    - Zgodności z zasadami projektu
    - Czytelności i maintainability
@@ -462,6 +512,7 @@ try {
 2. Wprowadź poprawki na podstawie feedbacku
 
 **Kryteria akceptacji:**
+
 - Kod jest zgodny z zasadami projektu
 - Wszystkie linter errors są naprawione
 - Code review jest pozytywne
@@ -469,22 +520,26 @@ try {
 ## 10. Uwagi dodatkowe
 
 ### Zależności
+
 - `zod` - walidacja danych wejściowych
 - `@supabase/supabase-js` - klient Supabase
 - `src/types.ts` - typy DTO i Command Models
 - `src/lib/services/authors.service.ts` - logika biznesowa
 
 ### Ograniczenia
+
 - Limit 500 autorów na użytkownika jest sztywny (można zmienić w `profiles.max_authors`)
 - Ręczni autorzy nie mogą mieć `openlibrary_id` (zgodnie z constraint)
 - Usunięcie użytkownika usuwa wszystkie jego autorów (CASCADE)
 
 ### Przyszłe rozszerzenia
+
 - Rate limiting (10 autorów/min) - obecnie nie wymagane dla tego endpointu
 - Bulk creation - możliwość utworzenia wielu autorów jednocześnie
 - Weryfikacja duplikatów nazw (opcjonalnie)
 
 ### Zgodność z zasadami projektu
+
 - ✅ Używa Supabase z `context.locals`
 - ✅ Używa Zod do walidacji
 - ✅ Ekstrakcja logiki do service layer
@@ -492,4 +547,3 @@ try {
 - ✅ Używa prawidłowych kodów HTTP
 - ✅ TypeScript z pełnym typowaniem
 - ✅ Zgodność z strukturą projektu
-

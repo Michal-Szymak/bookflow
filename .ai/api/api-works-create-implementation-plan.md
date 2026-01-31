@@ -5,6 +5,7 @@
 Endpoint `POST /api/works` służy do tworzenia ręcznego dzieła (work) przez uwierzytelnionego użytkownika i powiązania go z jednym lub wieloma autorami. Utworzone dzieło jest własnością użytkownika (`owner_user_id`) i jest oznaczone jako ręczne (`manual = true`). Endpoint automatycznie tworzy powiązania między dziełem a autorami poprzez tabelę `author_works`.
 
 **Kluczowe funkcjonalności:**
+
 - Tworzenie ręcznego dzieła z tytułem i opcjonalnymi metadanymi (rok pierwszego wydania, główne wydanie)
 - Powiązanie dzieła z jednym lub wieloma autorami poprzez tabelę `author_works`
 - Walidacja ograniczeń bazy danych (`works_manual_owner`, `works_manual_or_ol`)
@@ -18,14 +19,17 @@ Endpoint jest częścią systemu zarządzania dziełami, który pozwala użytkow
 ## 2. Szczegóły żądania
 
 ### Metoda HTTP
+
 `POST`
 
 ### Struktura URL
+
 ```
 /api/works
 ```
 
 ### Request Body
+
 ```typescript
 {
   "title": string,                    // Wymagane, 1-500 znaków po przycięciu
@@ -37,6 +41,7 @@ Endpoint jest częścią systemu zarządzania dziełami, który pozwala użytkow
 ```
 
 **Parametry:**
+
 - `title` (wymagane): Tytuł dzieła. Musi być niepustym stringiem po przycięciu, maksymalnie 500 znaków.
 - `manual` (wymagane): Musi być `true` dla ręcznych dzieł. Wartość jest automatycznie ustawiana przez endpoint.
 - `author_ids` (wymagane): Tablica UUID autorów, z którymi dzieło ma być powiązane. Musi zawierać co najmniej jeden element. Wszyscy autorzy muszą istnieć i być dostępni dla użytkownika (zgodnie z RLS).
@@ -44,6 +49,7 @@ Endpoint jest częścią systemu zarządzania dziełami, który pozwala użytkow
 - `primary_edition_id` (opcjonalne): UUID wydania, które ma być ustawione jako główne wydanie dzieła. Wydanie musi istnieć i należeć do utworzonego dzieła (walidacja po utworzeniu dzieła).
 
 **Przykładowe żądanie:**
+
 ```json
 {
   "title": "Moja pierwsza książka",
@@ -54,12 +60,14 @@ Endpoint jest częścią systemu zarządzania dziełami, który pozwala użytkow
 ```
 
 ### Headers
+
 - `Content-Type: application/json` (wymagane)
 - `Authorization: Bearer <access_token>` (wymagane dla uwierzytelnionych użytkowników)
 
 ## 3. Wykorzystywane typy
 
 ### Command Model (Request Body)
+
 ```typescript
 // src/types.ts
 export type CreateWorkCommand = Pick<WorkRow, "title" | "first_publish_year" | "primary_edition_id"> & {
@@ -69,6 +77,7 @@ export type CreateWorkCommand = Pick<WorkRow, "title" | "first_publish_year" | "
 ```
 
 ### Response DTO
+
 ```typescript
 // src/types.ts
 export interface WorkResponseDto {
@@ -94,6 +103,7 @@ export type PrimaryEditionSummaryDto = Pick<
 ```
 
 ### Typy pomocnicze
+
 ```typescript
 // src/types.ts
 export type WorkDto = WorkRow;
@@ -103,6 +113,7 @@ export type EditionRow = Tables<"editions">;
 ```
 
 ### Validation Schema
+
 ```typescript
 // src/lib/validation/create-work.schema.ts (do utworzenia)
 export const CreateWorkSchema = z.object({
@@ -117,9 +128,11 @@ export const CreateWorkSchema = z.object({
 ## 4. Szczegóły odpowiedzi
 
 ### Sukces (201 Created)
+
 Zwraca utworzone dzieło wraz z informacjami o głównym wydaniu (jeśli zostało ustawione).
 
 **Struktura odpowiedzi:**
+
 ```json
 {
   "work": {
@@ -148,12 +161,14 @@ Zwraca utworzone dzieło wraz z informacjami o głównym wydaniu (jeśli został
 ```
 
 **Headers odpowiedzi:**
+
 - `Content-Type: application/json`
 - `Location: /api/works/{workId}` (wskazuje na utworzone dzieło)
 
 ### Błędy
 
 #### 400 Bad Request - Błąd walidacji
+
 Zwracany, gdy dane wejściowe są nieprawidłowe.
 
 ```json
@@ -170,6 +185,7 @@ Zwracany, gdy dane wejściowe są nieprawidłowe.
 ```
 
 **Możliwe przyczyny:**
+
 - Brak lub puste `title`
 - `title` przekracza 500 znaków
 - `manual` nie jest `true`
@@ -180,6 +196,7 @@ Zwracany, gdy dane wejściowe są nieprawidłowe.
 - Nieprawidłowy format JSON w body
 
 #### 401 Unauthorized - Brak uwierzytelnienia
+
 Zwracany, gdy użytkownik nie jest uwierzytelniony.
 
 ```json
@@ -190,6 +207,7 @@ Zwracany, gdy użytkownik nie jest uwierzytelniony.
 ```
 
 #### 403 Forbidden - Brak uprawnień
+
 Zwracany, gdy użytkownik próbuje utworzyć dzieło bez odpowiednich uprawnień (np. naruszenie RLS).
 
 ```json
@@ -200,6 +218,7 @@ Zwracany, gdy użytkownik próbuje utworzyć dzieło bez odpowiednich uprawnień
 ```
 
 #### 404 Not Found - Autor nie znaleziony
+
 Zwracany, gdy jeden lub więcej autorów z `author_ids` nie istnieje lub nie jest dostępny dla użytkownika.
 
 ```json
@@ -211,9 +230,11 @@ Zwracany, gdy jeden lub więcej autorów z `author_ids` nie istnieje lub nie jes
 ```
 
 #### 409 Conflict - Konflikt lub limit przekroczony
+
 Zwracany w dwóch przypadkach:
 
 **1. Limit dzieł użytkownika przekroczony:**
+
 ```json
 {
   "error": "Conflict",
@@ -222,6 +243,7 @@ Zwracany w dwóch przypadkach:
 ```
 
 **2. Naruszenie ograniczeń bazy danych:**
+
 ```json
 {
   "error": "Conflict",
@@ -231,6 +253,7 @@ Zwracany w dwóch przypadkach:
 ```
 
 #### 500 Internal Server Error - Błąd serwera
+
 Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
 
 ```json
@@ -243,10 +266,12 @@ Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
 ## 5. Przepływ danych
 
 ### Krok 1: Walidacja uwierzytelnienia
+
 - Endpoint sprawdza obecność ważnej sesji użytkownika poprzez `locals.supabase.auth.getUser()`
 - Jeśli użytkownik nie jest uwierzytelniony, zwracany jest błąd 401
 
 ### Krok 2: Parsowanie i walidacja request body
+
 - Parsowanie JSON z request body
 - Walidacja danych wejściowych przy użyciu Zod schema (`CreateWorkSchema`)
 - Sprawdzenie, czy `manual` jest `true`
@@ -256,17 +281,20 @@ Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
 - Walidacja formatu `primary_edition_id` (jeśli podane: prawidłowy UUID)
 
 ### Krok 3: Sprawdzenie limitów użytkownika
+
 - Pobranie profilu użytkownika z tabeli `profiles`
 - Sprawdzenie, czy `work_count < max_works` (domyślnie 5000)
 - Jeśli limit został przekroczony, zwracany jest błąd 409
 
 ### Krok 4: Weryfikacja istnienia autorów
+
 - Dla każdego `author_id` z `author_ids`:
   - Sprawdzenie, czy autor istnieje w bazie danych
   - Sprawdzenie, czy autor jest dostępny dla użytkownika (zgodnie z RLS)
 - Jeśli którykolwiek autor nie istnieje lub nie jest dostępny, zwracany jest błąd 404 z listą nieprawidłowych `author_id`
 
 ### Krok 5: Utworzenie dzieła
+
 - Utworzenie rekordu w tabeli `works` z następującymi wartościami:
   - `title`: przycięty tytuł z request body
   - `manual`: `true`
@@ -277,11 +305,13 @@ Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
 - Operacja jest wykonywana w transakcji, aby zapewnić spójność danych
 
 ### Krok 6: Utworzenie powiązań z autorami
+
 - Dla każdego `author_id` z `author_ids`:
   - Utworzenie rekordu w tabeli `author_works` z `author_id` i `work_id`
 - Wszystkie powiązania są tworzone w tej samej transakcji co dzieło
 
 ### Krok 7: Walidacja i ustawienie primary_edition_id (jeśli podane)
+
 - Jeśli `primary_edition_id` zostało podane w request body:
   - Sprawdzenie, czy wydanie istnieje
   - Sprawdzenie, czy wydanie należy do utworzonego dzieła (`edition.work_id = work.id`)
@@ -289,17 +319,20 @@ Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
   - Jeśli walidacja się nie powiedzie, zwracany jest błąd 400
 
 ### Krok 8: Pobranie utworzonego dzieła z głównym wydaniem
+
 - Pobranie utworzonego dzieła z bazy danych
 - Jeśli `primary_edition_id` jest ustawione, pobranie informacji o głównym wydaniu
 - Zbudowanie odpowiedzi `WorkResponseDto` z `WorkWithPrimaryEditionDto`
 
 ### Krok 9: Zwrócenie odpowiedzi
+
 - Zwrócenie odpowiedzi 201 Created z danymi dzieła
 - Dodanie nagłówka `Location` wskazującego na utworzone dzieło
 
 ### Diagram przepływu danych
+
 ```
-[Request] 
+[Request]
   ↓
 [Auth Check] → 401 if unauthorized
   ↓
@@ -323,11 +356,13 @@ Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
 ## 6. Względy bezpieczeństwa
 
 ### Uwierzytelnianie
+
 - Endpoint wymaga uwierzytelnionego użytkownika
 - Użycie `locals.supabase` z kontekstu Astro zapewnia bezpieczne zarządzanie sesją
 - Weryfikacja użytkownika odbywa się na początku każdego żądania
 
 ### Autoryzacja (RLS)
+
 - Row Level Security (RLS) jest włączone na tabeli `works`
 - Polityka RLS dla `works`:
   - **SELECT**: Użytkownik może odczytać dzieła, gdzie `owner_user_id IS NULL` (globalne) lub `owner_user_id = auth.uid()` (własne)
@@ -336,6 +371,7 @@ Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
 - Endpoint automatycznie ustawia `owner_user_id` na `auth.uid()`, co zapewnia zgodność z RLS
 
 ### Walidacja danych wejściowych
+
 - Wszystkie dane wejściowe są walidowane przy użyciu Zod schema
 - `title` jest przycinany i ograniczony do 500 znaków
 - `author_ids` jest walidowane jako tablica niepustych UUID
@@ -343,16 +379,19 @@ Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
 - `primary_edition_id` jest walidowane jako prawidłowy UUID
 
 ### Ochrona przed atakami
+
 - **SQL Injection**: Użycie Supabase Client zapewnia parametryzowane zapytania
 - **XSS**: Dane wejściowe są walidowane, ale nie są renderowane bezpośrednio w HTML (to endpoint API)
 - **CSRF**: Astro automatycznie obsługuje ochronę CSRF dla endpointów API
 - **Rate Limiting**: Rozważenie implementacji rate limitingu dla tego endpointu (np. 10 żądań/min na użytkownika)
 
 ### Ograniczenia użytkownika
+
 - Sprawdzanie limitów użytkownika przed utworzeniem dzieła zapobiega nadużyciom
 - Limit 5000 dzieł na użytkownika jest egzekwowany zarówno w API, jak i w bazie danych (triggery)
 
 ### Weryfikacja relacji
+
 - Weryfikacja, że wszyscy autorzy istnieją i są dostępni dla użytkownika przed utworzeniem powiązań
 - Weryfikacja, że `primary_edition_id` (jeśli podane) należy do utworzonego dzieła
 
@@ -361,6 +400,7 @@ Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
 ### Kategorie błędów
 
 #### Błędy walidacji (400 Bad Request)
+
 - **Nieprawidłowy format JSON**: Zwracany, gdy request body nie jest prawidłowym JSON
 - **Brakujące wymagane pola**: `title`, `manual`, `author_ids`
 - **Nieprawidłowe wartości**: `title` puste lub za długie, `manual` nie jest `true`, `author_ids` puste
@@ -370,66 +410,81 @@ Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
 - **Nieprawidłowe primary_edition_id**: Wydanie nie istnieje lub nie należy do utworzonego dzieła
 
 **Obsługa:**
+
 - Logowanie ostrzeżenia z szczegółami walidacji
 - Zwrócenie szczegółowego komunikatu błędu z listą błędów walidacji
 
 #### Błędy uwierzytelniania (401 Unauthorized)
+
 - **Brak sesji**: Użytkownik nie jest uwierzytelniony
 - **Nieprawidłowy token**: Token dostępu jest nieprawidłowy lub wygasł
 
 **Obsługa:**
+
 - Logowanie ostrzeżenia (bez wrażliwych danych)
 - Zwrócenie ogólnego komunikatu błędu
 
 #### Błędy autoryzacji (403 Forbidden)
+
 - **Naruszenie RLS**: Próba utworzenia dzieła bez odpowiednich uprawnień
 
 **Obsługa:**
+
 - Logowanie ostrzeżenia z `userId`
 - Zwrócenie komunikatu błędu wskazującego na problem z uprawnieniami
 
 #### Błędy nie znalezionych zasobów (404 Not Found)
+
 - **Autor nie istnieje**: Jeden lub więcej autorów z `author_ids` nie istnieje w bazie danych
 - **Autor niedostępny**: Autor istnieje, ale nie jest dostępny dla użytkownika (RLS)
 
 **Obsługa:**
+
 - Logowanie ostrzeżenia z listą nieprawidłowych `author_id`
 - Zwrócenie komunikatu błędu z listą nieprawidłowych `author_id`
 
 #### Błędy konfliktów (409 Conflict)
+
 - **Limit przekroczony**: Użytkownik osiągnął limit 5000 dzieł
 - **Naruszenie ograniczeń bazy danych**: Naruszenie `works_manual_owner` lub `works_manual_or_ol`
 
 **Obsługa:**
+
 - Logowanie ostrzeżenia z `userId` i szczegółami limitu
 - Zwrócenie komunikatu błędu z informacją o limicie lub szczegółami naruszenia ograniczeń
 
 #### Błędy serwera (500 Internal Server Error)
+
 - **Błąd bazy danych**: Nieoczekiwany błąd podczas operacji na bazie danych
 - **Błąd serwisu**: Błąd w WorksService lub AuthorsService
 - **Nieoczekiwany błąd**: Wszystkie inne nieobsłużone błędy
 
 **Obsługa:**
+
 - Logowanie błędu z pełnymi szczegółami (w tym stack trace)
 - Zwrócenie ogólnego komunikatu błędu (bez wrażliwych szczegółów)
 
 ### Strategia obsługi błędów
 
 #### Wczesne zwracanie (Early Returns)
+
 - Użycie wzorca early return dla wszystkich warunków błędów
 - Unikanie zagnieżdżonych if-else poprzez wczesne zwracanie błędów
 
 #### Logowanie
+
 - **Ostrzeżenia (warn)**: Dla błędów walidacji, autoryzacji, limitów
 - **Błędy (error)**: Dla błędów serwera i nieoczekiwanych błędów
 - Logowanie zawiera kontekst (userId, authorIds, workId) bez wrażliwych danych
 
 #### Komunikaty błędów
+
 - Komunikaty błędów są przyjazne dla użytkownika
 - Szczegółowe komunikaty dla błędów walidacji (lista błędów)
 - Ogólne komunikaty dla błędów serwera (bez ujawniania wewnętrznych szczegółów)
 
 #### Transakcje
+
 - Użycie transakcji bazy danych dla operacji tworzenia dzieła i powiązań
 - Rollback w przypadku błędów, aby zapewnić spójność danych
 
@@ -438,21 +493,25 @@ Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
 ### Potencjalne wąskie gardła
 
 #### 1. Weryfikacja wielu autorów
+
 - **Problem**: Jeśli `author_ids` zawiera wiele elementów, wykonanie wielu zapytań do bazy danych może być wolne
 - **Rozwiązanie**: Użycie jednego zapytania z `IN` clause do weryfikacji wszystkich autorów jednocześnie
 - **Optymalizacja**: Indeks na `authors.id` (PK) zapewnia szybkie wyszukiwanie
 
 #### 2. Tworzenie wielu powiązań author_works
+
 - **Problem**: Tworzenie wielu rekordów w `author_works` może być wolne
 - **Rozwiązanie**: Użycie batch insert (jedno zapytanie z wieloma wartościami) zamiast wielu pojedynczych insertów
 - **Optymalizacja**: Indeks na `author_works(author_id, work_id)` (PK) zapewnia szybkie wstawianie
 
 #### 3. Sprawdzanie limitów użytkownika
+
 - **Problem**: Zapytanie do `profiles` dla każdego żądania
 - **Rozwiązanie**: Indeks na `profiles.user_id` (PK) zapewnia szybkie wyszukiwanie
 - **Optymalizacja**: Rozważenie cache'owania limitów użytkownika (opcjonalne, jeśli wydajność jest problemem)
 
 #### 4. Pobieranie głównego wydania
+
 - **Problem**: Dodatkowe zapytanie do `editions` dla `primary_edition`
 - **Rozwiązanie**: Użycie JOIN w zapytaniu do pobrania dzieła z głównym wydaniem w jednym zapytaniu
 - **Optymalizacja**: Indeks na `editions.id` (PK) i `editions.work_id` zapewnia szybkie wyszukiwanie
@@ -460,7 +519,9 @@ Zwracany, gdy wystąpił nieoczekiwany błąd po stronie serwera.
 ### Strategie optymalizacji
 
 #### Indeksy bazy danych
+
 Następujące indeksy są już zdefiniowane w schemacie bazy danych:
+
 - `works.id` (PK) - szybkie wyszukiwanie dzieła
 - `authors.id` (PK) - szybkie wyszukiwanie autorów
 - `author_works(author_id, work_id)` (PK) - szybkie wstawianie i wyszukiwanie powiązań
@@ -469,18 +530,22 @@ Następujące indeksy są już zdefiniowane w schemacie bazy danych:
 - `profiles.user_id` (PK) - szybkie wyszukiwanie profilu użytkownika
 
 #### Transakcje
+
 - Użycie transakcji bazy danych dla operacji tworzenia dzieła i powiązań
 - Zapewnia spójność danych i może poprawić wydajność poprzez zmniejszenie liczby round-tripów do bazy danych
 
 #### Batch Operations
+
 - Użycie batch insert dla `author_works` zamiast wielu pojedynczych insertów
 - Zmniejsza liczbę zapytań do bazy danych
 
 #### Query Optimization
+
 - Użycie JOIN do pobrania dzieła z głównym wydaniem w jednym zapytaniu
 - Unikanie N+1 problem poprzez batch weryfikację autorów
 
 ### Monitoring wydajności
+
 - Rozważenie dodania metryk czasu wykonania dla kluczowych operacji:
   - Czas weryfikacji autorów
   - Czas tworzenia dzieła
@@ -490,6 +555,7 @@ Następujące indeksy są już zdefiniowane w schemacie bazy danych:
 ## 9. Etapy wdrożenia
 
 ### Krok 1: Utworzenie schematu walidacji Zod
+
 - Utworzenie pliku `src/lib/validation/create-work.schema.ts`
 - Zdefiniowanie `CreateWorkSchema` z walidacją wszystkich pól:
   - `title`: string, min 1, max 500, trim
@@ -500,6 +566,7 @@ Następujące indeksy są już zdefiniowane w schemacie bazy danych:
 - Eksport typu `CreateWorkValidated` z inferencji Zod
 
 ### Krok 2: Utworzenie lub rozszerzenie WorksService
+
 - Utworzenie pliku `src/lib/services/works.service.ts` (jeśli nie istnieje)
 - Implementacja metody `checkUserWorkLimit(userId: string)`:
   - Pobranie profilu użytkownika z `profiles`
@@ -521,6 +588,7 @@ Następujące indeksy są już zdefiniowane w schemacie bazy danych:
   - Obsługa błędów (dzieło nie znalezione)
 
 ### Krok 3: Utworzenie endpointu API
+
 - Utworzenie pliku `src/pages/api/works/index.ts`
 - Implementacja funkcji `POST` zgodnie z przepływem danych:
   1. Walidacja uwierzytelnienia
@@ -542,21 +610,25 @@ Następujące indeksy są już zdefiniowane w schemacie bazy danych:
 - Dodanie komentarzy JSDoc z dokumentacją endpointu
 
 ### Krok 4: Implementacja logowania
+
 - Użycie `logger` z `src/lib/logger.ts` do logowania:
   - Ostrzeżenia dla błędów walidacji, autoryzacji, limitów
   - Błędy dla błędów serwera
 - Logowanie kontekstu (userId, authorIds, workId) bez wrażliwych danych
 
 ### Krok 5: Testy manualne
+
 **Plik:** `.ai/api/api-works-create-manual-tests.md`
 Przygotowanie przewodnika testów manualnych zawierającego scenariusze testowe do weryfikacji działania endpointu.
 
 ### Krok 6: Dokumentacja
+
 - Aktualizacja dokumentacji API (jeśli istnieje)
 - Dodanie przykładów użycia endpointu
 - Dokumentacja wszystkich możliwych kodów odpowiedzi
 
 ### Krok 7: Code Review i Refaktoryzacja
+
 - Przegląd kodu pod kątem:
   - Zgodności z zasadami kodowania (early returns, error handling)
   - Spójności z innymi endpointami (POST /api/authors jako wzorzec)

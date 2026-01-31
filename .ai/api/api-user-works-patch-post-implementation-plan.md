@@ -3,9 +3,11 @@
 ## 1. Przegląd punktu końcowego
 
 ### PATCH /api/user/works/{workId}
+
 Endpoint służy do aktualizacji statusu i/lub dostępności w Legimi dla pojedynczego dzieła przypisanego do profilu zalogowanego użytkownika. Endpoint aktualizuje rekord w tabeli `user_works` i automatycznie aktualizuje pole `status_updated_at` przez trigger bazy danych, gdy status ulega zmianie.
 
 **Główne funkcjonalności:**
+
 - Aktualizacja statusu dzieła (enum: `to_read`, `in_progress`, `read`, `hidden`)
 - Aktualizacja dostępności w Legimi (boolean lub null)
 - Automatyczna aktualizacja `status_updated_at` przy zmianie statusu (trigger bazy danych)
@@ -13,9 +15,11 @@ Endpoint służy do aktualizacji statusu i/lub dostępności w Legimi dla pojedy
 - Weryfikacja, że dzieło jest przypisane do użytkownika (404 jeśli nie)
 
 ### POST /api/user/works/status-bulk
+
 Endpoint służy do masowej aktualizacji statusu i/lub dostępności w Legimi dla wielu dzieł przypisanych do profilu zalogowanego użytkownika w jednej operacji. Endpoint aktualizuje wiele rekordów w tabeli `user_works` jednocześnie.
 
 **Główne funkcjonalności:**
+
 - Masowa aktualizacja statusu dla wielu dzieł jednocześnie
 - Masowa aktualizacja dostępności w Legimi dla wielu dzieł jednocześnie
 - Automatyczna aktualizacja `status_updated_at` przy zmianie statusu (trigger bazy danych)
@@ -24,6 +28,7 @@ Endpoint służy do masowej aktualizacji statusu i/lub dostępności w Legimi dl
 - Zwracanie listy zaktualizowanych dzieł z pełnymi danymi
 
 **Wykorzystywane zasoby bazy danych:**
+
 - Tabela `user_works` (relacja użytkownik-dzieło, composite PK: user_id, work_id)
 - Tabela `works` (katalog dzieł, dołączany w odpowiedzi)
 - Tabela `editions` (edycje dzieł, dołączane w odpowiedzi dla primary_edition)
@@ -41,13 +46,16 @@ Endpoint służy do masowej aktualizacji statusu i/lub dostępności w Legimi dl
 **Struktura URL:** `/api/user/works/{workId}`
 
 **Path Parameters:**
+
 - `workId` (wymagany): UUID dzieła w standardowym formacie (np. "550e8400-e29b-41d4-a716-446655440000")
 
 **Nagłówki:**
+
 - `Content-Type: application/json` (wymagany)
 - `Authorization: Bearer <access_token>` lub sesja cookie (wymagany)
 
 **Request Body:**
+
 ```json
 {
   "status"?: "to_read" | "in_progress" | "read" | "hidden",
@@ -56,10 +64,12 @@ Endpoint służy do masowej aktualizacji statusu i/lub dostępności w Legimi dl
 ```
 
 **Parametry body:**
+
 - `status` (opcjonalny): Nowy status dzieła. Musi być jednym z wartości enum: `to_read`, `in_progress`, `read`, `hidden`. Jeśli nie podano, status nie jest aktualizowany.
 - `available_in_legimi` (opcjonalny): Dostępność dzieła w Legimi. Może być `true`, `false` lub `null`. Jeśli nie podano, wartość nie jest aktualizowana.
 
 **Uwagi:**
+
 - Co najmniej jeden z parametrów (`status` lub `available_in_legimi`) musi być podany w body.
 - Jeśli podano tylko `status`, aktualizowany jest tylko status.
 - Jeśli podano tylko `available_in_legimi`, aktualizowana jest tylko dostępność.
@@ -72,10 +82,12 @@ Endpoint służy do masowej aktualizacji statusu i/lub dostępności w Legimi dl
 **Struktura URL:** `/api/user/works/status-bulk`
 
 **Nagłówki:**
+
 - `Content-Type: application/json` (wymagany)
 - `Authorization: Bearer <access_token>` lub sesja cookie (wymagany)
 
 **Request Body:**
+
 ```json
 {
   "work_ids": ["uuid1", "uuid2", ...],
@@ -85,11 +97,13 @@ Endpoint służy do masowej aktualizacji statusu i/lub dostępności w Legimi dl
 ```
 
 **Parametry body:**
+
 - `work_ids` (wymagany): Tablica UUID dzieł do aktualizacji. Musi zawierać co najmniej 1 element i maksymalnie 100 elementów. Duplikaty są automatycznie usuwane podczas walidacji.
 - `status` (opcjonalny): Nowy status dla wszystkich dzieł w tablicy. Musi być jednym z wartości enum: `to_read`, `in_progress`, `read`, `hidden`. Jeśli nie podano, status nie jest aktualizowany.
 - `available_in_legimi` (opcjonalny): Dostępność w Legimi dla wszystkich dzieł w tablicy. Może być `true`, `false` lub `null`. Jeśli nie podano, wartość nie jest aktualizowana.
 
 **Uwagi:**
+
 - Co najmniej jeden z parametrów (`status` lub `available_in_legimi`) musi być podany w body.
 - Wszystkie dzieła w tablicy `work_ids` otrzymują te same wartości `status` i `available_in_legimi`.
 - Dzieła, które nie są przypisane do użytkownika, są pomijane (nie powodują błędu).
@@ -100,6 +114,7 @@ Endpoint służy do masowej aktualizacji statusu i/lub dostępności w Legimi dl
 ### DTOs (Data Transfer Objects)
 
 **UpdateUserWorkCommand** (już istnieje w `src/types.ts`):
+
 ```typescript
 interface UpdateUserWorkCommand {
   status?: UserWorkStatus;
@@ -108,6 +123,7 @@ interface UpdateUserWorkCommand {
 ```
 
 **UpdateUserWorksBulkCommand** (już istnieje w `src/types.ts`):
+
 ```typescript
 type UpdateUserWorksBulkCommand = UpdateUserWorkCommand & {
   work_ids: WorkRow["id"][];
@@ -115,6 +131,7 @@ type UpdateUserWorksBulkCommand = UpdateUserWorkCommand & {
 ```
 
 **UserWorkResponseDto** (już istnieje w `src/types.ts`):
+
 ```typescript
 interface UserWorkResponseDto {
   work: UserWorkItemDto;
@@ -122,6 +139,7 @@ interface UserWorkResponseDto {
 ```
 
 **UserWorksBulkUpdateResponseDto** (już istnieje w `src/types.ts`):
+
 ```typescript
 interface UserWorksBulkUpdateResponseDto {
   works: UserWorkItemDto[];
@@ -129,6 +147,7 @@ interface UserWorksBulkUpdateResponseDto {
 ```
 
 **UserWorkItemDto** (już istnieje w `src/types.ts`):
+
 ```typescript
 interface UserWorkItemDto {
   work: WorkWithPrimaryEditionDto;
@@ -143,18 +162,21 @@ interface UserWorkItemDto {
 ### Schematy walidacji (do utworzenia)
 
 **UpdateUserWorkCommandSchema** (`src/lib/validation/update-user-work.schema.ts`):
+
 - Walidacja UUID dla `workId` w path parameter
 - Walidacja body: co najmniej jeden z `status` lub `available_in_legimi` musi być podany
 - Walidacja `status`: enum `["to_read", "in_progress", "read", "hidden"]`
 - Walidacja `available_in_legimi`: `boolean | null`
 
 **UpdateUserWorksBulkCommandSchema** (`src/lib/validation/update-user-works-bulk.schema.ts`):
+
 - Walidacja `work_ids`: tablica UUID, min 1 element, max 100 elementów, deduplikacja
 - Walidacja: co najmniej jeden z `status` lub `available_in_legimi` musi być podany
 - Walidacja `status`: enum `["to_read", "in_progress", "read", "hidden"]`
 - Walidacja `available_in_legimi`: `boolean | null`
 
 **WorkIdParamSchema** (możliwe, że już istnieje w `src/lib/validation/work-id.schema.ts`):
+
 - Walidacja UUID dla `workId` w path parameter
 
 ## 4. Szczegóły odpowiedzi
@@ -162,6 +184,7 @@ interface UserWorkItemDto {
 ### PATCH /api/user/works/{workId}
 
 **Sukces (200 OK):**
+
 ```json
 {
   "work": {
@@ -197,6 +220,7 @@ interface UserWorkItemDto {
 ```
 
 **Błędy:**
+
 - `400 Bad Request`: Błąd walidacji (nieprawidłowy UUID, nieprawidłowy enum status, brak wymaganych pól w body)
 - `401 Unauthorized`: Brak autoryzacji (niezalogowany użytkownik)
 - `404 Not Found`: Dzieło nie jest przypisane do użytkownika lub nie istnieje
@@ -205,6 +229,7 @@ interface UserWorkItemDto {
 ### POST /api/user/works/status-bulk
 
 **Sukces (200 OK):**
+
 ```json
 {
   "works": [
@@ -245,6 +270,7 @@ interface UserWorkItemDto {
 **Uwaga:** Tablica `works` zawiera tylko dzieła, które zostały pomyślnie zaktualizowane (były przypisane do użytkownika). Dzieła, które nie były przypisane, są pomijane bez zwracania błędu.
 
 **Błędy:**
+
 - `400 Bad Request`: Błąd walidacji (pusta tablica work_ids, nieprawidłowe UUID, nieprawidłowy enum status, brak wymaganych pól w body, przekroczony limit 100 elementów)
 - `401 Unauthorized`: Brak autoryzacji (niezalogowany użytkownik)
 - `500 Internal Server Error`: Nieoczekiwany błąd serwera
@@ -279,12 +305,14 @@ interface UserWorkItemDto {
 ## 6. Względy bezpieczeństwa
 
 ### Autoryzacja i uwierzytelnianie
+
 - **Wymagana autoryzacja**: Oba endpointy wymagają zalogowanego użytkownika (Supabase Auth)
 - **Weryfikacja sesji**: Middleware Astro weryfikuje sesję użytkownika przed przetworzeniem żądania
 - **RLS (Row Level Security)**: Polityki RLS w bazie danych zapewniają, że użytkownik może aktualizować tylko swoje własne rekordy w tabeli `user_works`
 - **Izolacja danych**: Użytkownik może aktualizować tylko dzieła przypisane do jego profilu (composite PK: user_id, work_id)
 
 ### Walidacja danych wejściowych
+
 - **UUID validation**: Wszystkie identyfikatory UUID są walidowane przed użyciem (path parameter i body)
 - **Enum validation**: Status jest walidowany jako enum z dozwolonymi wartościami
 - **Type validation**: `available_in_legimi` jest walidowane jako `boolean | null`
@@ -292,12 +320,14 @@ interface UserWorkItemDto {
 - **Required fields**: Co najmniej jeden z parametrów (`status` lub `available_in_legimi`) musi być podany w body
 
 ### Ochrona przed atakami
+
 - **SQL Injection**: Używanie Supabase Client zapewnia parametryzowane zapytania
 - **Mass assignment**: Walidacja schematów Zod zapobiega nieoczekiwanym polom w body
 - **Rate limiting**: Rozważenie dodania rate limitingu dla bulk endpoint (np. maksymalnie 10 żądań na minutę na użytkownika)
 - **Input sanitization**: UUID są walidowane przed użyciem w zapytaniach
 
 ### Bezpieczeństwo bazy danych
+
 - **RLS policies**: Polityki RLS zapewniają, że użytkownik może aktualizować tylko swoje własne rekordy
 - **Trigger security**: Trigger `user_works_set_updated_at` działa jako `SECURITY DEFINER`, ale aktualizuje tylko pola `updated_at` i `status_updated_at` (nie modyfikuje innych danych)
 - **Transaction safety**: W przypadku bulk update, wszystkie aktualizacje są wykonywane w jednej operacji (Supabase automatycznie zarządza transakcjami)
@@ -307,6 +337,7 @@ interface UserWorkItemDto {
 ### PATCH /api/user/works/{workId}
 
 **400 Bad Request - Błąd walidacji:**
+
 - Nieprawidłowy format UUID w path parameter `workId`
 - Brak wymaganych pól w body (brak zarówno `status`, jak i `available_in_legimi`)
 - Nieprawidłowa wartość enum dla `status` (nie jest jedną z dozwolonych wartości)
@@ -314,15 +345,18 @@ interface UserWorkItemDto {
 - Nieoczekiwane pola w body (strict validation)
 
 **401 Unauthorized:**
+
 - Brak tokena autoryzacyjnego lub nieprawidłowa sesja
 - Wygaśnięta sesja użytkownika
 - Nieprawidłowy token autoryzacyjny
 
 **404 Not Found:**
+
 - Dzieło o podanym `workId` nie jest przypisane do użytkownika (nie istnieje rekord w `user_works` dla tego użytkownika i dzieła)
 - Dzieło o podanym `workId` nie istnieje w bazie danych (nie jest widoczne przez RLS)
 
 **500 Internal Server Error:**
+
 - Błąd bazy danych podczas aktualizacji rekordu
 - Błąd podczas pobierania zaktualizowanych danych
 - Nieoczekiwany błąd w kodzie
@@ -330,6 +364,7 @@ interface UserWorkItemDto {
 ### POST /api/user/works/status-bulk
 
 **400 Bad Request - Błąd walidacji:**
+
 - Pusta tablica `work_ids` (min 1 element)
 - Przekroczony limit rozmiaru tablicy `work_ids` (max 100 elementów)
 - Nieprawidłowe UUID w tablicy `work_ids`
@@ -339,11 +374,13 @@ interface UserWorkItemDto {
 - Nieoczekiwane pola w body (strict validation)
 
 **401 Unauthorized:**
+
 - Brak tokena autoryzacyjnego lub nieprawidłowa sesja
 - Wygaśnięta sesja użytkownika
 - Nieprawidłowy token autoryzacyjny
 
 **500 Internal Server Error:**
+
 - Błąd bazy danych podczas masowej aktualizacji rekordów
 - Błąd podczas pobierania zaktualizowanych danych
 - Nieoczekiwany błąd w kodzie
@@ -351,6 +388,7 @@ interface UserWorkItemDto {
 **Uwaga:** W przypadku bulk endpoint, dzieła, które nie są przypisane do użytkownika, nie powodują błędu 404. Są po prostu pomijane, a odpowiedź zawiera tylko dzieła, które zostały pomyślnie zaktualizowane.
 
 ### Logowanie błędów
+
 - Wszystkie błędy są logowane przez `logger` z odpowiednimi kontekstami (userId, workId, error message, stack trace)
 - Błędy walidacji są logowane na poziomie `warn`
 - Błędy bazy danych i nieoczekiwane błędy są logowane na poziomie `error`
@@ -361,29 +399,34 @@ interface UserWorkItemDto {
 ### PATCH /api/user/works/{workId}
 
 **Optymalizacje:**
+
 - **Indeksy bazy danych**: Indeks `user_works(user_id, work_id)` zapewnia szybkie wyszukiwanie rekordu do aktualizacji
 - **Pojedyncze zapytanie UPDATE**: Aktualizacja rekordu w `user_works` jest wykonywana w jednym zapytaniu
 - **Efektywne pobieranie danych**: Po aktualizacji, dane są pobierane z użyciem JOIN lub RPC, aby zminimalizować liczbę zapytań
 - **Trigger performance**: Trigger `user_works_set_updated_at` jest zoptymalizowany i wykonuje się szybko
 
 **Potencjalne wąskie gardła:**
+
 - **RLS policy evaluation**: Polityki RLS są oceniane dla każdego zapytania, ale są zoptymalizowane przez Supabase
 - **JOIN z works i editions**: Pobieranie danych dzieła i primary edition wymaga JOIN, ale jest to niezbędne dla pełnej odpowiedzi
 
 ### POST /api/user/works/status-bulk
 
 **Optymalizacje:**
+
 - **Batch update**: Masowa aktualizacja wielu rekordów w jednym zapytaniu UPDATE z klauzulą WHERE IN
 - **Deduplikacja work_ids**: Duplikaty są usuwane przed walidacją, aby uniknąć niepotrzebnych aktualizacji
 - **Filtrowanie przypisanych dzieł**: Tylko dzieła przypisane do użytkownika są aktualizowane (filtrowanie przez RLS)
 - **Efektywne pobieranie danych**: Po aktualizacji, dane są pobierane z użyciem RPC lub batch query z JOIN
 
 **Potencjalne wąskie gardła:**
+
 - **Rozmiar batch**: Duże tablice `work_ids` (do 100 elementów) mogą wymagać więcej czasu na przetworzenie
 - **RLS policy evaluation**: Polityki RLS są oceniane dla każdego rekordu w batch update
 - **Trigger execution**: Trigger `user_works_set_updated_at` jest wykonywany dla każdego zaktualizowanego rekordu
 
 **Rekomendacje:**
+
 - Rozważyć dodanie rate limitingu dla bulk endpoint (np. maksymalnie 10 żądań na minutę na użytkownika)
 - Monitorować czas wykonania dla dużych batch updates
 - Rozważyć użycie RPC function w bazie danych dla bulk update, jeśli wydajność stanie się problemem
@@ -391,6 +434,7 @@ interface UserWorkItemDto {
 ## 9. Etapy wdrożenia
 
 ### Krok 1: Utworzenie schematów walidacji
+
 1. Utworzenie pliku `src/lib/validation/update-user-work.schema.ts` z schematem `UpdateUserWorkCommandSchema`
    - Walidacja: co najmniej jeden z `status` lub `available_in_legimi` musi być podany
    - Walidacja `status`: enum z dozwolonymi wartościami
@@ -402,6 +446,7 @@ interface UserWorkItemDto {
 3. Sprawdzenie, czy istnieje `src/lib/validation/work-id.schema.ts` z `WorkIdParamSchema` - jeśli nie, utworzenie go
 
 ### Krok 2: Rozszerzenie WorksService
+
 1. Dodanie metody `updateUserWork` w `WorksService`:
    - Parametry: `userId`, `workId`, `data: UpdateUserWorkCommand`
    - Weryfikacja, czy dzieło jest przypisane do użytkownika (sprawdzenie w `user_works`)
@@ -418,6 +463,7 @@ interface UserWorkItemDto {
    - Obsługa błędów RLS i bazy danych
 
 ### Krok 3: Implementacja endpointu PATCH /api/user/works/{workId}
+
 1. Utworzenie pliku `src/pages/api/user/works/[workId].ts`
 2. Implementacja handlera `PATCH`:
    - Weryfikacja autoryzacji (Supabase Auth)
@@ -431,6 +477,7 @@ interface UserWorkItemDto {
 4. Dodanie `export const prerender = false`
 
 ### Krok 4: Implementacja endpointu POST /api/user/works/status-bulk
+
 1. Utworzenie pliku `src/pages/api/user/works/status-bulk.ts`
 2. Implementacja handlera `POST`:
    - Weryfikacja autoryzacji (Supabase Auth)
@@ -443,6 +490,7 @@ interface UserWorkItemDto {
 4. Dodanie `export const prerender = false`
 
 ### Krok 5: Testowanie i walidacja
+
 1. Testowanie endpointu PATCH:
    - Test sukcesu: aktualizacja statusu
    - Test sukcesu: aktualizacja available_in_legimi
@@ -467,9 +515,9 @@ interface UserWorkItemDto {
    - Monitorowanie czasu wykonania
 
 ### Krok 6: Dokumentacja i czyszczenie
+
 1. Aktualizacja dokumentacji API (jeśli istnieje)
 2. Sprawdzenie, czy wszystkie typy są poprawnie eksportowane z `src/types.ts`
 3. Sprawdzenie linter errors i ich naprawa
 4. Weryfikacja zgodności z zasadami kodowania projektu
 5. Code review i refaktoryzacja (jeśli potrzebna)
-

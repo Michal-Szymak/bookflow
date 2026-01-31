@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: POST /api/works/{workId}/primary-edition
 
 ## 1. Przeglad punktu koncowego
+
 Endpoint sluzy do ustawienia lub zmiany glownego wydania (primary edition) dla wskazanej pracy (work). Operacja aktualizuje `works.primary_edition_id` poprzez RPC `set_primary_edition` i zwraca zaktualizowany obiekt pracy wraz z podsumowaniem primary edition.
 
 ## 2. Szczegoly zapytania
+
 - Metoda HTTP: `POST`
 - Struktura URL: `/api/works/{workId}/primary-edition`
 - Parametry:
@@ -18,6 +20,7 @@ Endpoint sluzy do ustawienia lub zmiany glownego wydania (primary edition) dla w
   - Sesja uzytkownika (Supabase) z `locals.supabase`
 
 ## 3. Wykorzystywane typy
+
 - DTO:
   - `WorkResponseDto`
   - `WorkWithPrimaryEditionDto`
@@ -29,6 +32,7 @@ Endpoint sluzy do ustawienia lub zmiany glownego wydania (primary edition) dla w
   - Nowy schemat walidacji `SetPrimaryEditionSchema` dla body
 
 ## 4. Szczegoly odpowiedzi
+
 - `200 OK`: `WorkResponseDto` z aktualnym stanem pracy i primary edition
 - `400 Bad Request`: bledny format UUID, nieprawidlowy JSON lub `edition_id` niezgodne z `workId`
 - `401 Unauthorized`: brak aktywnej sesji
@@ -36,6 +40,7 @@ Endpoint sluzy do ustawienia lub zmiany glownego wydania (primary edition) dla w
 - `500 Internal Server Error`: nieoczekiwany blad serwera lub bazy danych
 
 ## 5. Przeplyw danych
+
 1. Walidacja `workId` w parametrach sciezki (Zod, UUID).
 2. Weryfikacja sesji uzytkownika przez `locals.supabase.auth.getUser()`.
 3. Parsowanie JSON body z obsluga bledow skladni.
@@ -47,12 +52,14 @@ Endpoint sluzy do ustawienia lub zmiany glownego wydania (primary edition) dla w
 9. Zwrocenie `WorkResponseDto` z kodem `200`.
 
 ## 6. Wzgledy bezpieczenstwa
+
 - Wymagaj uwierzytelnienia (sesja Supabase); w przypadku braku zwroc `401`.
 - RPC `set_primary_edition` dziala jako `SECURITY DEFINER`, dlatego przed wywolaniem nalezy zweryfikowac widocznosc pracy i wydania w kontekscie uzytkownika (RLS), aby uniknac nieautoryzowanej modyfikacji danych.
 - Waliduj UUID-y wejsciowe i odrzuc nieprawidlowe dane (`400`).
 - Upewnij sie, ze `edition_id` nalezy do wskazanego `workId`, w przeciwnym razie zwroc `400`.
 
 ## 7. Obsluga bledow
+
 - `400`:
   - brak `workId` w path
   - niepoprawny UUID w path lub body
@@ -70,11 +77,13 @@ Endpoint sluzy do ustawienia lub zmiany glownego wydania (primary edition) dla w
   - brak tabeli bledow w schemacie DB; rejestrowanie odbywa sie przez `logger`
 
 ## 8. Wydajnosc
+
 - Ogranicz liczbe zapytan: minimalnie 1 sprawdzenie pracy, 1 sprawdzenie wydania, 1 RPC, 1 odczyt pracy z primary edition.
 - Uzywaj selekcji tylko potrzebnych kolumn w zapytaniach (`select` z lista pol).
 - Unikaj dodatkowych pobran, gdy wczesna walidacja juz wykryje blad.
 
 ## 9. Kroki implementacji
+
 1. Dodaj walidacje `workId` w `src/lib/validation/work-id.schema.ts` (Zod UUID).
 2. Dodaj walidacje body w `src/lib/validation/set-primary-edition.schema.ts` (Zod z `edition_id`).
 3. Rozszerz `WorksService` o metody pomocnicze do weryfikacji istnienia pracy i wydania z poszanowaniem RLS lub utworz `EditionsService`.

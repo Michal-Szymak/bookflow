@@ -5,6 +5,7 @@
 Endpoint `GET /api/user/authors` służy do pobierania listy autorów przypisanych do profilu zalogowanego użytkownika. Endpoint obsługuje wyszukiwanie po nazwie autora, paginację oraz sortowanie wyników. Jest to endpoint wymagający autoryzacji - tylko zalogowany użytkownik może przeglądać swoich przypisanych autorów.
 
 **Główne funkcjonalności:**
+
 - Listowanie autorów przypisanych do użytkownika z tabeli `user_authors`
 - Wyszukiwanie autorów po nazwie (case-insensitive, zawiera)
 - Paginacja wyników (domyślnie strona 1)
@@ -12,6 +13,7 @@ Endpoint `GET /api/user/authors` służy do pobierania listy autorów przypisany
 - Zwracanie całkowitej liczby przypisanych autorów
 
 **Wykorzystywane zasoby bazy danych:**
+
 - Tabela `user_authors` (relacja użytkownik-autor)
 - Tabela `authors` (dane autorów)
 - Indeksy: `user_authors(user_id)` oraz `authors(name/title idx)`
@@ -84,6 +86,7 @@ Należy utworzyć nowy schemat walidacji w `src/lib/validation/user-authors-list
 ### Sukces (200 OK)
 
 **Struktura odpowiedzi:**
+
 ```json
 {
   "items": [
@@ -107,10 +110,12 @@ Należy utworzyć nowy schemat walidacji w `src/lib/validation/user-authors-list
 ```
 
 **Opis pól:**
+
 - `items`: Tablica autorów przypisanych do użytkownika (zgodnie z paginacją)
 - `total`: Całkowita liczba autorów przypisanych do użytkownika (niezależnie od paginacji)
 
 **Przykładowa odpowiedź:**
+
 ```json
 {
   "items": [
@@ -136,6 +141,7 @@ Należy utworzyć nowy schemat walidacji w `src/lib/validation/user-authors-list
 ### Błędy
 
 **400 Bad Request** - Błąd walidacji parametrów zapytania
+
 ```json
 {
   "error": "Validation error",
@@ -145,6 +151,7 @@ Należy utworzyć nowy schemat walidacji w `src/lib/validation/user-authors-list
 ```
 
 **401 Unauthorized** - Brak autoryzacji lub nieprawidłowy token
+
 ```json
 {
   "error": "Unauthorized",
@@ -153,6 +160,7 @@ Należy utworzyć nowy schemat walidacji w `src/lib/validation/user-authors-list
 ```
 
 **500 Internal Server Error** - Błąd serwera
+
 ```json
 {
   "error": "Internal server error",
@@ -163,20 +171,24 @@ Należy utworzyć nowy schemat walidacji w `src/lib/validation/user-authors-list
 ## 5. Przepływ danych
 
 ### Krok 1: Walidacja autoryzacji
+
 - Middleware (`src/middleware/index.ts`) ekstraktuje token z nagłówka `Authorization`
 - Tworzy klienta Supabase z tokenem użytkownika
 - Jeśli token jest nieprawidłowy lub brakuje, Supabase RLS automatycznie zablokuje dostęp
 
 ### Krok 2: Ekstrakcja i walidacja parametrów zapytania
+
 - Parsowanie parametrów z URL (`page`, `search`, `sort`)
 - Walidacja przy użyciu `UserAuthorsListQuerySchema` (Zod)
 - Ustawienie wartości domyślnych: `page = 1`, `sort = "name_asc"`
 
 ### Krok 3: Pobranie ID użytkownika
+
 - Z tokena autoryzacyjnego (przez Supabase client) lub z sesji
 - Weryfikacja, że użytkownik jest zalogowany
 
 ### Krok 4: Zapytanie do bazy danych
+
 - Wywołanie metody serwisu do pobrania autorów użytkownika
 - Zapytanie wykorzystuje:
   - JOIN między `user_authors` a `authors` na `author_id`
@@ -187,34 +199,40 @@ Należy utworzyć nowy schemat walidacji w `src/lib/validation/user-authors-list
   - Liczenie całkowitej liczby wyników (COUNT)
 
 ### Krok 5: Mapowanie wyników
+
 - Mapowanie wyników z bazy na `UserAuthorDto[]`
 - Każdy element zawiera pełne dane autora (`AuthorDto`) oraz `created_at` z `user_authors`
 
 ### Krok 6: Zwrócenie odpowiedzi
+
 - Konstrukcja `UserAuthorsListResponseDto` z `items` i `total`
 - Zwrócenie odpowiedzi JSON z kodem 200
 
 ### Diagram przepływu:
+
 ```
-Request → Middleware (auth) → Extract Query Params → Validate (Zod) 
-→ Get User ID → Service Query (JOIN user_authors + authors) 
+Request → Middleware (auth) → Extract Query Params → Validate (Zod)
+→ Get User ID → Service Query (JOIN user_authors + authors)
 → Map to DTOs → Return Response (200)
 ```
 
 ## 6. Względy bezpieczeństwa
 
 ### Autoryzacja
+
 - **Wymagana**: Endpoint wymaga zalogowanego użytkownika
 - **Mechanizm**: Bearer token w nagłówku `Authorization`
 - **Weryfikacja**: Supabase RLS (Row Level Security) automatycznie filtruje wyniki do autorów przypisanych do zalogowanego użytkownika
 - **Brak autoryzacji**: Zwraca 401 Unauthorized
 
 ### Autoryzacja danych
+
 - RLS w Supabase zapewnia, że użytkownik widzi tylko swoich autorów z tabeli `user_authors`
 - Zapytanie używa `user_id` z sesji/tokena, nie z parametrów zapytania
 - Brak możliwości dostępu do autorów innych użytkowników
 
 ### Walidacja danych wejściowych
+
 - Wszystkie parametry zapytania są walidowane przez Zod
 - `page`: minimalna wartość 1, tylko liczby całkowite
 - `search`: maksymalna długość 200 znaków, trimowanie białych znaków
@@ -222,10 +240,12 @@ Request → Middleware (auth) → Extract Query Params → Validate (Zod)
 - Ochrona przed SQL injection przez parametryzowane zapytania Supabase
 
 ### Rate limiting
+
 - Endpoint nie ma specjalnych limitów rate (w przeciwieństwie do POST /api/user/authors)
 - Ogólne limity API mogą być zastosowane na poziomie infrastruktury
 
 ### Logowanie
+
 - Logowanie błędów walidacji (warn level)
 - Logowanie błędów bazy danych (error level)
 - Logowanie nieoczekiwanych błędów (error level)
@@ -262,10 +282,12 @@ Request → Middleware (auth) → Extract Query Params → Validate (Zod)
    - **Odpowiedź**: `500 Internal Server Error` z ogólnym komunikatem
 
 ### Pusta lista wyników
+
 - **Scenariusz**: Użytkownik nie ma przypisanych autorów lub wyszukiwanie nie zwróciło wyników
 - **Obsługa**: To nie jest błąd - zwracamy `200 OK` z pustą tablicą `items: []` i `total: 0`
 
 ### Strategia obsługi błędów
+
 - Używanie early returns dla warunków błędów
 - Szczegółowe logowanie błędów dla debugowania
 - Ogólne komunikaty błędów dla użytkownika końcowego (bez szczegółów technicznych)
@@ -274,18 +296,21 @@ Request → Middleware (auth) → Extract Query Params → Validate (Zod)
 ## 8. Rozważania dotyczące wydajności
 
 ### Indeksy bazy danych
+
 - **Wykorzystywane indeksy**:
   - `user_authors(user_id)` - szybkie filtrowanie po użytkowniku
   - `authors(name/title idx)` - efektywne wyszukiwanie po nazwie
 - **Optymalizacja**: Zapytanie powinno wykorzystywać oba indeksy dla maksymalnej wydajności
 
 ### Zapytanie SQL
+
 - JOIN między `user_authors` i `authors` jest wydajny dzięki indeksom
 - Filtrowanie po `user_id` jest pierwszym filtrem (najbardziej selektywny)
 - Wyszukiwanie po `name` używa ILIKE z indeksem (jeśli dostępny)
 - Paginacja ogranicza liczbę zwracanych wierszy
 
 ### Potencjalne wąskie gardła
+
 1. **Duża liczba autorów użytkownika**
    - **Rozwiązanie**: Paginacja ogranicza wyniki do rozsądnej liczby (np. 20-50 na stronę)
    - COUNT może być kosztowny dla dużych zbiorów - rozważyć przybliżone zliczanie
@@ -299,6 +324,7 @@ Request → Middleware (auth) → Extract Query Params → Validate (Zod)
    - Cache na poziomie aplikacji nie jest zalecany ze względu na personalizację
 
 ### Rekomendacje optymalizacji
+
 - Użyć `LIMIT` i `OFFSET` dla paginacji (lub cursor-based pagination dla bardzo dużych zbiorów)
 - Rozważyć materialized view dla często używanych zapytań (jeśli potrzeba)
 - Monitorować czas wykonania zapytań w produkcji
@@ -307,6 +333,7 @@ Request → Middleware (auth) → Extract Query Params → Validate (Zod)
 ## 9. Etapy wdrożenia
 
 ### Krok 1: Utworzenie schematu walidacji
+
 - Utworzyć plik `src/lib/validation/user-authors-list.schema.ts`
 - Zdefiniować `UserAuthorsListQuerySchema` używając Zod
 - Zaimplementować preprocess dla `page` (konwersja string → number)
@@ -315,6 +342,7 @@ Request → Middleware (auth) → Extract Query Params → Validate (Zod)
 - Wyeksportować typ `UserAuthorsListQueryValidated` z inferencji Zod
 
 ### Krok 2: Rozszerzenie AuthorsService
+
 - Otworzyć `src/lib/services/authors.service.ts`
 - Dodać nową metodę `findUserAuthors(userId: string, page: number, search?: string, sort?: "name_asc" | "created_desc"): Promise<{ items: UserAuthorDto[], total: number }>`
 - Zaimplementować zapytanie Supabase:
@@ -328,6 +356,7 @@ Request → Middleware (auth) → Extract Query Params → Validate (Zod)
 - Obsługa błędów z odpowiednimi komunikatami
 
 ### Krok 3: Utworzenie endpointu API
+
 - Utworzyć plik `src/pages/api/user/authors/index.ts`
 - Dodać `export const prerender = false`
 - Zaimplementować handler `GET: APIRoute`
@@ -343,12 +372,14 @@ Request → Middleware (auth) → Extract Query Params → Validate (Zod)
   - Zwrócić odpowiedź 200 z JSON
 
 ### Krok 4: Obsługa błędów i logowanie
+
 - Dodać logowanie błędów walidacji (logger.warn)
 - Dodać logowanie błędów bazy danych (logger.error)
 - Dodać globalny try-catch dla nieoczekiwanych błędów
 - Upewnić się, że komunikaty błędów są przyjazne dla użytkownika
 
 ### Krok 5: Testowanie
+
 Przygotować testy manualne według poniższych punktów. Opisać w pliku .ai/api/api-user-authors-get-manual-tests.md i przeprowadzić (zapytać o zgodę)
 
 - Przetestować endpoint z różnymi kombinacjami parametrów:
@@ -371,6 +402,7 @@ Przygotować testy manualne według poniższych punktów. Opisać w pliku .ai/ap
   - Duża liczba autorów (paginacja)
 
 ### Krok 6: Dokumentacja i cleanup
+
 - Sprawdzić, czy kod jest zgodny z linterem
 - Upewnić się, że wszystkie typy są poprawnie zaimportowane
 - Zweryfikować zgodność z zasadami projektu (early returns, guard clauses)

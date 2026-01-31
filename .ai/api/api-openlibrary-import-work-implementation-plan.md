@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: POST /api/openlibrary/import/work
 
 ## 1. Przegląd punktu końcowego
+
 Endpoint importuje lub odświeża dane utworu (work) z OpenLibrary i dołącza go do wskazanego autora. Operacje zapisu w katalogu globalnym muszą przejść przez RPC SECURITY DEFINER, aby obejść ograniczenia RLS dla rekordów OpenLibrary (owner_user_id = null). Odpowiedź zwraca `WorkResponseDto` z utworem i podsumowaniem primary edition.
 
 ## 2. Szczegóły żądania
+
 - Metoda HTTP: `POST`
 - URL: `/api/openlibrary/import/work`
 - Nagłówki: `Content-Type: application/json`
@@ -19,6 +21,7 @@ Endpoint importuje lub odświeża dane utworu (work) z OpenLibrary i dołącza g
   - `AuthorRow["id"]`, `WorkRow["openlibrary_id"]` (walidacja typów)
 
 ## 3. Szczegóły odpowiedzi
+
 - 200 OK:
   - `WorkResponseDto` z `work: WorkWithPrimaryEditionDto`
   - `primary_edition` może być `null`, jeśli OL nie zwrócił edycji lub nie udało się jej zmapować
@@ -35,6 +38,7 @@ Endpoint importuje lub odświeża dane utworu (work) z OpenLibrary i dołącza g
   - błąd RPC, błąd bazy lub nieobsłużony wyjątek
 
 ## 4. Przepływ danych
+
 1. Parsowanie JSON i wstępna walidacja struktury body.
 2. Walidacja Zod:
    - `openlibrary_id` trimmed, format krótki, długość <= 25.
@@ -59,6 +63,7 @@ Endpoint importuje lub odświeża dane utworu (work) z OpenLibrary i dołącza g
 9. Zwrócenie `200` z `WorkResponseDto`.
 
 ## 5. Względy bezpieczeństwa
+
 - Korzystać z `locals.supabase` (kontekst użytkownika) zgodnie z zasadami.
 - Zapisy do tabel globalnych (`works`, `author_works`, `editions`) wykonywać wyłącznie przez RPC SECURITY DEFINER.
 - Maskować informacje o istnieniu zasobów przez zwracanie `404` gdy autor nie jest widoczny (RLS).
@@ -66,6 +71,7 @@ Endpoint importuje lub odświeża dane utworu (work) z OpenLibrary i dołącza g
 - Ograniczyć logowanie danych wrażliwych; logować jedynie identyfikatory i typ błędu.
 
 ## 6. Obsługa błędów
+
 - 400:
   - `request.json()` niepoprawny
   - walidacja Zod niepowodzenie (zwrócić pierwszy błąd + `details`)
@@ -82,11 +88,13 @@ Endpoint importuje lub odświeża dane utworu (work) z OpenLibrary i dołącza g
   - brak dedykowanej tabeli błędów w schemacie; stosować `logger.warn/error` z kontekstem (endpoint, openlibrary_id, author_id).
 
 ## 7. Wydajność
+
 - Preferować pojedynczy RPC (jeśli dostępny) do upsert + link + set primary edition.
 - Minimalizować liczbę zapytań do OL i DB (uniknąć dodatkowych SELECT, jeśli RPC zwraca `work_id`).
 - Dodać krótkoterminowy cache w pamięci procesu tylko jeśli OL jest wąskim gardłem (opcjonalne).
 
 ## 8. Kroki implementacji
+
 1. Dodać schema walidacji `ImportWorkSchema` w `src/lib/validation/import-work.schema.ts` analogicznie do `ImportAuthorSchema`.
 2. Rozszerzyć `OpenLibraryService` o metody pobierania danych work i opcjonalnie primary edition (z obsługą timeout i walidacją odpowiedzi).
 3. Rozszerzyć `WorksService` o metody wywołań RPC: `upsertWorkFromOpenLibrary`, `linkAuthorWork`, `setPrimaryEdition` (lub jedna metoda agregująca).

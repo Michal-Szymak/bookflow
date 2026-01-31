@@ -3,10 +3,12 @@
 ## 1. Przegląd punktu końcowego
 
 Endpoint `DELETE /api/authors/{authorId}` umożliwia usunięcie manualnego autora należącego do zalogowanego użytkownika. Operacja jest dozwolona wyłącznie dla autorów, które:
+
 - Mają ustawione `manual=true`
 - Mają `owner_user_id` równe ID zalogowanego użytkownika (`auth.uid()`)
 
 Usunięcie autora powoduje kaskadowe usunięcie powiązanych rekordów:
+
 - Wszystkie powiązania w tabeli `author_works` (relacje autor-dzieło)
 - Wszystkie powiązania w tabeli `user_authors` (relacje użytkownik-autor)
 - Wszystkie powiązane dzieła (`works`) należące do tego autora (jeśli są manualne i należą do tego samego użytkownika)
@@ -55,6 +57,7 @@ Endpoint nie zwraca żadnych danych w przypadku sukcesu (204 No Content). W przy
 Usunięcie autora zakończyło się pomyślnie. Odpowiedź nie zawiera body.
 
 **Nagłówki:**
+
 - `Content-Length: 0` (lub brak nagłówka Content-Length)
 
 ### 400 Bad Request (Błąd walidacji)
@@ -88,6 +91,7 @@ Użytkownik nie jest zalogowany lub sesja/token jest nieprawidłowy.
 ### 403 Forbidden (Brak uprawnień)
 
 Użytkownik próbuje usunąć autora, który:
+
 - Nie jest autorem manualnym (`manual=false`)
 - Nie należy do użytkownika (`owner_user_id != auth.uid()`)
 
@@ -215,6 +219,7 @@ Response ← Return 204 ← Delete Author ← Verify Ownership & Manual Flag ←
 **Przyczyna:** Parametr `authorId` ma nieprawidłowy format lub jest brakujący.
 
 **Obsługa:**
+
 - Waliduj parametr używając `AuthorIdParamSchema`
 - Zwróć 400 z czytelnym komunikatem błędu i szczegółami walidacji
 - Zaloguj ostrzeżenie z parametrem i błędami walidacji
@@ -224,17 +229,20 @@ Response ← Return 204 ← Delete Author ← Verify Ownership & Manual Flag ←
 **Przyczyna:** Użytkownik nie jest zalogowany lub token/sesja jest nieprawidłowa.
 
 **Obsługa:**
+
 - Sprawdź `supabase.auth.getUser()` na początku endpointu
 - Zwróć 401 z komunikatem o wymaganej autoryzacji
 - Zaloguj ostrzeżenie o nieudanej próbie dostępu
 
 #### Brak uprawnień (403 Forbidden)
 
-**Przyczyna:** 
+**Przyczyna:**
+
 - Autor nie jest manualny (`manual=false`)
 - Autor nie należy do użytkownika (`owner_user_id != auth.uid()`)
 
 **Obsługa:**
+
 - Sprawdź flagę `manual` przed próbą usunięcia
 - Sprawdź `owner_user_id` przed próbą usunięcia
 - Zwróć 403 z komunikatem wyjaśniającym przyczynę odmowy
@@ -245,6 +253,7 @@ Response ← Return 204 ← Delete Author ← Verify Ownership & Manual Flag ←
 **Przyczyna:** Autor o podanym ID nie istnieje w bazie danych lub nie jest widoczny dla użytkownika zgodnie z zasadami RLS.
 
 **Obsługa:**
+
 - Sprawdź wynik `findById()` - jeśli zwraca `null`, zwróć 404
 - Zwróć 404 z komunikatem o nieznalezionym autorze
 - Nie loguj tego jako błąd (to normalny scenariusz)
@@ -254,6 +263,7 @@ Response ← Return 204 ← Delete Author ← Verify Ownership & Manual Flag ←
 **Przyczyna:** Wystąpił nieoczekiwany błąd podczas operacji na bazie danych (np. błąd połączenia, naruszenie ograniczeń, błąd RLS).
 
 **Obsługa:**
+
 - Złap wszystkie wyjątki w bloku try-catch
 - Zaloguj błąd z pełnym kontekstem (authorId, userId, komunikat błędu)
 - Zwróć 500 z ogólnym komunikatem (nie ujawniaj szczegółów błędu użytkownikowi)
@@ -312,6 +322,7 @@ Response ← Return 204 ← Delete Author ← Verify Ownership & Manual Flag ←
 6. Dodaj dokumentację JSDoc dla endpointu
 
 ### Krok 3: Testowanie ręczne endpointu
+
 **Plik:** `.ai/api/api-authors-delete-manual-tests.md`
 
 1. Przygotuj testy manualne dla wszystkich scenariuszy:

@@ -5,6 +5,7 @@
 Endpoint `DELETE /api/user/authors/{authorId}` służy do odłączenia autora od profilu zalogowanego użytkownika. Endpoint usuwa relację w tabeli `user_authors` oraz kaskadowo usuwa wszystkie powiązane rekordy `user_works` dla dzieł tego autora. Operacja automatycznie zmniejsza liczniki w profilu użytkownika poprzez triggery bazy danych.
 
 **Główne funkcjonalności:**
+
 - Usunięcie relacji użytkownik-autor z tabeli `user_authors`
 - Kaskadowe usunięcie wszystkich rekordów `user_works` dla dzieł tego autora należących do użytkownika
 - Automatyczne zmniejszanie licznika `author_count` w profilu użytkownika (via trigger)
@@ -12,6 +13,7 @@ Endpoint `DELETE /api/user/authors/{authorId}` służy do odłączenia autora od
 - Weryfikacja, że autor jest przypisany do użytkownika przed usunięciem
 
 **Wykorzystywane zasoby bazy danych:**
+
 - Tabela `user_authors` (relacja użytkownik-autor, composite PK: user_id, author_id)
 - Tabela `user_works` (relacja użytkownik-dzieło, composite PK: user_id, work_id)
 - Tabela `author_works` (relacja autor-dzieło, do identyfikacji dzieł autora)
@@ -29,6 +31,7 @@ Endpoint `DELETE /api/user/authors/{authorId}` służy do odłączenia autora od
 **Struktura URL:** `/api/user/authors/{authorId}`
 
 **Parametry ścieżki:**
+
 - **authorId** (wymagany)
   - Typ: UUID (string)
   - Opis: Identyfikator autora do odłączenia od profilu użytkownika
@@ -40,10 +43,12 @@ Endpoint `DELETE /api/user/authors/{authorId}` służy do odłączenia autora od
 **Request Body:** Brak (operacja DELETE nie wymaga body)
 
 **Nagłówki:**
+
 - `Authorization: Bearer <access_token>` (opcjonalne, jeśli używany jest token Bearer)
 - Alternatywnie: sesja cookie ustawiona przez endpointy autoryzacyjne Supabase
 
 **Przykładowe żądanie:**
+
 ```bash
 DELETE /api/user/authors/550e8400-e29b-41d4-a716-446655440000
 Authorization: Bearer <access_token>
@@ -56,6 +61,7 @@ Authorization: Bearer <access_token>
 ### Typy walidacji
 
 **AuthorIdParamSchema** (`src/lib/validation/author-id.schema.ts`):
+
 - Schemat Zod do walidacji parametru `authorId` jako UUID v4
 - Już istnieje w projekcie, można użyć bezpośrednio
 
@@ -74,6 +80,7 @@ Endpoint nie zwraca żadnych danych w przypadku sukcesu (204 No Content). W przy
 ### Typy serwisowe
 
 **AuthorsService** (`src/lib/services/authors.service.ts`):
+
 - Metoda `isAuthorAttached(userId: string, authorId: string): Promise<boolean>` - sprawdza, czy autor jest przypisany do użytkownika (już istnieje)
 - Metoda `detachUserAuthor(userId: string, authorId: string): Promise<void>` - **do utworzenia** - odłącza autora od użytkownika i usuwa powiązane `user_works`
 
@@ -86,9 +93,11 @@ Endpoint nie zwraca żadnych danych w przypadku sukcesu (204 No Content). W przy
 **Response Body:** Brak (pusty body)
 
 **Nagłówki:**
+
 - `Content-Type: application/json` (opcjonalnie, ale standardowo nie jest wymagany dla 204)
 
 **Przykład odpowiedzi:**
+
 ```
 HTTP/1.1 204 No Content
 ```
@@ -100,6 +109,7 @@ HTTP/1.1 204 No Content
 **Status:** `400 Bad Request`
 
 **Response Body:**
+
 ```json
 {
   "error": "Validation error",
@@ -115,6 +125,7 @@ HTTP/1.1 204 No Content
 ```
 
 **Scenariusze:**
+
 - Parametr `authorId` nie został podany
 - Parametr `authorId` nie jest w formacie UUID v4
 
@@ -123,6 +134,7 @@ HTTP/1.1 204 No Content
 **Status:** `401 Unauthorized`
 
 **Response Body:**
+
 ```json
 {
   "error": "Unauthorized",
@@ -131,6 +143,7 @@ HTTP/1.1 204 No Content
 ```
 
 **Scenariusze:**
+
 - Użytkownik nie jest zalogowany
 - Sesja wygasła lub token jest nieprawidłowy
 
@@ -139,6 +152,7 @@ HTTP/1.1 204 No Content
 **Status:** `404 Not Found`
 
 **Response Body:**
+
 ```json
 {
   "error": "Not Found",
@@ -147,6 +161,7 @@ HTTP/1.1 204 No Content
 ```
 
 **Scenariusze:**
+
 - Autor nie jest przypisany do profilu użytkownika
 - Autor nie istnieje lub nie jest widoczny dla użytkownika (RLS)
 
@@ -155,6 +170,7 @@ HTTP/1.1 204 No Content
 **Status:** `500 Internal Server Error`
 
 **Response Body:**
+
 ```json
 {
   "error": "Internal server error",
@@ -163,6 +179,7 @@ HTTP/1.1 204 No Content
 ```
 
 **Scenariusze:**
+
 - Błąd bazy danych podczas operacji DELETE
 - Błąd podczas kaskadowego usuwania `user_works`
 - Błąd podczas aktualizacji liczników (trigger)
@@ -196,20 +213,20 @@ HTTP/1.1 204 No Content
 1. Wywołaj metodę `detachUserAuthor(user.id, authorId)` na `AuthorsService`
 2. Metoda powinna wykonać następujące operacje w transakcji:
    a. Znajdź wszystkie dzieła autora poprzez `author_works`:
-      ```sql
-      SELECT work_id FROM author_works WHERE author_id = authorId
-      ```
+   ```sql
+   SELECT work_id FROM author_works WHERE author_id = authorId
+   ```
    b. Usuń wszystkie rekordy `user_works` dla tych dzieł należące do użytkownika:
-      ```sql
-      DELETE FROM user_works 
-      WHERE user_id = userId 
-      AND work_id IN (SELECT work_id FROM author_works WHERE author_id = authorId)
-      ```
+   ```sql
+   DELETE FROM user_works
+   WHERE user_id = userId
+   AND work_id IN (SELECT work_id FROM author_works WHERE author_id = authorId)
+   ```
    c. Usuń rekord `user_authors`:
-      ```sql
-      DELETE FROM user_authors 
-      WHERE user_id = userId AND author_id = authorId
-      ```
+   ```sql
+   DELETE FROM user_authors
+   WHERE user_id = userId AND author_id = authorId
+   ```
 3. Triggery bazy danych automatycznie zaktualizują liczniki:
    - `user_works_decrement_count` zmniejszy `profiles.work_count` dla każdego usuniętego `user_works`
    - `user_authors_decrement_count` zmniejszy `profiles.author_count` po usunięciu `user_authors`
@@ -251,15 +268,15 @@ HTTP/1.1 204 No Content
 
 ### Scenariusze błędów i odpowiedzi
 
-| Scenariusz | Kod statusu | Komunikat | Logowanie |
-|------------|-------------|-----------|-----------|
-| Brak parametru `authorId` | 400 | "authorId parameter is required" | warn |
-| Nieprawidłowy format UUID | 400 | "authorId must be a valid UUID" | warn |
-| Użytkownik nie zalogowany | 401 | "Authentication required" | warn |
-| Autor nie przypisany | 404 | "Author is not attached to your profile" | warn |
-| Błąd RLS (naruszenie uprawnień) | 403 | "Cannot detach author: insufficient permissions" | warn |
-| Błąd bazy danych | 500 | "An unexpected error occurred" | error |
-| Nieoczekiwany błąd | 500 | "An unexpected error occurred" | error |
+| Scenariusz                      | Kod statusu | Komunikat                                        | Logowanie |
+| ------------------------------- | ----------- | ------------------------------------------------ | --------- |
+| Brak parametru `authorId`       | 400         | "authorId parameter is required"                 | warn      |
+| Nieprawidłowy format UUID       | 400         | "authorId must be a valid UUID"                  | warn      |
+| Użytkownik nie zalogowany       | 401         | "Authentication required"                        | warn      |
+| Autor nie przypisany            | 404         | "Author is not attached to your profile"         | warn      |
+| Błąd RLS (naruszenie uprawnień) | 403         | "Cannot detach author: insufficient permissions" | warn      |
+| Błąd bazy danych                | 500         | "An unexpected error occurred"                   | error     |
+| Nieoczekiwany błąd              | 500         | "An unexpected error occurred"                   | error     |
 
 ### Szczegółowa obsługa błędów
 
@@ -302,8 +319,8 @@ HTTP/1.1 204 No Content
    - Zapytanie powinno używać indeksu `user_works(user_id)` i `author_works(author_id)`
    - Przykład optymalnego zapytania:
      ```sql
-     DELETE FROM user_works 
-     WHERE user_id = $1 
+     DELETE FROM user_works
+     WHERE user_id = $1
      AND work_id IN (
        SELECT work_id FROM author_works WHERE author_id = $2
      )
@@ -340,49 +357,49 @@ HTTP/1.1 204 No Content
 2. Dodaj nową metodę `detachUserAuthor(userId: string, authorId: string): Promise<void>`
 3. Metoda powinna:
    a. Znaleźć wszystkie dzieła autora poprzez zapytanie do `author_works`:
-      ```typescript
-      const { data: authorWorks, error: authorWorksError } = await this.supabase
-        .from("author_works")
-        .select("work_id")
-        .eq("author_id", authorId);
-      ```
+   ```typescript
+   const { data: authorWorks, error: authorWorksError } = await this.supabase
+     .from("author_works")
+     .select("work_id")
+     .eq("author_id", authorId);
+   ```
    b. Jeśli autor ma dzieła, usuń wszystkie powiązane `user_works`:
-      ```typescript
-      if (authorWorks && authorWorks.length > 0) {
-        const workIds = authorWorks.map(aw => aw.work_id);
-        const { error: deleteWorksError } = await this.supabase
-          .from("user_works")
-          .delete()
-          .eq("user_id", userId)
-          .in("work_id", workIds);
-        
-        if (deleteWorksError) {
-          throw new Error(`Failed to delete user works: ${deleteWorksError.message}`);
-        }
-      }
-      ```
+   ```typescript
+   if (authorWorks && authorWorks.length > 0) {
+     const workIds = authorWorks.map((aw) => aw.work_id);
+     const { error: deleteWorksError } = await this.supabase
+       .from("user_works")
+       .delete()
+       .eq("user_id", userId)
+       .in("work_id", workIds);
+
+     if (deleteWorksError) {
+       throw new Error(`Failed to delete user works: ${deleteWorksError.message}`);
+     }
+   }
+   ```
    c. Usuń rekord `user_authors`:
-      ```typescript
-      const { data, error } = await this.supabase
-        .from("user_authors")
-        .delete()
-        .eq("user_id", userId)
-        .eq("author_id", authorId)
-        .select();
-      
-      if (error) {
-        // Handle RLS policy violations
-        if (error.code === "42501") {
-          throw new Error("Cannot detach author: insufficient permissions");
-        }
-        throw new Error(`Failed to detach author: ${error.message}`);
-      }
-      
-      // Check if any row was actually deleted
-      if (!data || data.length === 0) {
-        throw new Error("Author is not attached to user profile");
-      }
-      ```
+   ```typescript
+   const { data, error } = await this.supabase
+     .from("user_authors")
+     .delete()
+     .eq("user_id", userId)
+     .eq("author_id", authorId)
+     .select();
+
+   if (error) {
+     // Handle RLS policy violations
+     if (error.code === "42501") {
+       throw new Error("Cannot detach author: insufficient permissions");
+     }
+     throw new Error(`Failed to detach author: ${error.message}`);
+   }
+
+   // Check if any row was actually deleted
+   if (!data || data.length === 0) {
+     throw new Error("Author is not attached to user profile");
+   }
+   ```
 4. Dodaj dokumentację JSDoc dla metody, opisującą kaskadowe usunięcie `user_works`
 5. Obsłuż błędy bazy danych i przekaż je dalej z odpowiednimi komunikatami
 

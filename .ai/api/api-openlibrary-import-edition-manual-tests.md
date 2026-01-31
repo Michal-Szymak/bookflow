@@ -1,6 +1,7 @@
 # Manual Testing Guide: POST /api/openlibrary/import/edition
 
 ## Prerequisites
+
 - Dev server running: `npm run dev`
 - Supabase environment variables configured
 - Database tables: `works`, `editions`
@@ -14,6 +15,7 @@
 This endpoint **requires authentication**. Use an access token or session cookie.
 
 ### Using curl with Authorization header
+
 ```bash
 curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
@@ -22,6 +24,7 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ```
 
 ### Using curl with Session Cookie
+
 ```bash
 curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
@@ -36,9 +39,11 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ## Test Cases
 
 ### Test 1: Successful Edition Import (Happy Path)
+
 **Description:** Import an edition from OpenLibrary with valid `openlibrary_id` and an accessible `work_id`.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
@@ -50,6 +55,7 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ```
 
 **Expected Response:**
+
 - Status: 200 OK
 - JSON with `edition` object containing:
   - `id`: UUID
@@ -61,6 +67,7 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   - `ol_expires_at`: ISO timestamp (7 days from `ol_fetched_at`)
 
 **Verification Steps:**
+
 1. Check database: Query `editions` table for the imported edition
    ```sql
    SELECT * FROM editions WHERE openlibrary_id = 'OL7353617M';
@@ -75,32 +82,38 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ---
 
 ### Test 2: Import with Valid Cache
+
 **Description:** Import an edition that already exists in the database with a valid (non-expired) cache.
 
 **Prerequisites:**
+
 - Run Test 1 first to create a cached edition
 - Ensure `ol_expires_at` is in the future
 
 **Request:** Same as Test 1.
 
 **Expected Response:**
+
 - Status: 200 OK
 - `ol_fetched_at` and `ol_expires_at` should be the same as from Test 1 (not updated)
 
 **Verification Steps:**
+
 1. Check database: `ol_fetched_at` should NOT be updated
 2. Check logs: Should see debug log "Cache hit"
 
 ---
 
 ### Test 3: Import with Expired Cache
+
 **Description:** Import an edition with expired cache. The endpoint should fetch fresh data from OpenLibrary and update the cache.
 
 **Prerequisites:**
+
 - Run Test 1 first to create a cached edition
 - Manually expire the cache in database:
   ```sql
-  UPDATE editions 
+  UPDATE editions
   SET ol_expires_at = NOW() - INTERVAL '1 day'
   WHERE openlibrary_id = 'OL7353617M';
   ```
@@ -108,15 +121,18 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 **Request:** Same as Test 1.
 
 **Expected Response:**
+
 - Status: 200 OK
 - `ol_fetched_at` and `ol_expires_at` updated to new values
 
 ---
 
 ### Test 4: Validation Error - Missing Required Fields
+
 **Description:** Attempt to import without required fields.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
@@ -125,15 +141,18 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error message about missing `openlibrary_id` and/or `work_id`
 
 ---
 
 ### Test 5: Validation Error - Invalid openlibrary_id Format
+
 **Description:** Attempt to import using long format or leading slash.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
@@ -145,15 +164,18 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error message about short format requirement
 
 ---
 
 ### Test 6: Validation Error - Invalid work_id
+
 **Description:** Provide a malformed UUID.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
@@ -165,15 +187,18 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Error message about invalid UUID
 
 ---
 
 ### Test 7: Work Not Found or Not Accessible
+
 **Description:** Use a work_id that does not exist or is not visible due to RLS.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
@@ -185,15 +210,18 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ```
 
 **Expected Response:**
+
 - Status: 404 Not Found
 - Message: "Work not found or not accessible"
 
 ---
 
 ### Test 8: Edition Not Found in OpenLibrary
+
 **Description:** Use a valid format `openlibrary_id` that doesn't exist in OpenLibrary.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
@@ -205,15 +233,18 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ```
 
 **Expected Response:**
+
 - Status: 404 Not Found
 - Error indicating OpenLibrary edition not found
 
 ---
 
 ### Test 9: Unauthorized Request
+
 **Description:** Omit authentication.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
@@ -224,23 +255,28 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ```
 
 **Expected Response:**
+
 - Status: 401 Unauthorized
 
 ---
 
 ### Test 10: OpenLibrary API Unavailable
+
 **Description:** Simulate OpenLibrary being unavailable (disconnect network or block domain).
 
 **Expected Response:**
+
 - Status: 502 Bad Gateway
 - Message: "Could not connect to OpenLibrary. Please try again later."
 
 ---
 
 ### Test 11: Invalid JSON Body
+
 **Description:** Send invalid JSON in the body.
 
 **Request:**
+
 ```bash
 curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
   -H "Content-Type: application/json" \
@@ -249,6 +285,7 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ```
 
 **Expected Response:**
+
 - Status: 400 Bad Request
 - Message: "Invalid JSON in request body"
 
@@ -257,8 +294,9 @@ curl -X POST "http://localhost:3000/api/openlibrary/import/edition" \
 ## Database Verification Queries
 
 ### Check Edition in Database
+
 ```sql
-SELECT 
+SELECT
   id,
   work_id,
   title,
@@ -276,12 +314,13 @@ WHERE openlibrary_id = 'OL7353617M';
 ```
 
 ### Check Cache Expiry
+
 ```sql
-SELECT 
+SELECT
   openlibrary_id,
   ol_fetched_at,
   ol_expires_at,
-  CASE 
+  CASE
     WHEN ol_expires_at > NOW() THEN 'Valid'
     ELSE 'Expired'
   END as cache_status,
@@ -295,18 +334,22 @@ WHERE openlibrary_id = 'OL7353617M';
 ## Troubleshooting
 
 ### Issue: 401 Unauthorized
+
 - **Cause:** Missing or invalid access token/session cookie
 - **Solution:** Provide a valid token or session cookie
 
 ### Issue: 404 Not Found
+
 - **Cause:** Work not visible (RLS) or edition not found in OpenLibrary
 - **Solution:** Verify `work_id` visibility and OpenLibrary ID correctness
 
 ### Issue: 400 Validation Error
+
 - **Cause:** Invalid `openlibrary_id` format or invalid `work_id`
 - **Solution:** Use short format (e.g., "OL7353617M") and valid UUID
 
 ### Issue: 502 Bad Gateway
+
 - **Cause:** OpenLibrary API unavailable or network issue
 - **Solution:** Check internet connection, retry later
 
@@ -318,4 +361,3 @@ WHERE openlibrary_id = 'OL7353617M';
 - **Global Catalog:** Imported editions are stored in the global catalog (`owner_user_id = null`, `manual = false`).
 - **Idempotency:** Multiple imports of the same edition are safe - RPC handles conflicts using `ON CONFLICT`.
 - **Format:** Only short format `openlibrary_id` is accepted (e.g., "OL7353617M"). Long format (e.g., "/books/OL7353617M") is rejected.
-
