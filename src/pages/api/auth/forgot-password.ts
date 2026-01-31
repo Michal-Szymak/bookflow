@@ -72,11 +72,19 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
 
     // Step 4: Get the origin from request to construct redirect URL
+    // Supabase will redirect to this URL with code parameter after verification
+    // We redirect directly to reset-password page which will handle the code
     const origin = new URL(request.url).origin;
     const redirectTo = `${origin}/reset-password`;
 
+    logger.info("POST /api/auth/forgot-password: Attempting to send password reset email", {
+      email,
+      redirectTo,
+      origin,
+    });
+
     // Step 5: Attempt to send password reset email
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
     });
 
@@ -86,12 +94,17 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       // Log the error but don't expose it to the client
       logger.warn("POST /api/auth/forgot-password: Password reset email failed", {
         email,
+        redirectTo,
         error: error.message,
+        errorCode: error.status,
+        errorName: error.name,
       });
       // Still return success to prevent email enumeration
     } else {
-      logger.info("POST /api/auth/forgot-password: Password reset email sent", {
+      logger.info("POST /api/auth/forgot-password: Password reset email sent successfully", {
         email,
+        redirectTo,
+        data: data || "no data returned",
       });
     }
 

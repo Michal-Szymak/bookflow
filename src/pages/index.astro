@@ -2,9 +2,15 @@
 import Welcome from "../components/Welcome.astro";
 import Layout from "../layouts/Layout.astro";
 
+// Handle password reset code from email link FIRST (before checking user)
+// Supabase sends code as query parameter, redirect to reset-password page
+const code = Astro.url.searchParams.get("code");
+if (code) {
+  return Astro.redirect(`/reset-password?code=${encodeURIComponent(code)}`, 302);
+}
+
 // If user is logged in, redirect to /app/authors
 // User will be available from middleware via Astro.locals.user
-// For now, we'll check if user exists - backend will provide it later
 const user = Astro.locals.user;
 
 if (user) {

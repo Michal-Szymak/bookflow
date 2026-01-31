@@ -14,6 +14,7 @@ const PUBLIC_PATHS = [
   "/api/auth/logout",
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
+  "/api/auth/verify",
 ];
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
@@ -31,8 +32,18 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Redirect logged-in users away from auth pages
-  if (user && ["/login", "/register", "/forgot-password", "/reset-password"].includes(url.pathname)) {
+  // Allow access to reset-password page if code or token is present (password reset flow)
+  const hasResetCode = url.searchParams.has("code") || url.searchParams.has("token");
+  const isResetPasswordPage = url.pathname === "/reset-password";
+
+  // Redirect logged-in users away from auth pages (except reset-password with code/token)
+  if (user && ["/login", "/register", "/forgot-password"].includes(url.pathname)) {
+    return redirect("/app/authors", 302);
+  }
+
+  // Allow reset-password page even if user is logged in (for password reset flow)
+  // But redirect if no code/token is present and user is already logged in
+  if (user && isResetPasswordPage && !hasResetCode) {
     return redirect("/app/authors", 302);
   }
 

@@ -21,17 +21,22 @@ export function ResetPasswordForm() {
   const [tokenError, setTokenError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Extract token from URL query parameters
+    // Extract code or token from URL query parameters
+    // Supabase sends 'code' parameter in the email link
     const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
     const urlToken = params.get("token");
     const type = params.get("type");
 
-    if (!urlToken || type !== "recovery") {
+    // Support both 'code' (from Supabase email) and 'token' + 'type' formats
+    if (code) {
+      setToken(code);
+    } else if (urlToken && type === "recovery") {
+      setToken(urlToken);
+    } else {
       setTokenError("Nieprawidłowy link. Sprawdź czy link jest kompletny.");
       return;
     }
-
-    setToken(urlToken);
   }, []);
 
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
