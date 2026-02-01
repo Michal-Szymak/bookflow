@@ -11,12 +11,33 @@ export interface AccountSettingsProps {
 /**
  * Account settings component displaying user account information,
  * logout button, and account deletion section.
+ *
+ * Features:
+ * - Displays user email address
+ * - Logout functionality with error handling
+ * - Account deletion dialog with confirmation requirement
+ *
+ * @param userEmail - Optional user email address from server-side session
+ *
+ * @example
+ * ```tsx
+ * <AccountSettings userEmail="user@example.com" />
+ * ```
  */
 export function AccountSettings({ userEmail }: AccountSettingsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
 
+  /**
+   * Handles user logout by calling the logout API endpoint.
+   * On success, redirects to login page. On error, displays error message.
+   *
+   * Error handling:
+   * - Network errors: displays generic error message
+   * - API errors (non-200 status): displays error message
+   * - Even on error, user might be logged out (session invalid), but we show error for transparency
+   */
   const handleLogout = async () => {
     setIsLoggingOut(true);
     setLogoutError(null);
@@ -36,6 +57,7 @@ export function AccountSettings({ userEmail }: AccountSettingsProps) {
       // Success - redirect to login
       window.location.href = "/login";
     } catch {
+      // Network error or other exception
       setLogoutError("Wystąpił błąd podczas wylogowania. Spróbuj ponownie.");
       setIsLoggingOut(false);
     }
@@ -58,16 +80,22 @@ export function AccountSettings({ userEmail }: AccountSettingsProps) {
           <p className="text-sm font-medium text-muted-foreground">E-mail</p>
           <p className="text-sm">{userEmail || "Ładowanie..."}</p>
         </div>
-        <Button onClick={handleLogout} disabled={isLoggingOut} variant="outline" className="w-full sm:w-auto">
+        <Button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          variant="outline"
+          className="w-full sm:w-auto"
+          aria-label={isLoggingOut ? "Wylogowywanie..." : "Wyloguj się"}
+        >
           {isLoggingOut ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Wylogowywanie...
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <span>Wylogowywanie...</span>
             </>
           ) : (
             <>
-              <LogOut className="h-4 w-4" />
-              Wyloguj
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+              <span>Wyloguj</span>
             </>
           )}
         </Button>
@@ -90,9 +118,9 @@ export function AccountSettings({ userEmail }: AccountSettingsProps) {
             </AlertDescription>
           </Alert>
         </div>
-        <Button onClick={handleDeleteClick} variant="destructive" className="w-full sm:w-auto">
-          <Trash2 className="h-4 w-4" />
-          Usuń konto
+        <Button onClick={handleDeleteClick} variant="destructive" className="w-full sm:w-auto" aria-label="Usuń konto">
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
+          <span>Usuń konto</span>
         </Button>
       </div>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useUrlSearchParams } from "@/lib/hooks/useUrlSearchParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { UserWorksListQuerySchema } from "@/lib/validation/user-works-list.schema";
@@ -65,6 +65,8 @@ export function useBooksList() {
   // Local state for search input (with debounce)
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 500);
+  // Ref to track previous debounced search value to avoid unnecessary updates
+  const prevDebouncedSearchRef = useRef<string>("");
 
   // Parse and validate filters from URL
   const filters: BooksListFilters = useMemo(() => {
@@ -106,16 +108,26 @@ export function useBooksList() {
 
   // Update URL when debounced search changes
   useEffect(() => {
-    const newParams = new URLSearchParams(searchParams);
-    if (debouncedSearch && debouncedSearch.trim().length > 0) {
-      newParams.set("search", debouncedSearch.trim());
-    } else {
-      newParams.delete("search");
+    const newSearch = debouncedSearch && debouncedSearch.trim().length > 0 ? debouncedSearch.trim() : "";
+
+    // Only update if search actually changed
+    if (prevDebouncedSearchRef.current === newSearch) {
+      return; // No change needed
     }
-    newParams.delete("page"); // Reset to first page
-    setSearchParams(newParams);
+
+    prevDebouncedSearchRef.current = newSearch;
+
+    // Get current search params from window to avoid stale closure
+    const currentParams = new URLSearchParams(window.location.search);
+    if (newSearch) {
+      currentParams.set("search", newSearch);
+    } else {
+      currentParams.delete("search");
+    }
+    currentParams.delete("page"); // Reset to first page
+    setSearchParams(currentParams);
     setSelectedWorkIds(new Set()); // Clear selection
-  }, [debouncedSearch, searchParams, setSearchParams]);
+  }, [debouncedSearch, setSearchParams]); // setSearchParams is stable from useCallback
 
   // ============================================================================
   // COMPUTED VALUES
@@ -684,17 +696,18 @@ export function useBooksList() {
 
   /**
    * Set default filters if no status in URL (first visit).
+   * Only runs once on mount to avoid conflicts with existing URL params.
    */
   useEffect(() => {
-    if (!searchParams.has("status")) {
-      const newParams = new URLSearchParams(searchParams);
+    // Only set defaults if URL is completely empty (first visit)
+    // Read directly from window to avoid stale closure
+    if (typeof window !== "undefined" && window.location.search === "") {
+      const newParams = new URLSearchParams();
       DEFAULT_FILTERS.status?.forEach((s) => newParams.append("status", s));
-      if (!newParams.has("sort")) {
-        newParams.set("sort", DEFAULT_FILTERS.sort);
-      }
+      newParams.set("sort", DEFAULT_FILTERS.sort);
       setSearchParams(newParams);
     }
-  }, [searchParams, setSearchParams]);
+  }, [setSearchParams]); // Run only once on mount
 
   /**
    * Fetch books whenever filters change.

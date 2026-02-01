@@ -3,11 +3,12 @@ import type { LimitStatus } from "./types";
 
 export interface LimitIndicatorProps {
   limitStatus: LimitStatus;
+  label?: string; // Optional label, defaults to "Autorzy:" for backward compatibility
   className?: string;
 }
 
 /**
- * Visual indicator showing current author count vs maximum limit.
+ * Visual indicator showing current count vs maximum limit.
  * Changes color based on percentage filled.
  *
  * Color scheme:
@@ -15,7 +16,7 @@ export interface LimitIndicatorProps {
  * - Yellow: 70-90%
  * - Red: 90-100%
  */
-export function LimitIndicator({ limitStatus, className }: LimitIndicatorProps) {
+export function LimitIndicator({ limitStatus, label = "Autorzy:", className }: LimitIndicatorProps) {
   const { current, max, percentage } = limitStatus;
 
   // Determine color based on percentage
@@ -31,7 +32,7 @@ export function LimitIndicator({ limitStatus, className }: LimitIndicatorProps) 
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <span className="text-sm text-muted-foreground">Autorzy:</span>
+      <span className="text-sm text-muted-foreground">{label}</span>
       <span className={cn("text-sm font-semibold", getColorClasses())}>
         {current} / {max}
       </span>

@@ -17,7 +17,7 @@ export function PageHeader({ limitStatus, className }: PageHeaderProps) {
       className={cn("flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6", className)}
     >
       <h1 className="text-2xl sm:text-3xl font-bold">Książki</h1>
-      <LimitIndicator limitStatus={limitStatus} />
+      <LimitIndicator limitStatus={limitStatus} label="Książki:" />
     </header>
   );
 }

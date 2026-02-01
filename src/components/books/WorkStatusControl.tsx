@@ -13,7 +13,7 @@ const STATUS_LABELS: Record<UserWorkStatus, string> = {
   to_read: "Do przeczytania",
   in_progress: "W trakcie",
   read: "Przeczytana",
-  hidden: "Ukryj",
+  hidden: "Ukryta",
 };
 
 /**
