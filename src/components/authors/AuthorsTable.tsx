@@ -14,7 +14,7 @@ export interface AuthorsTableProps {
  */
 export function AuthorsTable({ authors, onDeleteAuthor, className }: AuthorsTableProps) {
   return (
-    <div className={cn("border rounded-md overflow-hidden", className)}>
+    <div className={cn("border rounded-md overflow-hidden", className)} data-testid="authors-table">
       {authors.map((author) => (
         <AuthorRow key={author.author.id} author={author} onDelete={onDeleteAuthor} />
       ))}

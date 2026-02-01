@@ -28,11 +28,17 @@ export function AuthorRow({ author, onDelete, className }: AuthorRowProps) {
         "hover:bg-accent/50 transition-colors",
         className
       )}
+      data-testid="author-row"
+      data-author-id={authorData.id}
     >
       {/* Author info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <a href={`/app/authors/${authorData.id}`} className="text-sm font-medium hover:underline truncate">
+          <a
+            href={`/app/authors/${authorData.id}`}
+            className="text-sm font-medium hover:underline truncate"
+            data-testid="author-name-link"
+          >
             {authorData.name}
           </a>
           {/* Manual/OL Badge */}

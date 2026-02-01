@@ -34,7 +34,7 @@ export function AuthorWorksTable({
   };
 
   return (
-    <div className={`overflow-x-auto ${className || ""}`}>
+    <div className={`overflow-x-auto ${className || ""}`} data-testid="author-works-table">
       <table className="w-full border-collapse">
         <AuthorWorksTableHeader
           isAllSelected={isAllSelected}

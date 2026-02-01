@@ -22,7 +22,7 @@ export function AddAuthorButton({
 }: AddAuthorButtonProps) {
   return (
     <div className={cn("relative group", className)}>
-      <Button onClick={onClick} disabled={isDisabled} size="default" className="gap-2">
+      <Button onClick={onClick} disabled={isDisabled} size="default" className="gap-2" data-testid="add-author-button">
         <Plus className="size-4" />
         <span>Dodaj autora</span>
       </Button>

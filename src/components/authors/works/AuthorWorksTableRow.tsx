@@ -19,7 +19,7 @@ export function AuthorWorksTableRow({ work, isSelected, isInProfile, onToggle }:
   const publishDate = work.primary_edition?.publish_date;
 
   return (
-    <tr className="border-b hover:bg-muted/50">
+    <tr className="border-b hover:bg-muted/50" data-testid="author-work-row" data-work-id={work.id}>
       <td className="p-4">
         <Checkbox checked={isSelected} onCheckedChange={onToggle} aria-label={`Zaznacz ${title}`} />
       </td>

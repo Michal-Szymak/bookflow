@@ -31,9 +31,9 @@ export function LimitIndicator({ limitStatus, label = "Autorzy:", className }: L
   };
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center gap-2", className)} data-testid="author-limit-indicator">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className={cn("text-sm font-semibold", getColorClasses())}>
+      <span className={cn("text-sm font-semibold", getColorClasses())} data-testid="author-limit-count">
         {current} / {max}
       </span>
       {percentage >= 90 && <span className="text-xs text-muted-foreground">(Zbliżasz się do limitu)</span>}

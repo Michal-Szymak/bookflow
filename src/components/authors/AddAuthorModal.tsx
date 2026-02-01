@@ -124,6 +124,7 @@ export function AddAuthorModal({ isOpen, onClose, onAuthorAdded }: AddAuthorModa
       <div
         ref={modalContentRef}
         className="relative bg-background border rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col"
+        data-testid="add-author-modal"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -144,6 +145,7 @@ export function AddAuthorModal({ isOpen, onClose, onAuthorAdded }: AddAuthorModa
             aria-selected={activeTab === "search"}
             aria-controls="search-tab-panel"
             role="tab"
+            data-testid="author-search-tab"
             className={cn(
               "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-md transition-colors",
               "hover:bg-accent/50",

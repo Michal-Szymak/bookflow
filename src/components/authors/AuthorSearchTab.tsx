@@ -49,6 +49,7 @@ export function AuthorSearchTab({ onAuthorAdded, onResetRef, searchInputRef }: A
           placeholder="Wpisz nazwę autora..."
           maxLength={200}
           aria-label="Wyszukaj autora"
+          data-testid="author-search-input"
           className={cn(
             "w-full h-10 pl-9 pr-3 rounded-md border bg-background text-sm",
             "placeholder:text-muted-foreground",
@@ -95,11 +96,12 @@ export function AuthorSearchTab({ onAuthorAdded, onResetRef, searchInputRef }: A
 
         {/* Results list */}
         {!isSearching && !searchError && results.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-2" data-testid="author-search-results">
             {results.map((author, index) => (
               <div
                 key={author.openlibrary_id}
                 className="flex items-center justify-between gap-3 p-3 border rounded-md hover:bg-accent/50 transition-colors"
+                data-testid="author-search-result"
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{author.name}</p>
@@ -111,6 +113,7 @@ export function AuthorSearchTab({ onAuthorAdded, onResetRef, searchInputRef }: A
                   disabled={isAdding}
                   className="shrink-0 gap-1"
                   aria-label={`Dodaj autora ${author.name}`}
+                  data-testid="author-add-button"
                 >
                   {isAdding ? (
                     <Loader2 className="size-3 animate-spin" aria-hidden="true" />

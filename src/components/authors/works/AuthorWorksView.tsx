@@ -101,7 +101,7 @@ export function AuthorWorksView({ authorId, initialPage, initialSort }: AuthorWo
   const totalPages = Math.ceil(total / 30);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6" data-testid="author-works-view">
       {author && <AuthorWorksHeader authorName={author.name} />}
 
       <AuthorWorksToolbar
