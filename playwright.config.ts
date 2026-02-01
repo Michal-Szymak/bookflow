@@ -1,12 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env.test file before configuration
+dotenv.config({ path: path.resolve(__dirname, ".env.test") });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -51,7 +52,8 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "npm run dev",
+    // Use dev:e2e which runs with --mode test, so Astro automatically loads .env.test
+    command: "npm run dev:e2e",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
