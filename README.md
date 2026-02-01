@@ -51,6 +51,11 @@ BookFlow is not affiliated with Legimi. “Legimi” is a trademark of its respe
 - **External services (planned per PRD)**:
   - **OpenLibrary** for author search + works import (with 7-day cache/TTL)
   - **OpenRouter** for AI model access (if/when AI features are introduced)
+- **Testing**:
+  - **Vitest** for unit and integration tests
+  - **@testing-library/react** and **@testing-library/user-event** for React component testing
+  - **Playwright** for end-to-end (E2E) tests
+  - **MSW (Mock Service Worker)** for mocking HTTP requests
 - **CI/CD & Hosting (planned)**:
   - **GitHub Actions**
   - **DigitalOcean** (Docker-based deployment)

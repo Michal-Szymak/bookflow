@@ -151,7 +151,7 @@ Plan testów obejmuje:
 **Cel**: Weryfikacja działania pojedynczych funkcji, metod i komponentów w izolacji.
 
 **Narzędzia**: 
-- **Vitest** (zalecane dla Astro/TypeScript) lub **Jest**
+- **Vitest** (zalecane dla Astro/TypeScript)
 - **@testing-library/react** dla komponentów React
 - **@testing-library/user-event** dla symulacji interakcji użytkownika
 
@@ -342,7 +342,7 @@ Plan testów obejmuje:
 **Cel**: Weryfikacja pełnych przepływów użytkownika od początku do końca.
 
 **Narzędzia**:
-- **Playwright** (zalecane) lub **Cypress**
+- **Playwright** (zalecane)
 - Testowa instancja Supabase
 - Mock OpenLibrary API (lub testowa instancja)
 
