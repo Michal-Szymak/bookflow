@@ -29,6 +29,7 @@ src/
 ```
 
 Run tests:
+
 - `npm test` - Run tests once
 - `npm run test:watch` - Run tests in watch mode
 - `npm run test:ui` - Run tests with UI
@@ -46,6 +47,7 @@ tests/
 ```
 
 Run E2E tests:
+
 - `npm run test:e2e` - Run all E2E tests
 - `npm run test:e2e:ui` - Run with Playwright UI
 - `npm run test:e2e:debug` - Run in debug mode
@@ -56,16 +58,15 @@ Run E2E tests:
 To use MSW in your tests, import the setup in your test file:
 
 ```typescript
-import { server } from '@/test/msw/server';
-import { http, HttpResponse } from 'msw';
+import { server } from "@/test/msw/server";
+import { http, HttpResponse } from "msw";
 
 // In your test
 server.use(
-  http.get('/api/books', () => {
-    return HttpResponse.json([{ id: 1, title: 'Test Book' }]);
+  http.get("/api/books", () => {
+    return HttpResponse.json([{ id: 1, title: "Test Book" }]);
   })
 );
 ```
 
 Or add handlers to `src/test/msw/handlers.ts` for global mocks.
-
