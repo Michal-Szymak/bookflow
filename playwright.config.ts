@@ -37,8 +37,16 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     // Setup project
-    { name: "setup", testMatch: /.*\.setup\.ts/ },
-
+    {
+      name: "setup",
+      testMatch: /.*\.setup\.ts/,
+      teardown: "cleanup db",
+    },
+    // Teardown project
+    {
+      name: "cleanup db",
+      testMatch: /global\.teardown\.ts/,
+    },
     {
       name: "chromium",
       use: {

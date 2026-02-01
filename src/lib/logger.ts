@@ -12,8 +12,13 @@
  * Provides methods for different log levels with consistent formatting.
  */
 class Logger {
-  private isDev = import.meta.env.DEV;
-  private isProd = import.meta.env.PROD;
+  // Support both Astro/Vite (import.meta.env) and Node.js (process.env) environments
+  private isDev =
+    (typeof import.meta !== "undefined" && import.meta.env?.DEV) ||
+    (typeof process !== "undefined" && process.env.NODE_ENV !== "production");
+  private isProd =
+    (typeof import.meta !== "undefined" && import.meta.env?.PROD) ||
+    (typeof process !== "undefined" && process.env.NODE_ENV === "production");
 
   /**
    * Logs an error message with optional error object.
