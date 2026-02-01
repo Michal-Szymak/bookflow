@@ -75,6 +75,19 @@ interface OpenLibraryWorkResponse {
 }
 
 /**
+ * Raw response structure for a work entry in author works list API.
+ */
+interface OpenLibraryWorkEntry {
+  key?: string; // e.g., "/works/OL123W"
+  title?: string;
+  first_publish_year?: number;
+  first_publish_date?: string;
+  primary_edition?: string;
+  cover_edition?: string;
+  cover_edition_key?: string;
+}
+
+/**
  * Raw response structure from OpenLibrary edition detail API.
  */
 interface OpenLibraryEditionResponse {
@@ -224,6 +237,70 @@ export class OpenLibraryService {
           throw new Error("OpenLibrary API request timed out");
         }
         // Re-throw "not found" errors as-is
+        if (error.message.includes("not found")) {
+          throw error;
+        }
+        throw new Error(`Failed to fetch from OpenLibrary: ${error.message}`);
+      }
+      throw new Error("Unknown error occurred while fetching from OpenLibrary");
+    }
+  }
+
+  /**
+   * Fetches all works for an author from OpenLibrary.
+   * Accepts only short format (e.g., "OL23919A"), not long format (e.g., "/authors/OL23919A").
+   * The API returns full key format, which is normalized to short format in the response.
+   *
+   * @param openlibrary_id - OpenLibrary author ID in short format (e.g., "OL23919A")
+   * @param limit - Maximum number of works to fetch (default: 1000, OpenLibrary may return fewer)
+   * @returns Array of works with OpenLibrary IDs in short format
+   * @throws Error if author not found (404), API unavailable, or invalid response
+   */
+  async fetchAuthorWorks(openlibrary_id: string, limit = 1000): Promise<OpenLibraryWork[]> {
+    const worksUrl = new URL(`${this.baseUrl}/authors/${openlibrary_id}/works.json`);
+    worksUrl.searchParams.set("limit", limit.toString());
+
+    this.logger.debug("Fetching author works by OpenLibrary ID", {
+      openlibrary_id,
+      url: worksUrl.toString(),
+      limit,
+    });
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+      const response = await fetch(worksUrl.toString(), {
+        signal: controller.signal,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      this.logger.debug("Response status", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+      });
+
+      if (response.status === 404) {
+        throw new Error(`Author with openlibrary_id '${openlibrary_id}' not found in OpenLibrary`);
+      }
+
+      if (!response.ok) {
+        throw new Error(`OpenLibrary API returned status ${response.status}`);
+      }
+
+      const data: unknown = await response.json();
+      this.logger.debug("Raw response data", JSON.stringify(data, null, 2));
+      return this.parseAuthorWorksResponse(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name === "AbortError") {
+          throw new Error("OpenLibrary API request timed out");
+        }
         if (error.message.includes("not found")) {
           throw error;
         }
@@ -409,6 +486,52 @@ export class OpenLibraryService {
       }
       throw new Error("Unknown error occurred while fetching from OpenLibrary");
     }
+  }
+
+  /**
+   * Validates and transforms OpenLibrary author works API response to internal format.
+   * OpenLibrary API returns works in an entries array with keys like "/works/OL123W".
+   *
+   * @param data - Raw response data from OpenLibrary
+   * @returns Array of validated work objects with short format openlibrary_id
+   * @throws Error if response structure is invalid
+   */
+  private parseAuthorWorksResponse(data: unknown): OpenLibraryWork[] {
+    if (!data || typeof data !== "object") {
+      throw new Error("Invalid response format from OpenLibrary");
+    }
+
+    const response = data as { entries?: OpenLibraryWorkEntry[] };
+
+    if (!Array.isArray(response.entries)) {
+      // Empty array is valid (author has no works)
+      return [];
+    }
+
+    const works: OpenLibraryWork[] = [];
+
+    for (const entry of response.entries) {
+      const key = entry.key;
+      const title = entry.title;
+
+      if (!key || !title) {
+        continue;
+      }
+
+      const shortId = this.extractShortIdFromKey(key);
+      const firstPublishYear =
+        entry.first_publish_year ?? this.parseYearFromDateString(entry.first_publish_date ?? null) ?? null;
+      const primaryEditionKey = entry.primary_edition ?? entry.cover_edition_key ?? entry.cover_edition ?? null;
+
+      works.push({
+        openlibrary_id: shortId,
+        title: title.trim(),
+        first_publish_year: firstPublishYear,
+        primary_edition_openlibrary_id: primaryEditionKey ? this.extractShortIdFromKey(primaryEditionKey) : null,
+      });
+    }
+
+    return works;
   }
 
   /**

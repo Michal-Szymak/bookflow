@@ -203,7 +203,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
       });
     }
 
-    // Step 6: Fetch works for the author
+    // Step 6: Check if works exist, if not and author has openlibrary_id, import them
     const worksService = new WorksService(supabase);
     let worksResult;
     try {
@@ -225,6 +225,97 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
           headers: { "Content-Type": "application/json" },
         }
       );
+    }
+
+    // Step 6.5: Auto-import works from OpenLibrary if none exist and author has openlibrary_id
+    if (worksResult.total === 0 && author.openlibrary_id && !forceRefresh) {
+      logger.info("GET /api/authors/{authorId}/works: No works found, attempting auto-import from OpenLibrary", {
+        authorId,
+        openlibrary_id: author.openlibrary_id,
+      });
+
+      try {
+        const olService = new OpenLibraryService();
+        const olWorks = await olService.fetchAuthorWorks(author.openlibrary_id);
+
+        logger.debug("GET /api/authors/{authorId}/works: Fetched works from OpenLibrary", {
+          authorId,
+          openlibrary_id: author.openlibrary_id,
+          worksCount: olWorks.length,
+        });
+
+        // Import each work
+        for (const olWork of olWorks) {
+          try {
+            // Import work using the same logic as POST /api/openlibrary/import/work
+            const work = await worksService.upsertWorkFromOpenLibrary({
+              openlibrary_id: olWork.openlibrary_id,
+              title: olWork.title,
+              first_publish_year: olWork.first_publish_year,
+            });
+
+            // Link author to work
+            await worksService.linkAuthorWork(authorId, work.id);
+
+            // Import primary edition if available
+            if (olWork.primary_edition_openlibrary_id) {
+              try {
+                const olEdition = await olService.fetchEditionByOpenLibraryId(olWork.primary_edition_openlibrary_id);
+                const fetchedAt = new Date();
+                const expiresAt = new Date(fetchedAt.getTime() + 7 * 24 * 60 * 60 * 1000); // +7 days
+
+                const edition = await worksService.upsertEditionFromOpenLibrary({
+                  work_id: work.id,
+                  openlibrary_id: olEdition.openlibrary_id,
+                  title: olEdition.title,
+                  publish_year: olEdition.publish_year,
+                  publish_date: olEdition.publish_date,
+                  publish_date_raw: olEdition.publish_date_raw,
+                  isbn13: olEdition.isbn13,
+                  cover_url: olEdition.cover_url,
+                  language: olEdition.language,
+                  ol_fetched_at: fetchedAt.toISOString(),
+                  ol_expires_at: expiresAt.toISOString(),
+                });
+
+                await worksService.setPrimaryEdition(work.id, edition.id);
+              } catch (editionError) {
+                // Log but don't fail - primary edition is optional
+                logger.warn("GET /api/authors/{authorId}/works: Failed to import primary edition", {
+                  authorId,
+                  workId: work.id,
+                  editionId: olWork.primary_edition_openlibrary_id,
+                  error: editionError instanceof Error ? editionError.message : "Unknown error",
+                });
+              }
+            }
+          } catch (workError) {
+            // Log but continue with other works
+            logger.warn("GET /api/authors/{authorId}/works: Failed to import work", {
+              authorId,
+              workId: olWork.openlibrary_id,
+              error: workError instanceof Error ? workError.message : "Unknown error",
+            });
+          }
+        }
+
+        logger.info("GET /api/authors/{authorId}/works: Auto-import completed", {
+          authorId,
+          openlibrary_id: author.openlibrary_id,
+          importedCount: olWorks.length,
+        });
+
+        // Re-fetch works after import
+        worksResult = await worksService.findWorksByAuthorId(authorId, page, sort);
+      } catch (importError) {
+        // Log error but don't fail the request - return empty list
+        logger.error("GET /api/authors/{authorId}/works: Auto-import failed", {
+          authorId,
+          openlibrary_id: author.openlibrary_id,
+          error: importError instanceof Error ? importError.message : "Unknown error",
+        });
+        // Continue with empty result
+      }
     }
 
     // Step 7: Build and return response
