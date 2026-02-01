@@ -1,0 +1,47 @@
+Drzewo komponentów - AddAuthorButton
+=====================================
+
+AddAuthorButton (@src/components/authors/AddAuthorButton.tsx)
+│
+├── div (wrapper z tooltipem)
+│   │
+│   ├── Button (@src/components/ui/button.tsx)
+│   │   │
+│   │   ├── Slot (@radix-ui/react-slot) [external]
+│   │   │   └── (renderuje jako "button" lub Slot w zależności od asChild)
+│   │   │
+│   │   └── cn (@/lib/utils) [utility function]
+│   │
+│   ├── Plus (lucide-react) [external icon]
+│   │
+│   └── span ("Dodaj autora")
+│
+└── div (tooltip - warunkowo renderowany gdy isDisabled)
+    │
+    └── div (tooltip arrow)
+
+─────────────────────────────────────────────────────────────
+
+Kontekst użycia:
+─────────────────────────────────────────────────────────────
+
+AuthorsToolbar (@src/components/authors/AuthorsToolbar.tsx)
+│
+├── SearchInput (@src/components/authors/SearchInput.tsx)
+│
+├── SortSelect (@src/components/authors/SortSelect.tsx)
+│
+└── AddAuthorButton (@src/components/authors/AddAuthorButton.tsx)
+    │
+    └── [patrz wyżej]
+
+─────────────────────────────────────────────────────────────
+
+Legenda:
+─────────────────────────────────────────────────────────────
+[external]  - komponent z zewnętrznej biblioteki
+[utility]   - funkcja pomocnicza (nie komponent)
+│           - połączenie hierarchiczne
+├──         - dziecko komponentu
+└──         - ostatnie dziecko w grupie
+

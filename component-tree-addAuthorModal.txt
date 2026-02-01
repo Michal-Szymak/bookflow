@@ -1,0 +1,171 @@
+Drzewo komponentów - AddAuthorModal
+=====================================
+
+AddAuthorModal (@src/components/authors/AddAuthorModal.tsx)
+│
+├── div (modal backdrop - fixed inset-0 z-50)
+│   │
+│   └── div (modal content - max-w-2xl)
+│       │
+│       ├── div (header - border-b)
+│       │   │
+│       │   ├── h2 (modal title - "Dodaj autora")
+│       │   │
+│       │   └── Button (@src/components/ui/button.tsx)
+│       │       │
+│       │       ├── Slot (@radix-ui/react-slot) [external]
+│       │       │   └── (renderuje jako "button" lub Slot w zależności od asChild)
+│       │       │
+│       │       └── X (lucide-react) [external icon]
+│       │
+│       ├── div (tabs - role="tablist")
+│       │   │
+│       │   ├── button (search tab - role="tab")
+│       │   │   │
+│       │   │   ├── Search (lucide-react) [external icon]
+│       │   │   │
+│       │   │   └── span ("Szukaj w OpenLibrary")
+│       │   │
+│       │   └── button (manual tab - role="tab")
+│       │       │
+│       │       ├── UserPlus (lucide-react) [external icon]
+│       │       │
+│       │       └── span ("Dodaj ręcznie")
+│       │
+│       └── div (tab content - flex-1 overflow-y-auto)
+│           │
+│           ├── AuthorSearchTab (@src/components/authors/AuthorSearchTab.tsx)
+│           │   [renderowany gdy activeTab === "search"]
+│           │   │
+│           │   ├── div (search input wrapper - relative)
+│           │   │   │
+│           │   │   ├── Search (lucide-react) [external icon]
+│           │   │   │
+│           │   │   └── input (search input - ref={searchInputRef})
+│           │   │
+│           │   └── div (results area - min-h-[300px] max-h-[400px])
+│           │       │
+│           │       ├── div (empty state - no query)
+│           │       │   │
+│           │       │   ├── Search (lucide-react) [external icon]
+│           │       │   │
+│           │       │   └── p ("Wprowadź nazwę autora...")
+│           │       │
+│           │       ├── div (loading state - isSearching)
+│           │       │   │
+│           │       │   ├── Loader2 (lucide-react) [external icon - animate-spin]
+│           │       │   │
+│           │       │   └── p ("Wyszukiwanie...")
+│           │       │
+│           │       ├── div (error state - searchError)
+│           │       │   │
+│           │       │   ├── div (error icon wrapper)
+│           │       │   │   └── span ("⚠️")
+│           │       │   │
+│           │       │   └── p (error message)
+│           │       │
+│           │       ├── div (no results state)
+│           │       │   │
+│           │       │   ├── Search (lucide-react) [external icon]
+│           │       │   │
+│           │       │   └── p ("Nie znaleziono autorów...")
+│           │       │
+│           │       ├── div (results list - space-y-2)
+│           │       │   │
+│           │       │   └── div (result item) [mapped z results]
+│           │       │       │
+│           │       │       ├── div (author info - flex-1)
+│           │       │       │   │
+│           │       │       │   ├── p (author name)
+│           │       │       │   │
+│           │       │       │   └── p ("Już w katalogu") [warunkowo]
+│           │       │       │
+│           │       │       └── Button (@src/components/ui/button.tsx)
+│           │       │           │
+│           │       │           ├── Slot (@radix-ui/react-slot) [external]
+│           │       │           │
+│           │       │           ├── Loader2 (lucide-react) [external icon - gdy isAdding]
+│           │       │           │
+│           │       │           ├── Plus (lucide-react) [external icon - gdy !isAdding]
+│           │       │           │
+│           │       │           └── span ("Dodaj")
+│           │       │
+│           │       └── div (query too short hint)
+│           │           │
+│           │           └── p ("Wpisz co najmniej 2 znaki...")
+│           │
+│           └── ManualAuthorTab (@src/components/authors/ManualAuthorTab.tsx)
+│               [renderowany gdy activeTab === "manual"]
+│               │
+│               └── form (onSubmit handler)
+│                   │
+│                   ├── div (info message - bg-muted/50)
+│                   │   │
+│                   │   ├── Info (lucide-react) [external icon]
+│                   │   │
+│                   │   └── p (info text)
+│                   │
+│                   ├── div (name input wrapper - space-y-2)
+│                   │   │
+│                   │   ├── label (htmlFor="author-name")
+│                   │   │   │
+│                   │   │   ├── span ("Nazwa autora")
+│                   │   │   │
+│                   │   │   └── span ("*") [required indicator]
+│                   │   │
+│                   │   ├── input (id="author-name" - type="text")
+│                   │   │
+│                   │   ├── p (validation error) [warunkowo - role="alert"]
+│                   │   │
+│                   │   ├── p (create error) [warunkowo - role="alert"]
+│                   │   │
+│                   │   └── p (character count hint) [warunkowo - gdy name.length > 400]
+│                   │
+│                   └── Button (@src/components/ui/button.tsx)
+│                       │
+│                       ├── Slot (@radix-ui/react-slot) [external]
+│                       │
+│                       ├── Loader2 (lucide-react) [external icon - gdy isCreating]
+│                       │
+│                       ├── UserPlus (lucide-react) [external icon - gdy !isCreating]
+│                       │
+│                       └── span ("Dodaj autora" / "Dodawanie...")
+
+─────────────────────────────────────────────────────────────
+
+Hooks używane (nie są komponentami):
+─────────────────────────────────────────────────────────────
+
+AddAuthorModal:
+  - useState (activeTab)
+  - useRef (resetSearchRef, resetFormRef, modalContentRef, searchInputRef)
+  - useEffect (ESC key handler, body scroll lock, reset on close, focus management, focus trap)
+
+AuthorSearchTab:
+  - useAuthorSearch (@src/components/authors/hooks/useAuthorSearch.ts)
+    └── useDebounce (@src/lib/hooks/useDebounce.ts)
+  - useEffect (expose reset function)
+
+ManualAuthorTab:
+  - useManualAuthor (@src/components/authors/hooks/useManualAuthor.ts)
+  - useEffect (expose reset function)
+
+─────────────────────────────────────────────────────────────
+
+Utility functions:
+─────────────────────────────────────────────────────────────
+
+- cn (@src/lib/utils) - funkcja pomocnicza do łączenia klas CSS
+
+─────────────────────────────────────────────────────────────
+
+Legenda:
+─────────────────────────────────────────────────────────────
+[external]  - komponent/funkcja z zewnętrznej biblioteki
+[utility]   - funkcja pomocnicza (nie komponent)
+│           - połączenie hierarchiczne
+├──         - dziecko komponentu
+└──         - ostatnie dziecko w grupie
+[warunkowo] - renderowany warunkowo na podstawie stanu
+[mapped]    - renderowany w pętli map()
+
