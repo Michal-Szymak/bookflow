@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useUrlSearchParams } from "@/lib/hooks/useUrlSearchParams";
 import type { ProfileResponseDto, UserAuthorDto, UserAuthorsListResponseDto } from "@/types";
 import type { AuthorsListFilters, LimitStatus } from "../types";
@@ -111,7 +111,7 @@ export function useAuthorsList() {
    * Fetch paginated list of user's authors.
    * Called on mount and whenever filters change.
    */
-  const fetchAuthors = async () => {
+  const fetchAuthors = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -139,38 +139,33 @@ export function useAuthorsList() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filters]);
 
   /**
    * Delete (detach) an author from user's profile.
    * Shows toast notification and refreshes data on success.
    */
   const deleteAuthor = async (authorId: string) => {
-    try {
-      const response = await fetch(`/api/user/authors/${authorId}`, {
-        method: "DELETE",
-      });
+    const response = await fetch(`/api/user/authors/${authorId}`, {
+      method: "DELETE",
+    });
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          window.location.href = "/login";
-          return;
-        }
-        if (response.status === 404) {
-          throw new Error("Autor nie jest dołączony do Twojego profilu");
-        }
-        throw new Error("Nie udało się usunąć autora");
+    if (!response.ok) {
+      if (response.status === 401) {
+        window.location.href = "/login";
+        return;
       }
-
-      // Refresh data
-      await Promise.all([fetchProfile(), fetchAuthors()]);
-
-      // Success - component will show toast via callback
-      return { success: true };
-    } catch (err) {
-      // Error - component will show toast via callback
-      throw err;
+      if (response.status === 404) {
+        throw new Error("Autor nie jest dołączony do Twojego profilu");
+      }
+      throw new Error("Nie udało się usunąć autora");
     }
+
+    // Refresh data
+    await Promise.all([fetchProfile(), fetchAuthors()]);
+
+    // Success - component will show toast via callback
+    return { success: true };
   };
 
   // ============================================================================
@@ -237,7 +232,7 @@ export function useAuthorsList() {
    */
   useEffect(() => {
     fetchAuthors();
-  }, [filters.page, filters.search, filters.sort]);
+  }, [fetchAuthors]);
 
   // ============================================================================
   // RETURN VALUES
