@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { createSupabaseServerInstance } from "src/db/supabase.client.ts";
 import { LoginSchema } from "@/lib/validation/auth/login.schema";
 import { logger } from "@/lib/logger";
+import { ProfileService } from "@/lib/services/profile.service";
 
 export const prerender = false;
 
@@ -130,7 +131,39 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
-    // Step 7: Success - cookies are automatically set by @supabase/ssr
+    // Step 7: Ensure user profile exists (create if missing)
+    // This is a fallback in case profile wasn't created during registration
+    if (data.user && data.session) {
+      try {
+        const profileService = new ProfileService(supabase);
+        const existingProfile = await profileService.getProfile(data.user.id);
+
+        if (!existingProfile) {
+          // Profile doesn't exist - create it
+          await profileService.createProfile(data.user.id);
+          logger.info("POST /api/auth/login: Profile created during login", {
+            userId: data.user.id,
+          });
+        }
+      } catch (profileError) {
+        // Log error but don't fail login if profile creation fails
+        const errorMessage = profileError instanceof Error ? profileError.message : String(profileError);
+        if (errorMessage.includes("already exists")) {
+          // Profile was created between check and insert - this is fine
+          logger.debug("POST /api/auth/login: Profile already exists", {
+            userId: data.user.id,
+          });
+        } else {
+          logger.error("POST /api/auth/login: Failed to ensure profile exists", {
+            userId: data.user.id,
+            error: errorMessage,
+          });
+          // Don't fail login - profile can be created later
+        }
+      }
+    }
+
+    // Step 8: Success - cookies are automatically set by @supabase/ssr
     logger.info("POST /api/auth/login: Login successful", {
       userId: data.user.id,
       email: data.user.email,
@@ -149,7 +182,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }
     );
   } catch (error) {
-    // Step 8: Handle unexpected errors
+    // Step 9: Handle unexpected errors
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error("POST /api/auth/login: Unexpected error", {
       error: errorMessage,

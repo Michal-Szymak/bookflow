@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { createSupabaseServerInstance } from "src/db/supabase.client.ts";
 import { RegisterSchema } from "@/lib/validation/auth/register.schema";
 import { logger } from "@/lib/logger";
+import { ProfileService } from "@/lib/services/profile.service";
 
 export const prerender = false;
 
@@ -136,7 +137,35 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     // If session is null, user needs to confirm email
     const requiresEmailConfirmation = !data.session;
 
-    // Step 8: Success - log registration
+    // Step 8: Create user profile if session exists (user is logged in)
+    // If email confirmation is required, profile will be created after email confirmation
+    if (data.session && data.user) {
+      try {
+        // Use the authenticated session to create profile
+        // The supabase client now has the session, so RLS will allow the insert
+        const profileService = new ProfileService(supabase);
+        await profileService.createProfile(data.user.id);
+        logger.info("POST /api/auth/register: Profile created successfully", {
+          userId: data.user.id,
+        });
+      } catch (profileError) {
+        // Log error but don't fail registration if profile already exists
+        const errorMessage = profileError instanceof Error ? profileError.message : String(profileError);
+        if (errorMessage.includes("already exists")) {
+          logger.warn("POST /api/auth/register: Profile already exists", {
+            userId: data.user.id,
+          });
+        } else {
+          logger.error("POST /api/auth/register: Failed to create profile", {
+            userId: data.user.id,
+            error: errorMessage,
+          });
+          // Don't fail registration if profile creation fails - it can be created later
+        }
+      }
+    }
+
+    // Step 9: Success - log registration
     logger.info("POST /api/auth/register: Registration successful", {
       userId: data.user.id,
       email: data.user.email,
@@ -157,7 +186,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }
     );
   } catch (error) {
-    // Step 9: Handle unexpected errors
+    // Step 10: Handle unexpected errors
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error("POST /api/auth/register: Unexpected error", {
       error: errorMessage,
