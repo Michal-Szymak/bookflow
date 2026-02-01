@@ -5,6 +5,7 @@
 Widok "Książki użytkownika" (`/app/books`) jest głównym centrum zarządzania biblioteką użytkownika. Umożliwia przeglądanie, filtrowanie, sortowanie i zarządzanie statusami oraz dostępnością w Legimi dla wszystkich książek przypisanych do profilu użytkownika.
 
 **Główne funkcjonalności:**
+
 - Przeglądanie listy książek z paginacją (30 pozycji na stronę)
 - Filtrowanie po statusie (multi-select), dostępności w Legimi (tri-state), tytule (wyszukiwanie) i autorze
 - Sortowanie po dacie publikacji (od najnowszych) lub tytule (A-Z)
@@ -16,6 +17,7 @@ Widok "Książki użytkownika" (`/app/books`) jest głównym centrum zarządzani
 - Obsługa limitów (5000 książek na użytkownika)
 
 **User Stories realizowane:**
+
 - US-007: Zmiana statusu pojedynczej książki
 - US-008: Zmiana statusu wielu książek jednocześnie
 - US-009: Filtry i sortowanie listy
@@ -30,11 +32,13 @@ Widok "Książki użytkownika" (`/app/books`) jest głównym centrum zarządzani
 **Plik implementacji:** `src/pages/app/books.astro`
 
 **Struktura:**
+
 - Astro page jako shell routingu
 - React island `BooksListView` dla interaktywności
 - Wymaga autoryzacji (middleware redirect do `/login` jeśli brak sesji)
 
 **Przykładowa implementacja:**
+
 ```astro
 ---
 import { AppLayout } from "@/layouts/AppLayout";
@@ -87,11 +91,13 @@ BooksListView (główny komponent React)
 **Opis:** Główny komponent widoku, orchestrator wszystkich subkomponentów. Zarządza stanem, integracją z API i koordynuje interakcje użytkownika.
 
 **Główne elementy:**
+
 - Kontener główny z responsywnym layoutem
 - Komponenty potomne: `PageHeader`, `BooksFiltersBar`, `BooksListContent`, `BooksPagination`, `BooksBulkToolbar`
 - Custom hook `useBooksList` dla logiki biznesowej
 
 **Obsługiwane interakcje:**
+
 - Inicjalizacja widoku (pobranie profilu i listy książek)
 - Obsługa zmian filtrów (synchronizacja z URL)
 - Obsługa zmian statusu/dostępności (pojedynczo i bulk)
@@ -99,17 +105,20 @@ BooksListView (główny komponent React)
 - Obsługa błędów i retry
 
 **Obsługiwana walidacja:**
+
 - Walidacja parametrów URL przez `UserWorksListQuerySchema`
 - Pre-check limitów przed bulk operations
 - Walidacja UUID dla workId w operacjach pojedynczych
 
 **Typy:**
+
 - `UserWorkItemDto[]` - lista książek
 - `ProfileResponseDto` - profil użytkownika z limitami
 - `BooksListFilters` - filtry z URL
 - `Set<string>` - zaznaczone work IDs
 
 **Propsy:**
+
 ```typescript
 // Brak propsów - komponent jest self-contained
 // Dane pobierane przez custom hook z API i URL
@@ -120,19 +129,24 @@ BooksListView (główny komponent React)
 **Opis:** Nagłówek strony wyświetlający tytuł i licznik limitów książek.
 
 **Główne elementy:**
+
 - `<h1>` z tytułem "Książki"
 - `LimitIndicator` z licznikiem `work_count/max_works` (np. "1250 / 5000")
 
 **Obsługiwane interakcje:**
+
 - Brak interakcji (tylko wyświetlanie)
 
 **Obsługiwana walidacja:**
+
 - Brak
 
 **Typy:**
+
 - `LimitStatus` - obliczony status limitu z profilu
 
 **Propsy:**
+
 ```typescript
 interface PageHeaderProps {
   limitStatus: {
@@ -151,6 +165,7 @@ interface PageHeaderProps {
 **Opis:** Pasek filtrów z kontrolkami do filtrowania i sortowania listy książek. Wszystkie filtry są synchronizowane z URL jako źródłem prawdy.
 
 **Główne elementy:**
+
 - `StatusFilter` - multi-select checkboxy dla statusów
 - `AvailableFilter` - tri-state RadioGroup (Tak/Nie/Nieznane/Wszystkie)
 - `SearchInput` - input z debounce dla wyszukiwania po tytule
@@ -159,6 +174,7 @@ interface PageHeaderProps {
 - Przycisk "Wyczyść filtry" (widoczny tylko gdy są aktywne filtry)
 
 **Obsługiwane interakcje:**
+
 - Zmiana statusu → aktualizacja URL (`status` param jako array)
 - Zmiana dostępności → aktualizacja URL (`available` param: "true"/"false"/"null")
 - Zmiana wyszukiwania → debounce → aktualizacja URL (`search` param)
@@ -167,6 +183,7 @@ interface PageHeaderProps {
 - Wszystkie zmiany filtrów resetują `page` do 1
 
 **Obsługiwana walidacja:**
+
 - Status: enum `["to_read", "in_progress", "read", "hidden"]` (min 1 element w array)
 - Available: `true | false | null` (tri-state)
 - Search: string max 200 znaków, trim, nie może być pusty po trim
@@ -175,11 +192,13 @@ interface PageHeaderProps {
 - Page: integer min 1 (resetowany przy zmianie filtrów)
 
 **Typy:**
+
 - `BooksListFilters` - zsynchronizowane z URL
 - `UserWorkStatus[]` - statusy
 - `boolean | null` - dostępność
 
 **Propsy:**
+
 ```typescript
 interface BooksFiltersBarProps {
   filters: {
@@ -206,23 +225,28 @@ interface BooksFiltersBarProps {
 **Opis:** Multi-select checkboxy dla statusów książek. Domyślnie wybrane są wszystkie statusy oprócz `hidden` (preset "Aktywne").
 
 **Główne elementy:**
+
 - Checkboxy dla każdego statusu: "Do przeczytania", "W trakcie", "Przeczytana", "Ukryj"
 - Checkbox "Aktywne" (preset) - zaznacza wszystkie oprócz `hidden`
 - Checkbox "Wszystkie" - zaznacza wszystkie statusy
 
 **Obsługiwane interakcje:**
+
 - Kliknięcie checkboxa statusu → dodanie/usunięcie z array w URL
 - Kliknięcie "Aktywne" → ustawienie `status=to_read,in_progress,read` (bez `hidden`)
 - Kliknięcie "Wszystkie" → ustawienie wszystkich statusów lub usunięcie parametru
 
 **Obsługiwana walidacja:**
+
 - Status array: min 1 element, każdy element musi być z enum
 - Jeśli array jest pusty, parametr jest usuwany z URL
 
 **Typy:**
+
 - `UserWorkStatus[]` - zaznaczone statusy
 
 **Propsy:**
+
 ```typescript
 interface StatusFilterProps {
   selectedStatuses: UserWorkStatus[];
@@ -236,21 +260,26 @@ interface StatusFilterProps {
 **Opis:** Tri-state RadioGroup dla filtrowania po dostępności w Legimi.
 
 **Główne elementy:**
+
 - Radio button "Tak" (available = true)
 - Radio button "Nie" (available = false)
 - Radio button "Nieznane" (available = null)
 - Radio button "Wszystkie" (brak filtra, undefined)
 
 **Obsługiwane interakcje:**
+
 - Wybór opcji → aktualizacja URL (`available` param: "true"/"false"/"null" lub usunięcie)
 
 **Obsługiwana walidacja:**
+
 - Available: `true | false | null` (tri-state) lub undefined (brak filtra)
 
 **Typy:**
+
 - `boolean | null | undefined` - wartość filtra
 
 **Propsy:**
+
 ```typescript
 interface AvailableFilterProps {
   value: boolean | null | undefined;
@@ -264,6 +293,7 @@ interface AvailableFilterProps {
 **Opis:** Główna zawartość widoku z warunkowym renderowaniem stanów (loading, error, empty, lista).
 
 **Główne elementy:**
+
 - `BooksListSkeleton` - gdy `isLoading === true`
 - `BooksTable` - gdy `!isLoading && !error && items.length > 0`
 - `BooksEmptyState` - gdy `!isLoading && !error && items.length === 0 && !hasFilters`
@@ -271,18 +301,22 @@ interface AvailableFilterProps {
 - `ErrorDisplay` - gdy `error !== null`
 
 **Obsługiwane interakcje:**
+
 - Retry po błędzie → wywołanie `onRetry()`
 - Wyczyść filtry (z NoResultsState) → wywołanie `onClearFilters()`
 - Dodaj autora (z EmptyState) → przekierowanie do `/app/authors`
 
 **Obsługiwana walidacja:**
+
 - Brak
 
 **Typy:**
+
 - `UserWorkItemDto[]` - lista książek
 - `string | null` - komunikat błędu
 
 **Propsy:**
+
 ```typescript
 interface BooksListContentProps {
   isLoading: boolean;
@@ -300,21 +334,26 @@ interface BooksListContentProps {
 **Opis:** Tabela z listą książek użytkownika. Responsywna implementacja z stacked rows na mobile.
 
 **Główne elementy:**
+
 - `BooksTableHeader` - nagłówek z checkboxem "Zaznacz wszystkie"
 - `BooksTableRow[]` - wiersze dla każdej książki
 
 **Obsługiwane interakcje:**
+
 - Zaznaczanie/odznaczanie pojedynczych książek → wywołanie `onWorkToggle(workId)`
 - Zaznaczanie/odznaczanie wszystkich → wywołanie `onSelectAll()` / `onDeselectAll()`
 
 **Obsługiwana walidacja:**
+
 - Brak
 
 **Typy:**
+
 - `UserWorkItemDto[]` - lista książek
 - `Set<string>` - zaznaczone work IDs
 
 **Propsy:**
+
 ```typescript
 interface BooksTableProps {
   items: UserWorkItemDto[];
@@ -335,20 +374,25 @@ interface BooksTableProps {
 **Opis:** Nagłówek tabeli z checkboxem "Zaznacz wszystkie" i etykietami kolumn.
 
 **Główne elementy:**
+
 - Checkbox w pierwszej kolumnie (indeterminate state gdy część zaznaczona)
 - Kolumny: Checkbox, Okładka, Tytuł, Status, Dostępność w Legimi, Rok, Akcje
 
 **Obsługiwane interakcje:**
+
 - Kliknięcie checkboxa → wywołanie `onToggleAll()` (zaznacza/odznacza wszystkie na bieżącej stronie)
 
 **Obsługiwana walidacja:**
+
 - Brak
 
 **Typy:**
+
 - `boolean` - czy wszystkie zaznaczone
 - `boolean` - czy część zaznaczona (indeterminate)
 
 **Propsy:**
+
 ```typescript
 interface BooksTableHeaderProps {
   isAllSelected: boolean;
@@ -362,6 +406,7 @@ interface BooksTableHeaderProps {
 **Opis:** Pojedynczy wiersz tabeli z danymi książki, kontrolkami statusu/dostępności i szczegółami w Accordion.
 
 **Główne elementy:**
+
 - Checkbox (pierwsza kolumna)
 - Okładka (`CoverImage` z lazy loading i placeholder)
 - Tytuł książki (z `work.title` lub `primary_edition.title`)
@@ -372,6 +417,7 @@ interface BooksTableHeaderProps {
 - Przycisk "Usuń z profilu" (opcjonalnie w menu akcji)
 
 **Obsługiwane interakcje:**
+
 - Kliknięcie checkboxa → wywołanie `onToggle()`
 - Zmiana statusu → optymistyczna aktualizacja → wywołanie `onStatusChange(workId, status)`
 - Zmiana dostępności → optymistyczna aktualizacja → wywołanie `onAvailableChange(workId, available)`
@@ -379,16 +425,19 @@ interface BooksTableHeaderProps {
 - Usunięcie z profilu → wywołanie `onDelete(workId)`
 
 **Obsługiwana walidacja:**
+
 - Status: enum `["to_read", "in_progress", "read", "hidden"]`
 - Available: `boolean | null`
 - WorkId: UUID format
 
 **Typy:**
+
 - `UserWorkItemDto` - dane książki
 - `boolean` - czy zaznaczona
 - `boolean` - czy w trakcie aktualizacji (loading state)
 
 **Propsy:**
+
 ```typescript
 interface BooksTableRowProps {
   item: UserWorkItemDto;
@@ -406,21 +455,26 @@ interface BooksTableRowProps {
 **Opis:** Kontrolka zmiany statusu książki. Może być select dropdown lub button group w zależności od designu.
 
 **Główne elementy:**
+
 - Select dropdown z opcjami: "Do przeczytania", "W trakcie", "Przeczytana", "Ukryj"
 - Lub button group z ikonami dla każdego statusu
 
 **Obsługiwane interakcje:**
+
 - Wybór statusu → optymistyczna aktualizacja UI → wywołanie API → rollback przy błędzie
 
 **Obsługiwana walidacja:**
+
 - Status: enum `["to_read", "in_progress", "read", "hidden"]`
 - Co najmniej jeden z `status` lub `available_in_legimi` musi być podany (walidacja API)
 
 **Typy:**
+
 - `UserWorkStatus` - aktualny status
 - `UserWorkStatus` - nowy status
 
 **Propsy:**
+
 ```typescript
 interface WorkStatusControlProps {
   value: UserWorkStatus;
@@ -435,21 +489,26 @@ interface WorkStatusControlProps {
 **Opis:** Tri-state kontrolka dostępności w Legimi.
 
 **Główne elementy:**
+
 - Select dropdown lub button group z opcjami: "Tak" (true), "Nie" (false), "Nieznane" (null)
 - Wizualne oznaczenie stanu (ikony, kolory)
 
 **Obsługiwane interakcje:**
+
 - Wybór dostępności → optymistyczna aktualizacja UI → wywołanie API → rollback przy błędzie
 
 **Obsługiwana walidacja:**
+
 - Available: `boolean | null`
 - Co najmniej jeden z `status` lub `available_in_legimi` musi być podany (walidacja API)
 
 **Typy:**
+
 - `boolean | null` - aktualna dostępność
 - `boolean | null` - nowa dostępność
 
 **Propsy:**
+
 ```typescript
 interface WorkAvailableControlProps {
   value: boolean | null;
@@ -464,6 +523,7 @@ interface WorkAvailableControlProps {
 **Opis:** Accordion z dodatkowymi szczegółami książki (rozwijany/zwijany).
 
 **Główne elementy:**
+
 - Trigger button "Pokaż szczegóły" / "Ukryj szczegóły"
 - Zawartość Accordion:
   - Okładka (większy rozmiar, lazy loading)
@@ -476,15 +536,19 @@ interface WorkAvailableControlProps {
     - Data ostatniej zmiany statusu
 
 **Obsługiwane interakcje:**
+
 - Rozwijanie/zwijanie → lokalny stan `useState<boolean>`
 
 **Obsługiwana walidacja:**
+
 - Brak
 
 **Typy:**
+
 - `UserWorkItemDto` - dane książki
 
 **Propsy:**
+
 ```typescript
 interface WorkDetailsAccordionProps {
   item: UserWorkItemDto;
@@ -497,23 +561,28 @@ interface WorkDetailsAccordionProps {
 **Opis:** Kontrolki paginacji (Poprzednia/Następna + "Strona X z Y").
 
 **Główne elementy:**
+
 - Przycisk "Poprzednia" (disabled na pierwszej stronie)
 - Tekst "Strona X z Y"
 - Przycisk "Następna" (disabled na ostatniej stronie)
 
 **Obsługiwane interakcje:**
+
 - Kliknięcie "Poprzednia" → wywołanie `onPageChange(currentPage - 1)`
 - Kliknięcie "Następna" → wywołanie `onPageChange(currentPage + 1)`
 - Scroll do góry po zmianie strony
 
 **Obsługiwana walidacja:**
+
 - Page: integer min 1, max totalPages
 
 **Typy:**
+
 - `number` - aktualna strona
 - `number` - całkowita liczba stron
 
 **Propsy:**
+
 ```typescript
 interface BooksPaginationProps {
   currentPage: number;
@@ -528,6 +597,7 @@ interface BooksPaginationProps {
 **Opis:** Sticky toolbar na dole ekranu wyświetlany tylko gdy `selectedCount > 0`. Umożliwia masowe operacje na zaznaczonych książkach.
 
 **Główne elementy:**
+
 - Licznik zaznaczonych: "Zaznaczono: N"
 - `BulkStatusSelect` - select zmiany statusu dla zaznaczonych
 - `BulkAvailableSelect` - select zmiany dostępności z opcją "Nie zmieniaj" (undefined)
@@ -536,6 +606,7 @@ interface BooksPaginationProps {
 - Przycisk "Anuluj" (czyści selekcję)
 
 **Obsługiwane interakcje:**
+
 - Wybór statusu → lokalny stan (nie zapisuje od razu)
 - Wybór dostępności → lokalny stan (nie zapisuje od razu)
 - Kliknięcie "Zastosuj zmiany" → walidacja → wywołanie `POST /api/user/works/status-bulk`
@@ -543,17 +614,20 @@ interface BooksPaginationProps {
 - Kliknięcie "Anuluj" → czyszczenie selekcji
 
 **Obsługiwana walidacja:**
+
 - Work IDs: array min 1, max 100, deduplikacja automatyczna
 - Co najmniej jeden z `status` lub `available_in_legimi` musi być podany
 - Status: enum `["to_read", "in_progress", "read", "hidden"]`
 - Available: `boolean | null | undefined` (undefined = "Nie zmieniaj")
 
 **Typy:**
+
 - `Set<string>` - zaznaczone work IDs
 - `UserWorkStatus | undefined` - wybrany status
 - `boolean | null | undefined` - wybrana dostępność
 
 **Propsy:**
+
 ```typescript
 interface BooksBulkToolbarProps {
   selectedCount: number;
@@ -570,21 +644,26 @@ interface BooksBulkToolbarProps {
 **Opis:** Stan pusty gdy użytkownik nie ma jeszcze żadnych książek (bez aktywnych filtrów).
 
 **Główne elementy:**
+
 - Ikona/ilustracja
 - Nagłówek "Nie masz jeszcze książek"
 - Opis tekstowy
 - CTA button "Dodaj autora" (przekierowanie do `/app/authors`)
 
 **Obsługiwane interakcje:**
+
 - Kliknięcie "Dodaj autora" → nawigacja do `/app/authors`
 
 **Obsługiwana walidacja:**
+
 - Brak
 
 **Typy:**
+
 - Brak
 
 **Propsy:**
+
 ```typescript
 interface BooksEmptyStateProps {
   onAddAuthor: () => void;
@@ -597,21 +676,26 @@ interface BooksEmptyStateProps {
 **Opis:** Stan gdy nie ma wyników dla aktywnych filtrów.
 
 **Główne elementy:**
+
 - Ikona/ilustracja
 - Nagłówek "Brak wyników dla filtrów"
 - Opis tekstowy
 - CTA button "Wyczyść filtry"
 
 **Obsługiwane interakcje:**
+
 - Kliknięcie "Wyczyść filtry" → wywołanie `onClearFilters()`
 
 **Obsługiwana walidacja:**
+
 - Brak
 
 **Typy:**
+
 - Brak
 
 **Propsy:**
+
 ```typescript
 interface BooksNoResultsStateProps {
   onClearFilters: () => void;
@@ -624,19 +708,24 @@ interface BooksNoResultsStateProps {
 **Opis:** Skeleton loader wyświetlany podczas ładowania danych.
 
 **Główne elementy:**
+
 - Powtarzalne skeleton rows (30 sztuk)
 - Każdy row: checkbox, okładka, tytuł, status, dostępność
 
 **Obsługiwane interakcje:**
+
 - Brak
 
 **Obsługiwana walidacja:**
+
 - Brak
 
 **Typy:**
+
 - Brak
 
 **Propsy:**
+
 ```typescript
 interface BooksListSkeletonProps {
   count?: number; // domyślnie 30
@@ -649,6 +738,7 @@ interface BooksListSkeletonProps {
 ### 5.1. DTO z API
 
 **UserWorkItemDto:**
+
 ```typescript
 interface UserWorkItemDto {
   work: WorkWithPrimaryEditionDto;
@@ -661,6 +751,7 @@ interface UserWorkItemDto {
 ```
 
 **WorkWithPrimaryEditionDto:**
+
 ```typescript
 interface WorkWithPrimaryEditionDto {
   id: string;
@@ -677,6 +768,7 @@ interface WorkWithPrimaryEditionDto {
 ```
 
 **PrimaryEditionSummaryDto:**
+
 ```typescript
 interface PrimaryEditionSummaryDto {
   id: string;
@@ -692,6 +784,7 @@ interface PrimaryEditionSummaryDto {
 ```
 
 **UserWorksListResponseDto:**
+
 ```typescript
 interface UserWorksListResponseDto {
   items: UserWorkItemDto[];
@@ -701,6 +794,7 @@ interface UserWorksListResponseDto {
 ```
 
 **ProfileResponseDto:**
+
 ```typescript
 interface ProfileResponseDto {
   author_count: number;
@@ -711,6 +805,7 @@ interface ProfileResponseDto {
 ```
 
 **UserWorkResponseDto:**
+
 ```typescript
 interface UserWorkResponseDto {
   work: UserWorkItemDto;
@@ -718,6 +813,7 @@ interface UserWorkResponseDto {
 ```
 
 **UserWorksBulkUpdateResponseDto:**
+
 ```typescript
 interface UserWorksBulkUpdateResponseDto {
   works: UserWorkItemDto[];
@@ -727,6 +823,7 @@ interface UserWorksBulkUpdateResponseDto {
 ### 5.2. Typy ViewModel (lokalne)
 
 **BooksListFilters:**
+
 ```typescript
 interface BooksListFilters {
   page: number; // min 1, default 1
@@ -739,6 +836,7 @@ interface BooksListFilters {
 ```
 
 **LimitStatus:**
+
 ```typescript
 interface LimitStatus {
   current: number; // work_count
@@ -750,20 +848,21 @@ interface LimitStatus {
 ```
 
 **BooksListState:**
+
 ```typescript
 interface BooksListState {
   // Data
   items: UserWorkItemDto[];
   total: number;
   profile: ProfileResponseDto | null;
-  
+
   // UI
   isLoading: boolean;
   error: string | null;
-  
+
   // Selection
   selectedWorkIds: Set<string>;
-  
+
   // Optimistic updates tracking
   updatingWorkIds: Set<string>; // work IDs w trakcie aktualizacji
   optimisticUpdates: Map<string, Partial<UserWorkItemDto>>; // tymczasowe zmiany
@@ -773,6 +872,7 @@ interface BooksListState {
 ### 5.3. Typy komend API
 
 **UpdateUserWorkCommand:**
+
 ```typescript
 interface UpdateUserWorkCommand {
   status?: UserWorkStatus;
@@ -782,6 +882,7 @@ interface UpdateUserWorkCommand {
 ```
 
 **UpdateUserWorksBulkCommand:**
+
 ```typescript
 interface UpdateUserWorksBulkCommand {
   work_ids: string[]; // min 1, max 100, deduplikacja automatyczna
@@ -792,6 +893,7 @@ interface UpdateUserWorksBulkCommand {
 ```
 
 **UserWorksListQueryDto:**
+
 ```typescript
 interface UserWorksListQueryDto {
   page?: number; // min 1
@@ -810,33 +912,40 @@ interface UserWorksListQueryDto {
 Główna logika widoku jest enkapsulowana w custom hooku `useBooksList`:
 
 **Stan danych:**
+
 - `items: UserWorkItemDto[]` - lista książek z API
 - `total: number` - całkowita liczba książek (dla paginacji)
 - `profile: ProfileResponseDto | null` - profil użytkownika z limitami
 
 **Stan UI:**
+
 - `isLoading: boolean` - czy trwa ładowanie
 - `error: string | null` - komunikat błędu
 
 **Stan selekcji:**
+
 - `selectedWorkIds: Set<string>` - zaznaczone work IDs (tylko z bieżącej strony)
 
 **Stan optymistycznych aktualizacji:**
+
 - `updatingWorkIds: Set<string>` - work IDs w trakcie aktualizacji
 - `optimisticUpdates: Map<string, Partial<UserWorkItemDto>>` - tymczasowe zmiany przed potwierdzeniem z API
 
 **Filtry z URL:**
+
 - `searchParams: URLSearchParams` - odczyt z `useUrlSearchParams()`
 - `filters: BooksListFilters` - obliczone z URL params z domyślnymi wartościami
 - Domyślny preset: `status = ["to_read", "in_progress", "read"]` (bez `hidden`)
 
 **Obliczone wartości:**
+
 - `limitStatus: LimitStatus` - obliczony z profilu
 - `hasFilters: boolean` - czy są aktywne filtry (poza domyślnymi)
 - `isAllSelected: boolean` - czy wszystkie książki na stronie są zaznaczone
 - `isIndeterminate: boolean` - czy część książek jest zaznaczona
 
 **Funkcje:**
+
 - `fetchProfile()` - pobranie profilu
 - `fetchBooks()` - pobranie listy książek z filtrami
 - `setStatus(workId, status)` - zmiana statusu pojedynczej książki (optymistyczna)
@@ -854,6 +963,7 @@ Główna logika widoku jest enkapsulowana w custom hooku `useBooksList`:
 - `clearFilters()` - wyczyszczenie wszystkich filtrów
 
 **Efekty:**
+
 - `useEffect(() => fetchProfile(), [])` - pobranie profilu raz na mount
 - `useEffect(() => fetchBooks(), [filters])` - pobranie książek przy zmianie filtrów
 
@@ -891,17 +1001,20 @@ Wszystkie filtry są synchronizowane z URL jako źródłem prawdy:
 **Cel:** Pobranie profilu użytkownika z licznikami i limitami.
 
 **Request:**
+
 - Method: `GET`
 - Headers: `Authorization: Bearer <token>` (automatycznie przez Supabase client)
 - Body: brak
 
 **Response:**
+
 - `200 OK`: `ProfileResponseDto`
 - `401 Unauthorized`: brak autoryzacji
 - `404 Not Found`: profil nie znaleziony
 - `500 Internal Server Error`: błąd serwera
 
 **Implementacja:**
+
 ```typescript
 const fetchProfile = async () => {
   setIsLoading(true);
@@ -926,6 +1039,7 @@ const fetchProfile = async () => {
 **Cel:** Pobranie listy książek użytkownika z filtrami i paginacją.
 
 **Request:**
+
 - Method: `GET`
 - Query params:
   - `page?: number` (min 1, default 1)
@@ -936,12 +1050,14 @@ const fetchProfile = async () => {
   - `search?: string` (max 200 znaków)
 
 **Response:**
+
 - `200 OK`: `UserWorksListResponseDto`
 - `400 Bad Request`: błąd walidacji query params
 - `401 Unauthorized`: brak autoryzacji
 - `500 Internal Server Error`: błąd serwera
 
 **Implementacja:**
+
 ```typescript
 const fetchBooks = async () => {
   setIsLoading(true);
@@ -950,7 +1066,7 @@ const fetchBooks = async () => {
     const params = new URLSearchParams();
     if (filters.page > 1) params.set("page", filters.page.toString());
     if (filters.status && filters.status.length > 0) {
-      filters.status.forEach(s => params.append("status", s));
+      filters.status.forEach((s) => params.append("status", s));
     }
     if (filters.available !== undefined) {
       if (filters.available === true) params.set("available", "true");
@@ -960,7 +1076,7 @@ const fetchBooks = async () => {
     if (filters.sort) params.set("sort", filters.sort);
     if (filters.author_id) params.set("author_id", filters.author_id);
     if (filters.search) params.set("search", filters.search);
-    
+
     const response = await fetch(`/api/user/works?${params.toString()}`);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -982,6 +1098,7 @@ const fetchBooks = async () => {
 **Cel:** Zmiana statusu i/lub dostępności pojedynczej książki.
 
 **Request:**
+
 - Method: `PATCH`
 - Path param: `workId` (UUID)
 - Body: `UpdateUserWorkCommand`
@@ -990,6 +1107,7 @@ const fetchBooks = async () => {
   - Co najmniej jeden z powyższych musi być podany
 
 **Response:**
+
 - `200 OK`: `UserWorkResponseDto`
 - `400 Bad Request`: błąd walidacji (UUID, enum, brak wymaganych pól)
 - `401 Unauthorized`: brak autoryzacji
@@ -997,25 +1115,24 @@ const fetchBooks = async () => {
 - `500 Internal Server Error`: błąd serwera
 
 **Implementacja:**
+
 ```typescript
 const setStatus = async (workId: string, status: UserWorkStatus) => {
   // Optymistyczna aktualizacja
-  const originalItem = items.find(item => item.work.id === workId);
+  const originalItem = items.find((item) => item.work.id === workId);
   if (!originalItem) return;
-  
+
   updatingWorkIds.add(workId);
   optimisticUpdates.set(workId, { ...originalItem, status });
-  setItems(items.map(item => 
-    item.work.id === workId ? { ...item, status } : item
-  ));
-  
+  setItems(items.map((item) => (item.work.id === workId ? { ...item, status } : item)));
+
   try {
     const response = await fetch(`/api/user/works/${workId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
-    
+
     if (!response.ok) {
       if (response.status === 404) {
         // Work nie jest już przypisany - odśwież listę
@@ -1025,18 +1142,14 @@ const setStatus = async (workId: string, status: UserWorkStatus) => {
       }
       throw new Error(`HTTP ${response.status}`);
     }
-    
+
     const data: UserWorkResponseDto = await response.json();
     // Aktualizacja z danymi z API
-    setItems(items.map(item => 
-      item.work.id === workId ? data.work : item
-    ));
+    setItems(items.map((item) => (item.work.id === workId ? data.work : item)));
     toast.success("Status zaktualizowany");
   } catch (error) {
     // Rollback
-    setItems(items.map(item => 
-      item.work.id === workId ? originalItem : item
-    ));
+    setItems(items.map((item) => (item.work.id === workId ? originalItem : item)));
     toast.error("Nie udało się zaktualizować statusu");
   } finally {
     updatingWorkIds.delete(workId);
@@ -1050,6 +1163,7 @@ const setStatus = async (workId: string, status: UserWorkStatus) => {
 **Cel:** Masowa zmiana statusu i/lub dostępności wielu książek.
 
 **Request:**
+
 - Method: `POST`
 - Body: `UpdateUserWorksBulkCommand`
   - `work_ids: string[]` (min 1, max 100, deduplikacja automatyczna)
@@ -1058,28 +1172,26 @@ const setStatus = async (workId: string, status: UserWorkStatus) => {
   - Co najmniej jeden z `status`/`available_in_legimi` musi być podany
 
 **Response:**
+
 - `200 OK`: `UserWorksBulkUpdateResponseDto`
 - `400 Bad Request`: błąd walidacji (pusta lista, przekroczony limit, brak wymaganych pól)
 - `401 Unauthorized`: brak autoryzacji
 - `500 Internal Server Error`: błąd serwera
 
 **Implementacja:**
+
 ```typescript
-const bulkUpdateStatus = async (
-  workIds: string[],
-  status?: UserWorkStatus,
-  available?: boolean | null
-) => {
+const bulkUpdateStatus = async (workIds: string[], status?: UserWorkStatus, available?: boolean | null) => {
   if (workIds.length === 0) return;
   if (status === undefined && available === undefined) {
     toast.error("Wybierz status lub dostępność");
     return;
   }
-  
+
   // Optymistyczna aktualizacja
   const originalItems = new Map<string, UserWorkItemDto>();
-  workIds.forEach(workId => {
-    const item = items.find(i => i.work.id === workId);
+  workIds.forEach((workId) => {
+    const item = items.find((i) => i.work.id === workId);
     if (item) {
       originalItems.set(workId, item);
       updatingWorkIds.add(workId);
@@ -1090,57 +1202,63 @@ const bulkUpdateStatus = async (
       });
     }
   });
-  
-  setItems(items.map(item => {
-    if (workIds.includes(item.work.id)) {
-      return {
-        ...item,
-        ...(status !== undefined && { status }),
-        ...(available !== undefined && { available_in_legimi: available }),
-      };
-    }
-    return item;
-  }));
-  
+
+  setItems(
+    items.map((item) => {
+      if (workIds.includes(item.work.id)) {
+        return {
+          ...item,
+          ...(status !== undefined && { status }),
+          ...(available !== undefined && { available_in_legimi: available }),
+        };
+      }
+      return item;
+    })
+  );
+
   try {
     const body: UpdateUserWorksBulkCommand = {
       work_ids: workIds,
       ...(status !== undefined && { status }),
       ...(available !== undefined && { available_in_legimi: available }),
     };
-    
+
     const response = await fetch("/api/user/works/status-bulk", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    
+
     const data: UserWorksBulkUpdateResponseDto = await response.json();
     // Aktualizacja z danymi z API (tylko zaktualizowane works)
-    const updatedWorkIds = new Set(data.works.map(w => w.work.id));
-    setItems(items.map(item => {
-      if (updatedWorkIds.has(item.work.id)) {
-        const updated = data.works.find(w => w.work.id === item.work.id);
-        return updated || item;
-      }
-      return item;
-    }));
-    
+    const updatedWorkIds = new Set(data.works.map((w) => w.work.id));
+    setItems(
+      items.map((item) => {
+        if (updatedWorkIds.has(item.work.id)) {
+          const updated = data.works.find((w) => w.work.id === item.work.id);
+          return updated || item;
+        }
+        return item;
+      })
+    );
+
     toast.success(`Zaktualizowano ${data.works.length} książek`);
     setSelectedWorkIds(new Set()); // Czyszczenie selekcji
   } catch (error) {
     // Rollback
-    setItems(items.map(item => {
-      const original = originalItems.get(item.work.id);
-      return original || item;
-    }));
+    setItems(
+      items.map((item) => {
+        const original = originalItems.get(item.work.id);
+        return original || item;
+      })
+    );
     toast.error("Nie udało się zaktualizować książek");
   } finally {
-    workIds.forEach(id => {
+    workIds.forEach((id) => {
       updatingWorkIds.delete(id);
       optimisticUpdates.delete(id);
     });
@@ -1153,10 +1271,12 @@ const bulkUpdateStatus = async (
 **Cel:** Usunięcie książki z profilu użytkownika (detach, nie usuwa globalnego work).
 
 **Request:**
+
 - Method: `DELETE`
 - Path param: `workId` (UUID)
 
 **Response:**
+
 - `204 No Content`: sukces
 - `400 Bad Request`: błąd walidacji UUID
 - `401 Unauthorized`: brak autoryzacji
@@ -1165,13 +1285,14 @@ const bulkUpdateStatus = async (
 - `500 Internal Server Error`: błąd serwera
 
 **Implementacja:**
+
 ```typescript
 const deleteWork = async (workId: string) => {
   try {
     const response = await fetch(`/api/user/works/${workId}`, {
       method: "DELETE",
     });
-    
+
     if (!response.ok) {
       if (response.status === 404) {
         toast.error("Książka nie jest już przypisana do Twojego profilu");
@@ -1180,19 +1301,19 @@ const deleteWork = async (workId: string) => {
       }
       throw new Error(`HTTP ${response.status}`);
     }
-    
+
     // Usunięcie z listy
-    setItems(items.filter(item => item.work.id !== workId));
+    setItems(items.filter((item) => item.work.id !== workId));
     setTotal(total - 1);
-    setSelectedWorkIds(prev => {
+    setSelectedWorkIds((prev) => {
       const next = new Set(prev);
       next.delete(workId);
       return next;
     });
-    
+
     // Odświeżenie profilu (aktualizacja licznika)
     await fetchProfile();
-    
+
     toast.success("Książka usunięta z profilu");
   } catch (error) {
     logger.error("Failed to delete work", error);
@@ -1208,6 +1329,7 @@ const deleteWork = async (workId: string) => {
 **Akcja użytkownika:** Zaznaczenie/odznaczenie checkboxa statusu w `StatusFilter`
 
 **Oczekiwany wynik:**
+
 1. Aktualizacja array `status` w URL (dodanie/usunięcie statusu)
 2. Reset `page` do 1 w URL
 3. Wywołanie `fetchBooks()` z nowymi filtrami
@@ -1215,12 +1337,13 @@ const deleteWork = async (workId: string) => {
 5. Czyszczenie selekcji (jeśli była)
 
 **Implementacja:**
+
 ```typescript
 const handleStatusChange = (statuses: UserWorkStatus[]) => {
   const newParams = new URLSearchParams(searchParams);
   if (statuses.length > 0) {
     newParams.delete("status");
-    statuses.forEach(s => newParams.append("status", s));
+    statuses.forEach((s) => newParams.append("status", s));
   } else {
     newParams.delete("status");
   }
@@ -1235,6 +1358,7 @@ const handleStatusChange = (statuses: UserWorkStatus[]) => {
 **Akcja użytkownika:** Wybór opcji w `AvailableFilter` (RadioGroup)
 
 **Oczekiwany wynik:**
+
 1. Aktualizacja `available` w URL ("true"/"false"/"null" lub usunięcie)
 2. Reset `page` do 1 w URL
 3. Wywołanie `fetchBooks()` z nowymi filtrami
@@ -1242,6 +1366,7 @@ const handleStatusChange = (statuses: UserWorkStatus[]) => {
 5. Czyszczenie selekcji
 
 **Implementacja:**
+
 ```typescript
 const handleAvailableChange = (available: boolean | null | undefined) => {
   const newParams = new URLSearchParams(searchParams);
@@ -1265,6 +1390,7 @@ const handleAvailableChange = (available: boolean | null | undefined) => {
 **Akcja użytkownika:** Wpisanie tekstu w `SearchInput`
 
 **Oczekiwany wynik:**
+
 1. Debounce 500ms przed aktualizacją URL
 2. Aktualizacja `search` w URL (lub usunięcie jeśli pusty)
 3. Reset `page` do 1 w URL
@@ -1273,6 +1399,7 @@ const handleAvailableChange = (available: boolean | null | undefined) => {
 6. Czyszczenie selekcji
 
 **Implementacja:**
+
 ```typescript
 const [searchInput, setSearchInput] = useState(filters.search || "");
 const debouncedSearch = useDebounce(searchInput, 500);
@@ -1295,6 +1422,7 @@ useEffect(() => {
 **Akcja użytkownika:** Wybór opcji w `SortSelect`
 
 **Oczekiwany wynik:**
+
 1. Aktualizacja `sort` w URL
 2. Reset `page` do 1 w URL
 3. Wywołanie `fetchBooks()` z nowym sortowaniem
@@ -1302,6 +1430,7 @@ useEffect(() => {
 5. Czyszczenie selekcji
 
 **Implementacja:**
+
 ```typescript
 const handleSortChange = (sort: "published_desc" | "title_asc") => {
   const newParams = new URLSearchParams(searchParams);
@@ -1317,6 +1446,7 @@ const handleSortChange = (sort: "published_desc" | "title_asc") => {
 **Akcja użytkownika:** Kliknięcie "Poprzednia" lub "Następna" w `BooksPagination`
 
 **Oczekiwany wynik:**
+
 1. Aktualizacja `page` w URL
 2. Wywołanie `fetchBooks()` z nową stroną
 3. Aktualizacja listy książek
@@ -1324,6 +1454,7 @@ const handleSortChange = (sort: "published_desc" | "title_asc") => {
 5. Czyszczenie selekcji (nowa strona = nowa selekcja)
 
 **Implementacja:**
+
 ```typescript
 const handlePageChange = (page: number) => {
   const newParams = new URLSearchParams(searchParams);
@@ -1343,15 +1474,17 @@ const handlePageChange = (page: number) => {
 **Akcja użytkownika:** Kliknięcie checkboxa przy pojedynczej książce
 
 **Oczekiwany wynik:**
+
 1. Dodanie/usunięcie `workId` z `selectedWorkIds`
 2. Aktualizacja stanu checkboxa
 3. Aktualizacja checkboxa "Zaznacz wszystkie" (indeterminate/checked/unchecked)
 4. Pojawienie się/zniknięcie `BooksBulkToolbar` (jeśli `selectedCount > 0`)
 
 **Implementacja:**
+
 ```typescript
 const handleWorkToggle = (workId: string) => {
-  setSelectedWorkIds(prev => {
+  setSelectedWorkIds((prev) => {
     const next = new Set(prev);
     if (next.has(workId)) {
       next.delete(workId);
@@ -1368,18 +1501,20 @@ const handleWorkToggle = (workId: string) => {
 **Akcja użytkownika:** Kliknięcie checkboxa "Zaznacz wszystkie" w nagłówku tabeli
 
 **Oczekiwany wynik:**
+
 1. Zaznaczenie wszystkich `workId` z `items` w `selectedWorkIds`
 2. Aktualizacja wszystkich checkboxów w wierszach
 3. Aktualizacja checkboxa "Zaznacz wszystkie" (checked)
 4. Pojawienie się `BooksBulkToolbar`
 
 **Implementacja:**
+
 ```typescript
 const handleSelectAll = () => {
   if (isAllSelected) {
     setSelectedWorkIds(new Set());
   } else {
-    setSelectedWorkIds(new Set(items.map(item => item.work.id)));
+    setSelectedWorkIds(new Set(items.map((item) => item.work.id)));
   }
 };
 ```
@@ -1389,6 +1524,7 @@ const handleSelectAll = () => {
 **Akcja użytkownika:** Wybór statusu w `WorkStatusControl` dla pojedynczej książki
 
 **Oczekiwany wynik:**
+
 1. Optymistyczna aktualizacja UI (natychmiastowa zmiana statusu)
 2. Wywołanie API `PATCH /api/user/works/{workId}`
 3. Po sukcesie: aktualizacja z danymi z API, toast sukcesu
@@ -1396,6 +1532,7 @@ const handleSelectAll = () => {
 5. Jeśli 404: odświeżenie listy + komunikat
 
 **Implementacja:**
+
 ```typescript
 const handleStatusChange = async (workId: string, status: UserWorkStatus) => {
   await setStatus(workId, status);
@@ -1407,6 +1544,7 @@ const handleStatusChange = async (workId: string, status: UserWorkStatus) => {
 **Akcja użytkownika:** Wybór dostępności w `WorkAvailableControl` dla pojedynczej książki
 
 **Oczekiwany wynik:**
+
 1. Optymistyczna aktualizacja UI (natychmiastowa zmiana dostępności)
 2. Wywołanie API `PATCH /api/user/works/{workId}`
 3. Po sukcesie: aktualizacja z danymi z API, toast sukcesu
@@ -1414,6 +1552,7 @@ const handleStatusChange = async (workId: string, status: UserWorkStatus) => {
 5. Jeśli 404: odświeżenie listy + komunikat
 
 **Implementacja:**
+
 ```typescript
 const handleAvailableChange = async (workId: string, available: boolean | null) => {
   // Podobna implementacja jak setStatus, ale dla available_in_legimi
@@ -1425,6 +1564,7 @@ const handleAvailableChange = async (workId: string, available: boolean | null) 
 **Akcja użytkownika:** Wybór statusu/dostępności w `BooksBulkToolbar` i kliknięcie "Zastosuj zmiany"
 
 **Oczekiwany wynik:**
+
 1. Walidacja: co najmniej jeden z `status`/`available` musi być podany
 2. Walidacja: `workIds.length` min 1, max 100
 3. Optymistyczna aktualizacja UI dla wszystkich zaznaczonych książek
@@ -1433,19 +1573,20 @@ const handleAvailableChange = async (workId: string, available: boolean | null) 
 6. Po błędzie: rollback do oryginalnych wartości, toast błędu
 
 **Implementacja:**
+
 ```typescript
 const handleBulkUpdate = async () => {
   const workIds = Array.from(selectedWorkIds);
   if (workIds.length === 0) return;
-  
+
   const status = bulkStatus; // z lokalnego stanu toolbar
   const available = bulkAvailable; // z lokalnego stanu toolbar
-  
+
   if (status === undefined && available === undefined) {
     toast.error("Wybierz status lub dostępność");
     return;
   }
-  
+
   await bulkUpdateStatus(workIds, status, available);
 };
 ```
@@ -1455,6 +1596,7 @@ const handleBulkUpdate = async () => {
 **Akcja użytkownika:** Kliknięcie "Usuń z profilu" w menu akcji książki
 
 **Oczekiwany wynik:**
+
 1. AlertDialog potwierdzenia (opcjonalnie)
 2. Wywołanie API `DELETE /api/user/works/{workId}`
 3. Po sukcesie: usunięcie z listy, aktualizacja `total`, odświeżenie profilu, toast sukcesu
@@ -1462,6 +1604,7 @@ const handleBulkUpdate = async () => {
 5. Jeśli 404: odświeżenie listy + komunikat
 
 **Implementacja:**
+
 ```typescript
 const handleDelete = async (workId: string) => {
   await deleteWork(workId);
@@ -1473,12 +1616,14 @@ const handleDelete = async (workId: string) => {
 **Akcja użytkownika:** Kliknięcie "Usuń z profilu" w `BooksBulkToolbar`
 
 **Oczekiwany wynik:**
+
 1. AlertDialog potwierdzenia z liczbą zaznaczonych książek
 2. Dla każdej książki: wywołanie API `DELETE /api/user/works/{workId}`
 3. Po sukcesie: usunięcie z listy, aktualizacja `total`, odświeżenie profilu, toast sukcesu, czyszczenie selekcji
 4. Po błędzie: toast błędu dla każdej nieudanej operacji
 
 **Implementacja:**
+
 ```typescript
 const handleBulkDelete = async (workIds: string[]) => {
   // Potwierdzenie w AlertDialog
@@ -1499,6 +1644,7 @@ const handleBulkDelete = async (workIds: string[]) => {
 **Komponent:** `useBooksList` hook
 
 **Warunki:**
+
 - `page`: integer min 1, domyślnie 1
 - `status`: array enum `["to_read", "in_progress", "read", "hidden"]`, min 1 element jeśli podane
 - `available`: `"true" | "false" | "null"` (jako string w URL), konwertowane do `boolean | null`
@@ -1507,10 +1653,12 @@ const handleBulkDelete = async (workIds: string[]) => {
 - `sort`: enum `["published_desc", "title_asc"]`, domyślnie "published_desc"
 
 **Walidacja:**
+
 - Użycie `UserWorksListQuerySchema` z `@/lib/validation/user-works-list.schema`
 - Błędy walidacji: wyświetlenie komunikatu błędu, fallback do domyślnych wartości
 
 **Implementacja:**
+
 ```typescript
 const [searchParams] = useUrlSearchParams();
 const queryParams = {
@@ -1544,16 +1692,19 @@ if (!validation.success) {
 **Komponent:** `BooksBulkToolbar`
 
 **Warunki:**
+
 - `workIds.length` min 1, max 100
 - Co najmniej jeden z `status` lub `available_in_legimi` musi być podany
 - `status`: enum jeśli podany
 - `available_in_legimi`: `boolean | null` jeśli podany
 
 **Walidacja:**
+
 - Użycie `UpdateUserWorksBulkCommandSchema` z `@/lib/validation/update-user-works-bulk.schema`
 - Błędy walidacji: wyświetlenie toast z komunikatem, blokada wywołania API
 
 **Implementacja:**
+
 ```typescript
 const handleBulkUpdate = async () => {
   const workIds = Array.from(selectedWorkIds);
@@ -1562,13 +1713,13 @@ const handleBulkUpdate = async () => {
     ...(bulkStatus !== undefined && { status: bulkStatus }),
     ...(bulkAvailable !== undefined && { available_in_legimi: bulkAvailable }),
   };
-  
+
   const validation = UpdateUserWorksBulkCommandSchema.safeParse(body);
   if (!validation.success) {
     toast.error(validation.error.errors[0]?.message || "Błąd walidacji");
     return;
   }
-  
+
   // Wywołanie API z validated data
   await bulkUpdateStatus(validation.data.work_ids, validation.data.status, validation.data.available_in_legimi);
 };
@@ -1579,11 +1730,13 @@ const handleBulkUpdate = async () => {
 **Komponent:** `WorkStatusControl`, `WorkAvailableControl`
 
 **Warunki:**
+
 - Co najmniej jeden z `status` lub `available_in_legimi` musi być podany
 - `status`: enum jeśli podany
 - `available_in_legimi`: `boolean | null` jeśli podany
 
 **Walidacja:**
+
 - Użycie `UpdateUserWorkCommandSchema` z `@/lib/validation/update-user-work.schema`
 - Błędy walidacji: wyświetlenie toast z komunikatem, blokada wywołania API
 
@@ -1592,9 +1745,11 @@ const handleBulkUpdate = async () => {
 **Komponent:** `BooksBulkToolbar` (przed bulk operations)
 
 **Warunek:**
+
 - Sprawdzenie `profile.work_count < profile.max_works` przed bulk attach (nie dotyczy bulk update/delete)
 
 **Walidacja:**
+
 - Jeśli limit osiągnięty: wyświetlenie komunikatu, blokada operacji
 - API zwróci `409 Conflict` jeśli limit przekroczony (obsługa w error handling)
 
@@ -1603,10 +1758,12 @@ const handleBulkUpdate = async () => {
 **Komponent:** `useBooksList` hook
 
 **Warunek:**
+
 - Jeśli brak parametru `status` w URL, ustawienie domyślnego: `["to_read", "in_progress", "read"]` (bez `hidden`)
 - Preset "Aktywne" jest domyślny przy pierwszym wejściu na widok
 
 **Implementacja:**
+
 ```typescript
 const getDefaultFilters = (): BooksListFilters => ({
   page: 1,
@@ -1621,7 +1778,7 @@ const getDefaultFilters = (): BooksListFilters => ({
 useEffect(() => {
   if (!searchParams.has("status")) {
     const newParams = new URLSearchParams(searchParams);
-    ["to_read", "in_progress", "read"].forEach(s => newParams.append("status", s));
+    ["to_read", "in_progress", "read"].forEach((s) => newParams.append("status", s));
     setSearchParams(newParams);
   }
 }, []);
@@ -1634,10 +1791,12 @@ useEffect(() => {
 **Scenariusz:** Sesja wygasła lub brak autoryzacji
 
 **Obsługa:**
+
 - Redirect do `/login` z komunikatem "Zaloguj się ponownie"
 - Toast z komunikatem błędu
 
 **Implementacja:**
+
 ```typescript
 if (response.status === 401) {
   window.location.href = "/login?redirect=/app/books";
@@ -1651,11 +1810,13 @@ if (response.status === 401) {
 **Scenariusz:** Błąd walidacji parametrów/body
 
 **Obsługa:**
+
 - Wyświetlenie komunikatu błędu z API (pierwszy błąd z `details`)
 - Toast z komunikatem
 - Dla query params: fallback do domyślnych wartości
 
 **Implementacja:**
+
 ```typescript
 if (response.status === 400) {
   const error = await response.json();
@@ -1669,15 +1830,18 @@ if (response.status === 400) {
 
 ### 10.3. Błąd 404 (Not Found)
 
-**Scenariusz:** 
+**Scenariusz:**
+
 - Work nie jest przypisany do użytkownika (PATCH/DELETE)
 - Profil nie znaleziony (GET profile)
 
 **Obsługa:**
+
 - Dla work: odświeżenie listy książek, toast z komunikatem "Książka nie jest już przypisana do Twojego profilu"
 - Dla profilu: wyświetlenie komunikatu błędu, możliwość retry
 
 **Implementacja:**
+
 ```typescript
 if (response.status === 404) {
   if (isWorkOperation) {
@@ -1694,10 +1858,12 @@ if (response.status === 404) {
 **Scenariusz:** RLS policy violation
 
 **Obsługa:**
+
 - Toast z komunikatem "Brak uprawnień do wykonania tej operacji"
 - Logowanie błędu dla developera
 
 **Implementacja:**
+
 ```typescript
 if (response.status === 403) {
   toast.error("Brak uprawnień do wykonania tej operacji");
@@ -1710,10 +1876,12 @@ if (response.status === 403) {
 **Scenariusz:** Limit książek osiągnięty (bulk attach)
 
 **Obsługa:**
+
 - Toast z komunikatem "Osiągnięto limit książek (5000)"
 - Blokada dalszych operacji bulk attach
 
 **Implementacja:**
+
 ```typescript
 if (response.status === 409) {
   toast.error("Osiągnięto limit książek (5000)");
@@ -1727,11 +1895,13 @@ if (response.status === 409) {
 **Scenariusz:** Błąd serwera
 
 **Obsługa:**
+
 - Toast z komunikatem "Wystąpił błąd serwera. Spróbuj ponownie później"
 - Logowanie błędu dla developera
 - Możliwość retry
 
 **Implementacja:**
+
 ```typescript
 if (response.status === 500) {
   toast.error("Wystąpił błąd serwera. Spróbuj ponownie później");
@@ -1745,11 +1915,13 @@ if (response.status === 500) {
 **Scenariusz:** Brak połączenia z serwerem, timeout
 
 **Obsługa:**
+
 - Toast z komunikatem "Brak połączenia z serwerem"
 - Możliwość retry
 - Dla optymistycznych aktualizacji: rollback
 
 **Implementacja:**
+
 ```typescript
 catch (error) {
   if (error instanceof TypeError && error.message.includes("fetch")) {
@@ -1765,17 +1937,19 @@ catch (error) {
 **Scenariusz:** Błąd API po optymistycznej aktualizacji UI
 
 **Obsługa:**
+
 - Rollback do oryginalnej wartości z `optimisticUpdates`
 - Toast z komunikatem błędu
 - Usunięcie `workId` z `updatingWorkIds`
 
 **Implementacja:**
+
 ```typescript
 catch (error) {
   // Rollback
   const original = optimisticUpdates.get(workId);
   if (original) {
-    setItems(items.map(item => 
+    setItems(items.map(item =>
       item.work.id === workId ? original : item
     ));
     optimisticUpdates.delete(workId);
@@ -1790,11 +1964,13 @@ catch (error) {
 **Scenariusz:** Niektóre works nie zostały zaktualizowane (nie są przypisane do użytkownika)
 
 **Obsługa:**
+
 - API zwraca tylko zaktualizowane works w `UserWorksBulkUpdateResponseDto`
 - Toast z komunikatem "Zaktualizowano N z M książek" (gdy `updated.length < requested.length`)
 - Aktualizacja UI tylko dla zaktualizowanych works
 
 **Implementacja:**
+
 ```typescript
 const data: UserWorksBulkUpdateResponseDto = await response.json();
 if (data.works.length < workIds.length) {
@@ -1906,4 +2082,3 @@ if (data.works.length < workIds.length) {
 4. Sprawdzenie dostępności (a11y)
 5. Poprawki stylów i layoutu
 6. Finalne testy E2E
-

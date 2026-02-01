@@ -638,10 +638,10 @@ curl -X GET "http://localhost:4321/api/user/authors?search=ToLkIeN" \
 
 ## Notatki z testów
 
-**Data testów:** ******\_\_\_******  
-**Tester:** ******\_\_\_******  
-**Środowisko:** ******\_\_\_******  
-**Wersja API:** ******\_\_\_******
+**Data testów:** **\*\***\_\_\_**\*\***  
+**Tester:** **\*\***\_\_\_**\*\***  
+**Środowisko:** **\*\***\_\_\_**\*\***  
+**Wersja API:** **\*\***\_\_\_**\*\***
 
 **Znalezione problemy:**
 

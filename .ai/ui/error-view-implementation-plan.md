@@ -10,6 +10,7 @@ Widok Not Found / Error jest widokiem globalnym obsługującym dwa główne scen
 Głównym celem widoku jest czytelne prowadzenie użytkownika w razie błędów routingu i awarii API, zapewniając przyjazne komunikaty bez technicznych szczegółów (stack trace'ów) oraz oferując jasne akcje powrotu do głównych sekcji aplikacji.
 
 Widok składa się z:
+
 - Strony 404 dostępnej pod ścieżką `/404` (fallback Astro) z przyciskami CTA "Wróć do Autorów" i "Wróć do Książek"
 - Wzorca "inline error" już zaimplementowanego w widokach list poprzez komponent `ErrorDisplay`
 
@@ -18,6 +19,7 @@ Widok składa się z:
 ### 2.1. Strona 404
 
 Astro automatycznie obsługuje strony 404 poprzez plik `404.astro` w katalogu `src/pages/`. Plik ten jest wywoływany automatycznie, gdy:
+
 - Użytkownik próbuje uzyskać dostęp do nieistniejącej ścieżki
 - API zwraca 404 dla zasobu (np. autor/książka nie istnieje)
 - Middleware przekierowuje do 404 w przypadku nieprawidłowych parametrów
@@ -25,6 +27,7 @@ Astro automatycznie obsługuje strony 404 poprzez plik `404.astro` w katalogu `s
 **Ścieżka pliku**: `src/pages/404.astro`
 
 **Dostępność**:
+
 - Działa dla wszystkich ścieżek, które nie pasują do istniejących routów
 - Dostępna zarówno dla zalogowanych, jak i niezalogowanych użytkowników
 - Używa odpowiedniego layoutu w zależności od stanu autoryzacji
@@ -34,6 +37,7 @@ Astro automatycznie obsługuje strony 404 poprzez plik `404.astro` w katalogu `s
 Inline errors są już zaimplementowane w widokach list poprzez komponent `ErrorDisplay` i są wyświetlane w kontekście konkretnego widoku (np. lista autorów, lista książek).
 
 **Lokalizacje**:
+
 - `src/components/authors/AuthorsListContent.tsx` - wyświetla `ErrorDisplay` gdy `error !== null`
 - `src/components/books/BooksListContent.tsx` - wyświetla `ErrorDisplay` gdy `error !== null`
 - Inne widoki list używające podobnego wzorca
@@ -64,6 +68,7 @@ ErrorDisplay.tsx (już istnieje - inline errors)
 **Opis komponentu**: Komponent React wyświetlający stronę 404 z przyjaznym komunikatem i przyciskami nawigacji do głównych sekcji aplikacji. Komponent jest responsywny i dostosowuje się do stanu autoryzacji użytkownika.
 
 **Główne elementy**:
+
 - Kontener główny z wyśrodkowaną zawartością (`flex flex-col items-center justify-center`)
 - Ikona błędu (AlertCircle z lucide-react) w okręgu z tłem
 - Nagłówek "Strona nie została znaleziona" (h2)
@@ -71,14 +76,17 @@ ErrorDisplay.tsx (już istnieje - inline errors)
 - Sekcja przycisków nawigacji z warunkowym renderowaniem w zależności od stanu autoryzacji
 
 **Obsługiwane zdarzenia**:
+
 - `onClick` na przyciskach nawigacji - przekierowanie do odpowiednich sekcji
 - Automatyczne wykrywanie stanu autoryzacji przez props
 
 **Warunki walidacji**:
+
 - Brak walidacji po stronie komponentu (walidacja routingu po stronie Astro)
 
 **Typy**:
-- `NotFoundViewProps`: 
+
+- `NotFoundViewProps`:
   ```typescript
   interface NotFoundViewProps {
     isAuthenticated: boolean;
@@ -87,6 +95,7 @@ ErrorDisplay.tsx (już istnieje - inline errors)
   ```
 
 **Propsy**:
+
 - `isAuthenticated: boolean` - określa, czy użytkownik jest zalogowany (wpływa na wyświetlane przyciski)
 - `className?: string` - opcjonalna klasa CSS do dostosowania stylów
 
@@ -95,6 +104,7 @@ ErrorDisplay.tsx (już istnieje - inline errors)
 **Opis komponentu**: Komponent wyświetlający błędy inline w widokach list. Używany do wyświetlania błędów API bezpośrednio w kontekście konkretnego widoku (np. lista autorów, lista książek).
 
 **Główne elementy**:
+
 - Kontener z wyśrodkowaną zawartością
 - Ikona błędu (AlertCircle) w okręgu z tłem destruktywnym
 - Nagłówek "Coś poszło nie tak" (h3)
@@ -102,12 +112,15 @@ ErrorDisplay.tsx (już istnieje - inline errors)
 - Przycisk "Spróbuj ponownie" (opcjonalny, gdy `onRetry` jest przekazany)
 
 **Obsługiwane zdarzenia**:
+
 - `onClick` na przycisku retry - wywołuje funkcję `onRetry` przekazaną przez props
 
 **Warunki walidacji**:
+
 - Brak walidacji (komponent wyświetla tylko przekazany komunikat)
 
 **Typy**:
+
 - `ErrorDisplayProps`:
   ```typescript
   interface ErrorDisplayProps {
@@ -118,6 +131,7 @@ ErrorDisplay.tsx (już istnieje - inline errors)
   ```
 
 **Propsy**:
+
 - `message: string` - komunikat błędu do wyświetlenia
 - `onRetry?: () => void` - opcjonalna funkcja wywoływana po kliknięciu przycisku retry
 - `className?: string` - opcjonalna klasa CSS
@@ -127,20 +141,25 @@ ErrorDisplay.tsx (już istnieje - inline errors)
 **Opis komponentu**: Strona Astro obsługująca routing 404. Automatycznie wywoływana przez Astro, gdy użytkownik próbuje uzyskać dostęp do nieistniejącej ścieżki. Wykrywa stan autoryzacji użytkownika i renderuje odpowiedni layout oraz komponenty.
 
 **Główne elementy**:
+
 - Logika wykrywania stanu autoryzacji (`Astro.locals.user`)
 - Warunkowe renderowanie layoutu (`AppLayout` dla zalogowanych, `Layout` dla niezalogowanych)
 - Komponent `NotFoundView` z przekazanym stanem autoryzacji
 
 **Obsługiwane zdarzenia**:
+
 - Brak bezpośrednich zdarzeń (logika po stronie serwera)
 
 **Warunki walidacji**:
+
 - Automatyczna obsługa przez Astro (nie wymaga dodatkowej walidacji)
 
 **Typy**:
+
 - Brak dodatkowych typów (używa standardowych typów Astro)
 
 **Propsy**:
+
 - Brak props (strona Astro)
 
 ## 5. Typy
@@ -156,7 +175,7 @@ interface NotFoundViewProps {
    * Wpływa na wyświetlane przyciski nawigacji.
    */
   isAuthenticated: boolean;
-  
+
   /**
    * Opcjonalna klasa CSS do dostosowania stylów komponentu.
    */
@@ -165,6 +184,7 @@ interface NotFoundViewProps {
 ```
 
 **Pola**:
+
 - `isAuthenticated: boolean` - wartość boolean określająca stan autoryzacji użytkownika. Gdy `true`, wyświetlane są przyciski "Wróć do Autorów" i "Wróć do Książek". Gdy `false`, wyświetlany jest przycisk "Wróć do strony głównej".
 - `className?: string` - opcjonalna klasa CSS pozwalająca na dostosowanie stylów komponentu z zewnątrz.
 
@@ -179,13 +199,13 @@ interface ErrorDisplayProps {
    * Powinien być przyjazny i zrozumiały, bez technicznych szczegółów.
    */
   message: string;
-  
+
   /**
    * Opcjonalna funkcja wywoływana po kliknięciu przycisku "Spróbuj ponownie".
    * Gdy nie jest przekazana, przycisk retry nie jest wyświetlany.
    */
   onRetry?: () => void;
-  
+
   /**
    * Opcjonalna klasa CSS do dostosowania stylów komponentu.
    */
@@ -194,6 +214,7 @@ interface ErrorDisplayProps {
 ```
 
 **Pola**:
+
 - `message: string` - komunikat błędu wyświetlany użytkownikowi. Powinien być przyjazny i zrozumiały, bez technicznych szczegółów (stack trace'ów).
 - `onRetry?: () => void` - opcjonalna funkcja callback wywoływana po kliknięciu przycisku "Spróbuj ponownie". Gdy nie jest przekazana, przycisk retry nie jest renderowany.
 - `className?: string` - opcjonalna klasa CSS pozwalająca na dostosowanie stylów komponentu.
@@ -203,6 +224,7 @@ interface ErrorDisplayProps {
 ### 6.1. Strona 404
 
 Strona 404 nie wymaga zarządzania stanem po stronie klienta, ponieważ:
+
 - Stan autoryzacji jest przekazywany przez `Astro.locals.user` (server-side)
 - Komponent `NotFoundView` jest prostym komponentem prezentacyjnym bez wewnętrznego stanu
 - Nawigacja odbywa się poprzez standardowe linki `<a>` lub `window.location.href`
@@ -210,11 +232,13 @@ Strona 404 nie wymaga zarządzania stanem po stronie klienta, ponieważ:
 ### 6.2. Inline errors w widokach list
 
 Inline errors są zarządzane przez istniejące hooki:
+
 - `useAuthorsList` - zarządza stanem błędów dla listy autorów (`error: string | null`)
 - `useBooksList` - zarządza stanem błędów dla listy książek (`error: string | null`)
 - Inne hooki używające podobnego wzorca
 
 **Stan błędów**:
+
 - `error: string | null` - przechowuje komunikat błędu lub `null` gdy brak błędu
 - Ustawiany przez hooki podczas obsługi błędów API
 - Resetowany do `null` podczas retry lub nowego żądania
@@ -226,6 +250,7 @@ Inline errors są zarządzane przez istniejące hooki:
 ### 7.1. Strona 404
 
 Strona 404 **nie wymaga integracji z API**, ponieważ:
+
 - Jest wywoływana automatycznie przez Astro przy nieistniejących ścieżkach
 - Nie wykonuje żadnych wywołań API
 - Stan autoryzacji jest dostępny przez `Astro.locals.user` (ustawiany przez middleware)
@@ -235,6 +260,7 @@ Strona 404 **nie wymaga integracji z API**, ponieważ:
 Inline errors są wyświetlane w odpowiedzi na błędy z istniejących wywołań API:
 
 **Endpointy mogące zwracać błędy**:
+
 - `GET /api/user/authors` - lista autorów użytkownika
 - `GET /api/user/works` - lista książek użytkownika
 - `GET /api/authors/search` - wyszukiwanie autorów w OpenLibrary
@@ -242,6 +268,7 @@ Inline errors są wyświetlane w odpowiedzi na błędy z istniejących wywołań
 - Inne endpointy używane w widokach list
 
 **Typy odpowiedzi błędów**:
+
 ```typescript
 interface ErrorResponse {
   error: string;
@@ -250,22 +277,24 @@ interface ErrorResponse {
 ```
 
 **Obsługa błędów w hookach**:
+
 - Hooki przechwytują błędy z `fetch` i parsują odpowiedzi JSON
 - Komunikaty błędów są ekstrahowane z `error.message` lub `errorResponse.message`
 - Stan `error` jest ustawiany w hooku i przekazywany do komponentu `ErrorDisplay`
 
 **Przykład obsługi błędu** (z `useAuthorsList`):
+
 ```typescript
 try {
-  const response = await fetch('/api/user/authors?...');
+  const response = await fetch("/api/user/authors?...");
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    setError(errorData.message || 'Wystąpił błąd podczas ładowania autorów');
+    setError(errorData.message || "Wystąpił błąd podczas ładowania autorów");
     return;
   }
   // ... sukces
 } catch (err) {
-  setError(err instanceof Error ? err.message : 'Wystąpił nieoczekiwany błąd');
+  setError(err instanceof Error ? err.message : "Wystąpił nieoczekiwany błąd");
 }
 ```
 
@@ -274,6 +303,7 @@ try {
 ### 8.1. Strona 404
 
 **Interakcje**:
+
 1. **Kliknięcie przycisku "Wróć do Autorów"** (tylko dla zalogowanych):
    - Akcja: Przekierowanie do `/app/authors`
    - Implementacja: `<a href="/app/authors">` lub `window.location.href = '/app/authors'`
@@ -292,12 +322,14 @@ try {
 ### 8.2. Inline errors w widokach list
 
 **Interakcje**:
+
 1. **Kliknięcie przycisku "Spróbuj ponownie"** (gdy `onRetry` jest przekazany):
    - Akcja: Wywołanie funkcji `onRetry` przekazanej przez props
    - Implementacja: `onClick={onRetry}` w komponencie `ErrorDisplay`
    - Oczekiwany wynik: Hook ponownie wykonuje żądanie API i aktualizuje stan (sukces lub nowy błąd)
 
 **Brak interakcji** (gdy `onRetry` nie jest przekazany):
+
 - Przycisk retry nie jest wyświetlany
 - Użytkownik może odświeżyć stronę ręcznie lub użyć nawigacji
 
@@ -306,37 +338,42 @@ try {
 ### 9.1. Strona 404
 
 **Warunki routingu**:
+
 - Astro automatycznie wywołuje `404.astro` dla nieistniejących ścieżek
 - Nie wymaga dodatkowej walidacji po stronie komponentu
 
 **Warunki renderowania**:
+
 - `isAuthenticated === true`: Renderuje `AppLayout` i przyciski "Wróć do Autorów" / "Wróć do Książek"
 - `isAuthenticated === false`: Renderuje `Layout` i przycisk "Wróć do strony głównej"
 
 ### 9.2. Inline errors w widokach list
 
 **Warunki wyświetlania błędów**:
+
 - `error !== null && error !== undefined`: Komponent `ErrorDisplay` jest renderowany zamiast zawartości listy
 - `error === null`: Normalna zawartość listy jest renderowana (lub loading/empty state)
 
 **Warunki wyświetlania przycisku retry**:
+
 - `onRetry !== undefined && onRetry !== null`: Przycisk "Spróbuj ponownie" jest wyświetlany
 - `onRetry === undefined || onRetry === null`: Przycisk retry nie jest wyświetlany
 
 **Wpływ warunków na stan UI**:
 
-| Warunek | Komponent | Efekt UI |
-|---------|-----------|----------|
-| `error !== null` | `AuthorsListContent` / `BooksListContent` | Renderuje `ErrorDisplay` zamiast listy |
-| `onRetry !== undefined` | `ErrorDisplay` | Wyświetla przycisk "Spróbuj ponownie" |
-| `isLoading === true` | `AuthorsListContent` / `BooksListContent` | Renderuje skeleton zamiast `ErrorDisplay` |
-| `error === null && authors.length === 0` | `AuthorsListContent` | Renderuje `EmptyState` zamiast `ErrorDisplay` |
+| Warunek                                  | Komponent                                 | Efekt UI                                      |
+| ---------------------------------------- | ----------------------------------------- | --------------------------------------------- |
+| `error !== null`                         | `AuthorsListContent` / `BooksListContent` | Renderuje `ErrorDisplay` zamiast listy        |
+| `onRetry !== undefined`                  | `ErrorDisplay`                            | Wyświetla przycisk "Spróbuj ponownie"         |
+| `isLoading === true`                     | `AuthorsListContent` / `BooksListContent` | Renderuje skeleton zamiast `ErrorDisplay`     |
+| `error === null && authors.length === 0` | `AuthorsListContent`                      | Renderuje `EmptyState` zamiast `ErrorDisplay` |
 
 ## 10. Obsługa błędów
 
 ### 10.1. Strona 404
 
 **Scenariusze błędów**:
+
 1. **Brak dostępu do `Astro.locals.user`**:
    - Obsługa: Użycie wartości domyślnej `false` dla `isAuthenticated`
    - Implementacja: `const isAuthenticated = !!Astro.locals.user;`
@@ -382,6 +419,7 @@ try {
    - Rezultat: `ErrorDisplay` wyświetla domyślny komunikat
 
 **Zasady wyświetlania komunikatów błędów**:
+
 - Komunikaty są przyjazne i zrozumiałe dla użytkownika
 - Nie wyświetlają technicznych szczegółów (stack trace'ów, kodów błędów HTTP)
 - Logowanie techniczne odbywa się po stronie serwera (logger)
@@ -471,4 +509,3 @@ try {
    - Testowanie na różnych przeglądarkach
    - Testowanie na różnych urządzeniach (desktop, mobile)
    - Weryfikacja wydajności renderowania
-

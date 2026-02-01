@@ -5,6 +5,7 @@
 Widok Ustawienia konta (`/app/settings`) umożliwia użytkownikowi zarządzanie sesją i lifecycle konta. Widok realizuje wymagania z US-002 (Logowanie i wylogowanie) oraz US-003 (Usunięcie konta i danych). Głównym celem jest zapewnienie bezpiecznego i intuicyjnego interfejsu do wylogowania oraz trwałego usunięcia konta wraz z wszystkimi powiązanymi danymi.
 
 Widok składa się z dwóch głównych sekcji:
+
 - **Sekcja Konto**: wyświetla adres e-mail użytkownika i przycisk wylogowania
 - **Sekcja Usuń konto**: zawiera ostrzeżenie o nieodwracalności operacji oraz przycisk uruchamiający dialog potwierdzenia usunięcia konta
 
@@ -14,7 +15,8 @@ Widok składa się z dwóch głównych sekcji:
 
 **Plik implementacji**: `src/pages/app/settings.astro`
 
-**Ochrona routingu**: 
+**Ochrona routingu**:
+
 - Middleware (`src/middleware/index.ts`) automatycznie przekierowuje nieautoryzowanych użytkowników do `/login?redirect_to=/app/settings`
 - Użytkownik musi być zalogowany (sesja weryfikowana przez `supabase.auth.getUser()`)
 - Email użytkownika jest dostępny przez `Astro.locals.user?.email` (ustawiane przez middleware)
@@ -49,6 +51,7 @@ settings.astro (Astro page)
 **Opis komponentu**: Główny komponent widoku ustawień konta. Wyświetla informacje o koncie, przycisk wylogowania oraz sekcję usuwania konta. Zarządza stanem dialogu usuwania konta i obsługuje akcję wylogowania.
 
 **Główne elementy**:
+
 - Kontener główny (`<div className="space-y-6">`)
 - Sekcja "Konto" (`<div className="space-y-4">`):
   - Nagłówek `<h2 className="text-2xl font-semibold">Konto</h2>`
@@ -62,6 +65,7 @@ settings.astro (Astro page)
 - Komponent `DeleteAccountDialog` (renderowany warunkowo)
 
 **Obsługiwane zdarzenia**:
+
 - `onClick` przycisku wylogowania → `handleLogout()`:
   - Ustawia `isLoggingOut = true`
   - Wywołuje `POST /api/auth/logout`
@@ -73,10 +77,12 @@ settings.astro (Astro page)
   - Ustawia `isDeleteDialogOpen = false`
 
 **Obsługiwana walidacja**:
+
 - Brak walidacji po stronie komponentu (walidacja wylogowania po stronie API)
 - Stan ładowania wylogowania: przycisk jest `disabled` gdy `isLoggingOut === true`
 
 **Typy**:
+
 - Props: `AccountSettingsProps`:
   ```typescript
   interface AccountSettingsProps {
@@ -89,6 +95,7 @@ settings.astro (Astro page)
   - `logoutError: string | null`
 
 **Props**:
+
 - `userEmail?: string` - adres e-mail użytkownika przekazywany z Astro page
 
 ### DeleteAccountDialog.tsx
@@ -96,6 +103,7 @@ settings.astro (Astro page)
 **Opis komponentu**: Dialog potwierdzenia usunięcia konta wymagający wpisania tekstu potwierdzenia "USUŃ" przed umożliwieniem usunięcia. Zapewnia dodatkową warstwę bezpieczeństwa przed przypadkowym usunięciem konta.
 
 **Główne elementy**:
+
 - `AlertDialog` (shadcn/ui):
   - `AlertDialogHeader`:
     - `AlertDialogTitle`: "Usuń konto"
@@ -109,6 +117,7 @@ settings.astro (Astro page)
     - `AlertDialogAction` (variant="destructive"): "Usuń konto" (z loaderem podczas ładowania)
 
 **Obsługiwane zdarzenia**:
+
 - `onChange` inputa → `handleConfirmTextChange()`:
   - Aktualizuje `confirmText` z wartości inputa
   - Resetuje `error` na `null`
@@ -128,6 +137,7 @@ settings.astro (Astro page)
 - `onOpenChange` dialogu → gdy `open === false`, wywołuje `handleCancel()`
 
 **Obsługiwana walidacja**:
+
 - Tekst potwierdzenia musi być dokładnie równy `CONFIRM_TEXT` ("USUŃ") - porównanie case-sensitive
 - Przycisk "Usuń konto" jest `disabled` gdy:
   - `confirmText !== CONFIRM_TEXT` LUB
@@ -135,6 +145,7 @@ settings.astro (Astro page)
 - Input jest `disabled` gdy `isLoading === true`
 
 **Typy**:
+
 - Props: `DeleteAccountDialogProps`:
   ```typescript
   interface DeleteAccountDialogProps {
@@ -149,6 +160,7 @@ settings.astro (Astro page)
   - `error: string | null`
 
 **Props**:
+
 - `isOpen: boolean` - kontroluje widoczność dialogu
 - `onClose: () => void` - callback wywoływany przy zamknięciu dialogu
 
@@ -157,6 +169,7 @@ settings.astro (Astro page)
 ### Typy komponentów (interfejsy props)
 
 **AccountSettingsProps**:
+
 ```typescript
 interface AccountSettingsProps {
   userEmail?: string;
@@ -164,6 +177,7 @@ interface AccountSettingsProps {
 ```
 
 **DeleteAccountDialogProps**:
+
 ```typescript
 interface DeleteAccountDialogProps {
   isOpen: boolean;
@@ -174,6 +188,7 @@ interface DeleteAccountDialogProps {
 ### Typy odpowiedzi API
 
 **DELETE /api/user/account**:
+
 - **Sukces (204 No Content)**: Brak body w odpowiedzi
 - **Błąd 401 Unauthorized**:
   ```typescript
@@ -191,17 +206,20 @@ interface DeleteAccountDialogProps {
   ```
 
 **POST /api/auth/logout**:
+
 - **Sukces (200 OK)**: Brak body w odpowiedzi (lub puste JSON)
 - **Błąd**: Różne kody statusu z komunikatem błędu
 
 ### Typy stanu lokalnego
 
 **AccountSettings.tsx**:
+
 - `isDeleteDialogOpen: boolean` - stan otwarcia dialogu usuwania konta
 - `isLoggingOut: boolean` - stan ładowania podczas wylogowania
 - `logoutError: string | null` - komunikat błędu wylogowania
 
 **DeleteAccountDialog.tsx**:
+
 - `confirmText: string` - tekst wpisany przez użytkownika do potwierdzenia
 - `isLoading: boolean` - stan ładowania podczas usuwania konta
 - `error: string | null` - komunikat błędu usuwania konta
@@ -211,10 +229,12 @@ interface DeleteAccountDialogProps {
 Widok używa wyłącznie lokalnego stanu React (useState) w komponentach. Nie wymaga globalnego zarządzania stanem ani niestandardowych hooków.
 
 **AccountSettings.tsx**:
+
 - `useState` dla `isDeleteDialogOpen`, `isLoggingOut`, `logoutError`
 - Stan jest lokalny dla komponentu i nie jest współdzielony z innymi komponentami
 
 **DeleteAccountDialog.tsx**:
+
 - `useState` dla `confirmText`, `isLoading`, `error`
 - Stan jest lokalny dla dialogu i resetowany przy zamknięciu
 
@@ -228,38 +248,46 @@ Widok używa wyłącznie lokalnego stanu React (useState) w komponentach. Nie wy
 
 **Metoda**: `DELETE`
 
-**Autoryzacja**: 
+**Autoryzacja**:
+
 - Wymagana sesja użytkownika (cookie/header)
 - Endpoint weryfikuje autoryzację przez `supabase.auth.getUser()` w middleware/endpoint
 
 **Request**:
+
 - Brak body
 - Headers: `Content-Type: application/json`
 - `credentials: "include"` (wymagane dla cookie-based session)
 
 **Response - Sukces (204 No Content)**:
+
 - Brak body
 - Po sukcesie: redirect do `/login` + toast (opcjonalnie, można dodać)
 
 **Response - Błąd 401 Unauthorized**:
+
 ```json
 {
   "error": "Unauthorized",
   "message": "Authentication required"
 }
 ```
+
 - Obsługa: wyświetlenie komunikatu "Sesja wygasła. Zaloguj się ponownie." + możliwość redirect do `/login`
 
 **Response - Błąd 500 Internal Server Error**:
+
 ```json
 {
   "error": "Internal server error",
   "message": "Failed to delete user account"
 }
 ```
+
 - Obsługa: wyświetlenie komunikatu "Wystąpił błąd podczas usuwania konta. Spróbuj ponownie później."
 
 **Implementacja w DeleteAccountDialog.tsx**:
+
 ```typescript
 const response = await fetch("/api/user/account", {
   method: "DELETE",
@@ -276,22 +304,27 @@ const response = await fetch("/api/user/account", {
 
 **Metoda**: `POST`
 
-**Autoryzacja**: 
+**Autoryzacja**:
+
 - Wymagana sesja użytkownika
 
 **Request**:
+
 - Body: puste lub `{}`
 - Headers: `Content-Type: application/json`
 
 **Response - Sukces (200 OK)**:
+
 - Brak body lub puste JSON
 - Po sukcesie: `window.location.href = "/login"`
 
 **Response - Błąd**:
+
 - Różne kody statusu z komunikatem błędu
 - Obsługa: wyświetlenie komunikatu błędu, ale nadal redirect do `/login` (sesja może być już nieważna)
 
 **Implementacja w AccountSettings.tsx**:
+
 ```typescript
 const response = await fetch("/api/auth/logout", {
   method: "POST",
@@ -304,6 +337,7 @@ const response = await fetch("/api/auth/logout", {
 ### Interakcja 1: Wylogowanie
 
 **Kroki użytkownika**:
+
 1. Użytkownik klika przycisk "Wyloguj" w sekcji "Konto"
 2. Przycisk pokazuje stan ładowania (ikona spinner + tekst "Wylogowywanie...")
 3. Wywoływane jest `POST /api/auth/logout`
@@ -315,6 +349,7 @@ const response = await fetch("/api/auth/logout", {
 ### Interakcja 2: Otwarcie dialogu usuwania konta
 
 **Kroki użytkownika**:
+
 1. Użytkownik klika przycisk "Usuń konto" w sekcji "Usuń konto"
 2. Otwiera się `AlertDialog` z ostrzeżeniem
 3. Dialog wyświetla opis nieodwracalności operacji
@@ -326,6 +361,7 @@ const response = await fetch("/api/auth/logout", {
 ### Interakcja 3: Wpisanie tekstu potwierdzenia
 
 **Kroki użytkownika**:
+
 1. Użytkownik wpisuje tekst w input "confirm-delete"
 2. Tekst jest automatycznie konwertowany na uppercase (przez className="uppercase")
 3. Gdy tekst jest równy "USUŃ", przycisk "Usuń konto" staje się enabled
@@ -336,6 +372,7 @@ const response = await fetch("/api/auth/logout", {
 ### Interakcja 4: Potwierdzenie usunięcia konta
 
 **Kroki użytkownika**:
+
 1. Użytkownik wpisuje "USUŃ" w input
 2. Użytkownik klika przycisk "Usuń konto" w dialogu
 3. Przycisk pokazuje stan ładowania (ikona spinner + tekst "Usuwanie...")
@@ -350,6 +387,7 @@ const response = await fetch("/api/auth/logout", {
 ### Interakcja 5: Anulowanie usuwania konta
 
 **Kroki użytkownika**:
+
 1. Użytkownik klika przycisk "Anuluj" w dialogu LUB klika poza dialogiem LUB naciska ESC
 2. Dialog się zamyka
 3. Stan `confirmText` jest resetowany do pustego stringa
@@ -363,13 +401,15 @@ const response = await fetch("/api/auth/logout", {
 
 **Warunek**: Użytkownik musi być zalogowany, aby uzyskać dostęp do `/app/settings`
 
-**Weryfikacja**: 
+**Weryfikacja**:
+
 - Middleware (`src/middleware/index.ts`) sprawdza `supabase.auth.getUser()`
 - Jeśli brak sesji → redirect do `/login?redirect_to=/app/settings`
 
 **Komponent**: Middleware
 
-**Wpływ na UI**: 
+**Wpływ na UI**:
+
 - Jeśli użytkownik nie jest zalogowany, nie zobaczy widoku ustawień (zostanie przekierowany)
 - Jeśli użytkownik jest zalogowany, `Astro.locals.user.email` jest dostępny i przekazywany do `AccountSettings`
 
@@ -377,13 +417,15 @@ const response = await fetch("/api/auth/logout", {
 
 **Warunek**: Tekst wpisany przez użytkownika musi być dokładnie równy "USUŃ" (case-sensitive)
 
-**Weryfikacja**: 
+**Weryfikacja**:
+
 - W `DeleteAccountDialog.tsx`: `confirmText === CONFIRM_TEXT`
 - Input ma `className="uppercase"` dla lepszego UX (automatyczna konwersja na uppercase)
 
 **Komponent**: `DeleteAccountDialog.tsx`
 
-**Wpływ na UI**: 
+**Wpływ na UI**:
+
 - Przycisk "Usuń konto" w dialogu jest `disabled` gdy `confirmText !== CONFIRM_TEXT`
 - Przycisk jest `enabled` tylko gdy tekst jest dokładnie "USUŃ"
 
@@ -391,13 +433,15 @@ const response = await fetch("/api/auth/logout", {
 
 **Warunek**: Podczas wykonywania operacji (wylogowanie, usuwanie konta) UI powinien być w stanie ładowania
 
-**Weryfikacja**: 
+**Weryfikacja**:
+
 - `isLoggingOut === true` dla wylogowania
 - `isLoading === true` dla usuwania konta
 
 **Komponent**: `AccountSettings.tsx`, `DeleteAccountDialog.tsx`
 
-**Wpływ na UI**: 
+**Wpływ na UI**:
+
 - Przyciski są `disabled` podczas ładowania
 - Przyciski pokazują ikonę spinnera i tekst "Wylogowywanie..." / "Usuwanie..."
 - Input w dialogu jest `disabled` podczas ładowania
@@ -406,13 +450,15 @@ const response = await fetch("/api/auth/logout", {
 
 **Warunek**: Sesja użytkownika musi być ważna podczas wywołania `DELETE /api/user/account`
 
-**Weryfikacja**: 
+**Weryfikacja**:
+
 - Endpoint weryfikuje autoryzację przez `supabase.auth.getUser()`
 - Jeśli brak sesji → zwraca 401
 
 **Komponent**: `DeleteAccountDialog.tsx` (obsługa błędu 401)
 
-**Wpływ na UI**: 
+**Wpływ na UI**:
+
 - Przy błędzie 401: wyświetlany jest Alert z komunikatem "Sesja wygasła. Zaloguj się ponownie."
 - Użytkownik może zostać przekierowany do `/login` (opcjonalnie)
 
@@ -423,6 +469,7 @@ const response = await fetch("/api/auth/logout", {
 **Scenariusz**: Wywołanie `POST /api/auth/logout` zwraca błąd (status !== 200)
 
 **Obsługa**:
+
 - Ustawienie `logoutError` na komunikat: "Wystąpił błąd podczas wylogowania. Spróbuj ponownie."
 - Resetowanie `isLoggingOut = false`
 - Wyświetlenie Alert z błędem pod przyciskiem wylogowania
@@ -437,6 +484,7 @@ const response = await fetch("/api/auth/logout", {
 **Scenariusz**: Wywołanie `DELETE /api/user/account` zwraca 401 Unauthorized (sesja wygasła)
 
 **Obsługa**:
+
 - Ustawienie `error` na komunikat: "Sesja wygasła. Zaloguj się ponownie."
 - Resetowanie `isLoading = false`
 - Wyświetlenie Alert z błędem w dialogu
@@ -451,6 +499,7 @@ const response = await fetch("/api/auth/logout", {
 **Scenariusz**: Wywołanie `DELETE /api/user/account` zwraca 500 Internal Server Error (błąd serwera)
 
 **Obsługa**:
+
 - Ustawienie `error` na komunikat: "Wystąpił błąd podczas usuwania konta. Spróbuj ponownie później."
 - Resetowanie `isLoading = false`
 - Wyświetlenie Alert z błędem w dialogu
@@ -465,6 +514,7 @@ const response = await fetch("/api/auth/logout", {
 **Scenariusz**: Wywołanie API rzuca wyjątek (np. brak połączenia sieciowego)
 
 **Obsługa**:
+
 - W `catch` block: ustawienie odpowiedniego komunikatu błędu
 - Resetowanie stanu ładowania
 - Wyświetlenie Alert z błędem
@@ -478,6 +528,7 @@ const response = await fetch("/api/auth/logout", {
 **Scenariusz**: Użytkownik próbuje kliknąć "Usuń konto" gdy tekst potwierdzenia nie jest równy "USUŃ"
 
 **Obsługa**:
+
 - Przycisk "Usuń konto" jest `disabled` gdy `confirmText !== CONFIRM_TEXT`
 - Brak możliwości kliknięcia przycisku (walidacja przez `disabled` attribute)
 - Brak potrzeby wyświetlania komunikatu błędu (przycisk jest wizualnie disabled)
@@ -654,4 +705,3 @@ const response = await fetch("/api/auth/logout", {
 1. Dodaj komentarze JSDoc do komponentów i funkcji
 2. Upewnij się, że komentarze wyjaśniają logikę biznesową (np. dlaczego wymagamy wpisania "USUŃ")
 3. Dodaj komentarze do obsługi błędów wyjaśniające różne scenariusze
-

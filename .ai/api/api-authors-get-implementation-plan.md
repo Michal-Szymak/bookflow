@@ -60,6 +60,7 @@ Brak (metoda GET)
    - Zawiera pojedynczy obiekt `AuthorDto`
 
 2. **AuthorDto** (z `src/types.ts`)
+
    ```typescript
    export type AuthorDto = AuthorRow;
    ```

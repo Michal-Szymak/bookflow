@@ -5,6 +5,7 @@
 Widok "Autor – works" (`/app/authors/:authorId`) wyświetla pełną listę prac (works) wybranego autora z możliwością masowego dodania książek do profilu użytkownika. Widok realizuje wymagania z US-005 (pobranie i sortowanie prac autora) oraz US-006 (dodanie książek autora hurtowo).
 
 Główne funkcjonalności:
+
 - Wyświetlanie listy works autora z danymi z primary edition (tytuł, okładka, język, ISBN, rok publikacji)
 - Informacja o tym, czy dana książka jest już w profilu użytkownika
 - Sortowanie po dacie publikacji (domyślnie od najnowszych) lub po tytule (A-Z)
@@ -21,11 +22,13 @@ Główne funkcjonalności:
 **Plik**: `src/pages/app/authors/[authorId].astro`
 
 **Parametry URL**:
+
 - `authorId` (path parameter): UUID autora
 - `page` (query parameter, opcjonalny): numer strony (domyślnie 1)
 - `sort` (query parameter, opcjonalny): `published_desc` (domyślnie) lub `title_asc`
 
 **Struktura pliku Astro**:
+
 - Import `AppLayout`
 - Odczyt `authorId` z `Astro.params`
 - Odczyt parametrów query z `Astro.url.searchParams`
@@ -62,27 +65,32 @@ AuthorWorksView (React island)
 **Opis**: Główny komponent React island zarządzający całym widokiem. Orkiestruje wszystkie podkomponenty i zarządza stanem.
 
 **Główne elementy**:
+
 - Hook `useAuthorWorks` do zarządzania stanem i logiką
 - Renderowanie sekwencyjne: Header → Toolbar → Content → Pagination → BulkToolbar
 - Obsługa modali i dialogów (jeśli potrzebne)
 
 **Obsługiwane interakcje**:
+
 - Zmiana sortowania → aktualizacja URL i odświeżenie danych
 - Zmiana strony → aktualizacja URL i odświeżenie danych
 - Zaznaczanie/odznaczanie checkboxów → aktualizacja lokalnego stanu selekcji
 - Bulk dodanie → wywołanie API i aktualizacja UI
 
 **Obsługiwana walidacja**:
+
 - Walidacja `authorId` (UUID format) - po stronie API
 - Walidacja parametrów query (page ≥ 1, sort enum) - po stronie API
 - Pre-check limitu 5000 książek przed bulk dodaniem
 
 **Typy**:
+
 - `authorId: string` (z props)
 - `initialPage?: number` (z URL)
 - `initialSort?: "published_desc" | "title_asc"` (z URL)
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksViewProps {
   authorId: string;
@@ -96,19 +104,23 @@ interface AuthorWorksViewProps {
 **Opis**: Nagłówek widoku z nazwą autora i breadcrumb nawigacją.
 
 **Główne elementy**:
+
 - Breadcrumb: "Autorzy" → "Nazwa autora"
 - Tytuł: "Prace: [Nazwa autora]"
 - Opcjonalnie: link powrotu do `/app/authors`
 
 **Obsługiwane interakcje**:
+
 - Kliknięcie w breadcrumb "Autorzy" → nawigacja do `/app/authors`
 
 **Obsługiwana walidacja**: Brak
 
 **Typy**:
+
 - `authorName: string`
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksHeaderProps {
   authorName: string;
@@ -120,22 +132,26 @@ interface AuthorWorksHeaderProps {
 **Opis**: Pasek narzędzi z kontrolkami sortowania i opcjonalnym przyciskiem odświeżania.
 
 **Główne elementy**:
+
 - `SortSelect` komponent (published_desc / title_asc)
 - Opcjonalnie: przycisk "Odśwież dane" (tylko dla autorów z OpenLibrary)
 
 **Obsługiwane interakcje**:
+
 - Zmiana sortowania → wywołanie `onSortChange(sort)`
 - Kliknięcie "Odśwież" → wywołanie `onForceRefresh()` z parametrem `forceRefresh=true`
 
 **Obsługiwana walidacja**: Brak (walidacja po stronie API)
 
 **Typy**:
+
 - `sort: "published_desc" | "title_asc"`
 - `hasOpenLibraryId: boolean` (czy autor ma openlibrary_id)
 - `onSortChange: (sort: "published_desc" | "title_asc") => void`
 - `onForceRefresh?: () => void`
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksToolbarProps {
   sort: "published_desc" | "title_asc";
@@ -150,6 +166,7 @@ interface AuthorWorksToolbarProps {
 **Opis**: Komponent warunkowego renderowania zawartości (loading, error, empty, table).
 
 **Główne elementy**:
+
 - Warunkowe renderowanie w zależności od stanu:
   - `isLoading` → `<AuthorWorksSkeleton />`
   - `error` → `<AuthorWorksError />`
@@ -161,6 +178,7 @@ interface AuthorWorksToolbarProps {
 **Obsługiwana walidacja**: Brak
 
 **Typy**:
+
 - `isLoading: boolean`
 - `error: string | null`
 - `works: WorkListItemDto[]`
@@ -171,6 +189,7 @@ interface AuthorWorksToolbarProps {
 - `isAllSelected: boolean`
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksContentProps {
   isLoading: boolean;
@@ -190,6 +209,7 @@ interface AuthorWorksContentProps {
 **Opis**: Placeholder loading state dla listy works.
 
 **Główne elementy**:
+
 - Skeleton UI (shimmer effect) z shadcn/ui
 - 5-10 wierszy skeleton odpowiadających `AuthorWorksTableRow`
 
@@ -200,6 +220,7 @@ interface AuthorWorksContentProps {
 **Typy**: Brak
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksSkeletonProps {
   count?: number;
@@ -212,23 +233,27 @@ interface AuthorWorksSkeletonProps {
 **Opis**: Komponent wyświetlania błędów z opcją retry i fallback do ręcznego dodania.
 
 **Główne elementy**:
+
 - Ikona błędu
 - Komunikat błędu (przyjazny dla użytkownika)
 - Przycisk "Spróbuj ponownie"
 - Opcjonalnie: przycisk "Dodaj ręcznie" (jeśli wspierane w MVP)
 
 **Obsługiwane interakcje**:
+
 - Kliknięcie "Spróbuj ponownie" → wywołanie `onRetry()`
 - Kliknięcie "Dodaj ręcznie" → otwarcie modalu (jeśli wspierane)
 
 **Obsługiwana walidacja**: Brak
 
 **Typy**:
+
 - `message: string`
 - `onRetry?: () => void`
 - `onManualAdd?: () => void`
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksErrorProps {
   message: string;
@@ -243,11 +268,13 @@ interface AuthorWorksErrorProps {
 **Opis**: Stan pusty gdy autor nie ma żadnych works.
 
 **Główne elementy**:
+
 - Ilustracja/ikona (pusta lista)
 - Komunikat: "Ten autor nie ma jeszcze żadnych prac"
 - Opcjonalnie: CTA "Dodaj ręcznie" (jeśli wspierane w MVP)
 
 **Obsługiwane interakcje**:
+
 - Kliknięcie "Dodaj ręcznie" → otwarcie modalu (jeśli wspierane)
 
 **Obsługiwana walidacja**: Brak
@@ -255,6 +282,7 @@ interface AuthorWorksErrorProps {
 **Typy**: Brak
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksEmptyProps {
   onManualAdd?: () => void;
@@ -267,17 +295,20 @@ interface AuthorWorksEmptyProps {
 **Opis**: Tabela z listą works z checkboxami do selekcji.
 
 **Główne elementy**:
+
 - `<table>` lub `<div>` z klasami table (responsywny stacked rows)
 - `AuthorWorksTableHeader` z checkboxem "Zaznacz wszystkie"
 - `AuthorWorksTableRow[]` dla każdego work
 
 **Obsługiwane interakcje**:
+
 - Zaznaczanie/odznaczanie pojedynczych works → wywołanie `onWorkToggle(workId)`
 - Zaznaczanie/odznaczanie wszystkich → wywołanie `onSelectAll()` / `onDeselectAll()`
 
 **Obsługiwana walidacja**: Brak
 
 **Typy**:
+
 - `works: WorkListItemDto[]`
 - `selectedWorkIds: Set<string>`
 - `onWorkToggle: (workId: string) => void`
@@ -286,6 +317,7 @@ interface AuthorWorksEmptyProps {
 - `isAllSelected: boolean`
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksTableProps {
   works: WorkListItemDto[];
@@ -303,20 +335,24 @@ interface AuthorWorksTableProps {
 **Opis**: Nagłówek tabeli z checkboxem "Zaznacz wszystkie" i kolumnami.
 
 **Główne elementy**:
+
 - Checkbox w pierwszej kolumnie (indeterminate state gdy część zaznaczona)
 - Kolumny: Checkbox, Okładka, Tytuł, Rok, Język, Status (jeśli w profilu)
 
 **Obsługiwane interakcje**:
+
 - Kliknięcie checkboxa → wywołanie `onToggleAll()`
 
 **Obsługiwana walidacja**: Brak
 
 **Typy**:
+
 - `isAllSelected: boolean`
 - `isIndeterminate: boolean` (część zaznaczona)
 - `onToggleAll: () => void`
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksTableHeaderProps {
   isAllSelected: boolean;
@@ -330,6 +366,7 @@ interface AuthorWorksTableHeaderProps {
 **Opis**: Pojedynczy wiersz tabeli z danymi work i checkboxem.
 
 **Główne elementy**:
+
 - Checkbox (pierwsza kolumna)
 - Okładka (CoverImage z lazy loading)
 - Tytuł work (z primary edition fallback)
@@ -339,18 +376,21 @@ interface AuthorWorksTableHeaderProps {
 - Accordion z dodatkowymi szczegółami (ISBN, pełna data publikacji)
 
 **Obsługiwane interakcje**:
+
 - Kliknięcie checkboxa → wywołanie `onToggle()`
 - Rozwijanie/zwijanie Accordion → lokalny stan
 
 **Obsługiwana walidacja**: Brak
 
 **Typy**:
+
 - `work: WorkListItemDto`
 - `isSelected: boolean`
 - `isInProfile: boolean` (czy work jest już w profilu)
 - `onToggle: () => void`
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksTableRowProps {
   work: WorkListItemDto;
@@ -365,22 +405,26 @@ interface AuthorWorksTableRowProps {
 **Opis**: Kontrolki paginacji (Poprzednia/Następna + "Strona X z Y").
 
 **Główne elementy**:
+
 - Przycisk "Poprzednia" (disabled na pierwszej stronie)
 - Tekst "Strona X z Y"
 - Przycisk "Następna" (disabled na ostatniej stronie)
 
 **Obsługiwane interakcje**:
+
 - Kliknięcie "Poprzednia" → wywołanie `onPageChange(currentPage - 1)`
 - Kliknięcie "Następna" → wywołanie `onPageChange(currentPage + 1)`
 
 **Obsługiwana walidacja**: Brak
 
 **Typy**:
+
 - `currentPage: number`
 - `totalPages: number`
 - `onPageChange: (page: number) => void`
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksPaginationProps {
   currentPage: number;
@@ -395,19 +439,23 @@ interface AuthorWorksPaginationProps {
 **Opis**: Sticky toolbar na dole ekranu wyświetlany tylko gdy `selectedCount > 0`.
 
 **Główne elementy**:
+
 - Licznik zaznaczonych: "Zaznaczono: N"
 - Przycisk "Dodaj zaznaczone" (domyślnie status `to_read`)
 - Opcjonalnie: Select statusu początkowego (jeśli wymagane w UI)
 
 **Obsługiwane interakcje**:
+
 - Kliknięcie "Dodaj zaznaczone" → wywołanie `onBulkAdd(workIds, status)`
 - Zmiana statusu początkowego → aktualizacja lokalnego stanu
 
 **Obsługiwana walidacja**:
+
 - Pre-check limitu 5000 książek (z profilu użytkownika)
 - Walidacja `work_ids` array (min 1, max 100, UUID format) - po stronie API
 
 **Typy**:
+
 - `selectedCount: number`
 - `selectedWorkIds: string[]`
 - `onBulkAdd: (workIds: string[], status?: UserWorkStatus) => Promise<void>`
@@ -415,6 +463,7 @@ interface AuthorWorksPaginationProps {
 - `limitStatus?: { current: number; max: number; isAtLimit: boolean }`
 
 **Propsy**:
+
 ```typescript
 interface AuthorWorksBulkToolbarProps {
   selectedCount: number;
@@ -434,6 +483,7 @@ interface AuthorWorksBulkToolbarProps {
 ### 5.1. Typy DTO (z `src/types.ts`)
 
 **WorkListItemDto**:
+
 ```typescript
 type WorkListItemDto = WorkWithPrimaryEditionDto & {
   publish_year: number | null; // COALESCE(work.first_publish_year, edition.publish_year)
@@ -441,6 +491,7 @@ type WorkListItemDto = WorkWithPrimaryEditionDto & {
 ```
 
 **WorkWithPrimaryEditionDto**:
+
 ```typescript
 type WorkWithPrimaryEditionDto = WorkDto & {
   primary_edition: PrimaryEditionSummaryDto | null;
@@ -448,6 +499,7 @@ type WorkWithPrimaryEditionDto = WorkDto & {
 ```
 
 **PrimaryEditionSummaryDto**:
+
 ```typescript
 type PrimaryEditionSummaryDto = Pick<
   EditionRow,
@@ -464,11 +516,13 @@ type PrimaryEditionSummaryDto = Pick<
 ```
 
 **AuthorWorksListResponseDto**:
+
 ```typescript
 type AuthorWorksListResponseDto = PaginatedResponseDto<WorkListItemDto>;
 ```
 
 **PaginatedResponseDto**:
+
 ```typescript
 interface PaginatedResponseDto<TItem> {
   items: TItem[];
@@ -478,6 +532,7 @@ interface PaginatedResponseDto<TItem> {
 ```
 
 **BulkAttachUserWorksCommand**:
+
 ```typescript
 interface BulkAttachUserWorksCommand {
   work_ids: WorkRow["id"][];
@@ -486,6 +541,7 @@ interface BulkAttachUserWorksCommand {
 ```
 
 **BulkAttachUserWorksResponseDto**:
+
 ```typescript
 interface BulkAttachUserWorksResponseDto {
   added: WorkRow["id"][];
@@ -494,6 +550,7 @@ interface BulkAttachUserWorksResponseDto {
 ```
 
 **AuthorResponseDto**:
+
 ```typescript
 interface AuthorResponseDto {
   author: AuthorDto;
@@ -501,6 +558,7 @@ interface AuthorResponseDto {
 ```
 
 **ProfileResponseDto**:
+
 ```typescript
 interface ProfileResponseDto {
   author_count: number;
@@ -513,6 +571,7 @@ interface ProfileResponseDto {
 ### 5.2. Typy ViewModel (lokalne dla komponentów)
 
 **AuthorWorksFilters**:
+
 ```typescript
 interface AuthorWorksFilters {
   page: number; // domyślnie 1
@@ -521,6 +580,7 @@ interface AuthorWorksFilters {
 ```
 
 **AuthorWorksState**:
+
 ```typescript
 interface AuthorWorksState {
   // Dane
@@ -528,22 +588,23 @@ interface AuthorWorksState {
   works: WorkListItemDto[];
   total: number;
   profile: ProfileResponseDto | null;
-  
+
   // Stan UI
   isLoading: boolean;
   isLoadingAuthor: boolean;
   isLoadingWorks: boolean;
   error: string | null;
-  
+
   // Selekcja
   selectedWorkIds: Set<string>; // selekcja per strona
-  
+
   // Filtry (z URL)
   filters: AuthorWorksFilters;
 }
 ```
 
 **WorkInProfileStatus**:
+
 ```typescript
 // Informacja czy work jest już w profilu użytkownika
 // Można sprawdzić przez porównanie work.id z listą user_works
@@ -568,22 +629,22 @@ function useAuthorWorks(authorId: string, initialPage?: number, initialSort?: "p
   const [works, setWorks] = useState<WorkListItemDto[]>([]);
   const [total, setTotal] = useState(0);
   const [profile, setProfile] = useState<ProfileResponseDto | null>(null);
-  
+
   // Stan UI
   const [isLoadingAuthor, setIsLoadingAuthor] = useState(true);
   const [isLoadingWorks, setIsLoadingWorks] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Selekcja (per strona)
   const [selectedWorkIds, setSelectedWorkIds] = useState<Set<string>>(new Set());
-  
+
   // Filtry z URL
   const [searchParams, setSearchParams] = useSearchParams();
   const filters: AuthorWorksFilters = {
     page: initialPage ?? parseInt(searchParams.get("page") || "1", 10),
-    sort: initialSort ?? (searchParams.get("sort") as "published_desc" | "title_asc") || "published_desc",
+    sort: initialSort ?? ((searchParams.get("sort") as "published_desc" | "title_asc") || "published_desc"),
   };
-  
+
   // Obliczony limit status
   const limitStatus = useMemo(() => {
     if (!profile) return null;
@@ -594,7 +655,7 @@ function useAuthorWorks(authorId: string, initialPage?: number, initialSort?: "p
       remaining: profile.max_works - profile.work_count,
     };
   }, [profile]);
-  
+
   // Funkcje do zmiany filtrów (aktualizują URL)
   const setPage = (page: number) => {
     const newParams = new URLSearchParams(searchParams);
@@ -607,7 +668,7 @@ function useAuthorWorks(authorId: string, initialPage?: number, initialSort?: "p
     // Czyszczenie selekcji przy zmianie strony
     setSelectedWorkIds(new Set());
   };
-  
+
   const setSort = (sort: "published_desc" | "title_asc") => {
     const newParams = new URLSearchParams(searchParams);
     newParams.set("sort", sort);
@@ -616,7 +677,7 @@ function useAuthorWorks(authorId: string, initialPage?: number, initialSort?: "p
     // Czyszczenie selekcji przy zmianie sortu
     setSelectedWorkIds(new Set());
   };
-  
+
   // Funkcje selekcji
   const toggleWork = (workId: string) => {
     setSelectedWorkIds((prev) => {
@@ -629,18 +690,18 @@ function useAuthorWorks(authorId: string, initialPage?: number, initialSort?: "p
       return next;
     });
   };
-  
+
   const selectAll = () => {
     setSelectedWorkIds(new Set(works.map((w) => w.id)));
   };
-  
+
   const deselectAll = () => {
     setSelectedWorkIds(new Set());
   };
-  
+
   const isAllSelected = selectedWorkIds.size === works.length && works.length > 0;
   const isIndeterminate = selectedWorkIds.size > 0 && selectedWorkIds.size < works.length;
-  
+
   // Funkcje API
   const fetchAuthor = async () => {
     setIsLoadingAuthor(true);
@@ -661,7 +722,7 @@ function useAuthorWorks(authorId: string, initialPage?: number, initialSort?: "p
       setIsLoadingAuthor(false);
     }
   };
-  
+
   const fetchWorks = async (forceRefresh = false) => {
     setIsLoadingWorks(true);
     setError(null);
@@ -692,7 +753,7 @@ function useAuthorWorks(authorId: string, initialPage?: number, initialSort?: "p
       setIsLoadingWorks(false);
     }
   };
-  
+
   const fetchProfile = async () => {
     try {
       const response = await fetch("/api/user/profile");
@@ -705,26 +766,24 @@ function useAuthorWorks(authorId: string, initialPage?: number, initialSort?: "p
       console.error("Failed to fetch profile:", err);
     }
   };
-  
+
   const bulkAddWorks = async (workIds: string[], status: UserWorkStatus = "to_read") => {
     // Pre-check limitu
     if (limitStatus?.isAtLimit) {
       throw new Error(`Osiągnięto limit książek (${limitStatus.max} książek na użytkownika)`);
     }
-    
+
     if (limitStatus && limitStatus.current + workIds.length > limitStatus.max) {
-      throw new Error(
-        `Nie można dodać ${workIds.length} książek. Pozostało miejsca: ${limitStatus.remaining}`
-      );
+      throw new Error(`Nie można dodać ${workIds.length} książek. Pozostało miejsca: ${limitStatus.remaining}`);
     }
-    
+
     try {
       const response = await fetch("/api/user/works/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ work_ids: workIds, status }),
       });
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           throw new Error("Musisz być zalogowany, aby dodać książki");
@@ -738,31 +797,31 @@ function useAuthorWorks(authorId: string, initialPage?: number, initialSort?: "p
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Nie udało się dodać książek");
       }
-      
+
       const data: BulkAttachUserWorksResponseDto = await response.json();
-      
+
       // Czyszczenie selekcji po sukcesie
       setSelectedWorkIds(new Set());
-      
+
       // Odświeżenie profilu (aktualizacja licznika)
       await fetchProfile();
-      
+
       return data;
     } catch (err) {
       throw err;
     }
   };
-  
+
   // Effects
   useEffect(() => {
     fetchAuthor();
     fetchProfile();
   }, [authorId]);
-  
+
   useEffect(() => {
     fetchWorks();
   }, [authorId, filters.page, filters.sort]);
-  
+
   return {
     // Dane
     author,
@@ -770,21 +829,21 @@ function useAuthorWorks(authorId: string, initialPage?: number, initialSort?: "p
     total,
     profile,
     limitStatus,
-    
+
     // Stan UI
     isLoading: isLoadingAuthor || isLoadingWorks,
     isLoadingAuthor,
     isLoadingWorks,
     error,
-    
+
     // Selekcja
     selectedWorkIds,
     isAllSelected,
     isIndeterminate,
-    
+
     // Filtry
     filters,
-    
+
     // Akcje
     setPage,
     setSort,
@@ -837,11 +896,13 @@ useEffect(() => {
 **Typ odpowiedzi**: `AuthorResponseDto`
 
 **Obsługa błędów**:
+
 - `400`: Błąd walidacji UUID → komunikat "Nieprawidłowy identyfikator autora"
 - `404`: Autor nie znaleziony → komunikat "Autor nie został znaleziony" + link powrotu
 - `500`: Błąd serwera → komunikat "Wystąpił błąd serwera" + retry
 
 **Użycie w komponencie**:
+
 ```typescript
 const response = await fetch(`/api/authors/${authorId}`);
 const data: AuthorResponseDto = await response.json();
@@ -853,6 +914,7 @@ setAuthor(data.author);
 **Typ żądania**: `GET`
 
 **Query parameters**:
+
 - `page?: number` (domyślnie 1)
 - `sort?: "published_desc" | "title_asc"` (domyślnie "published_desc")
 - `forceRefresh?: boolean` (domyślnie false)
@@ -860,12 +922,14 @@ setAuthor(data.author);
 **Typ odpowiedzi**: `AuthorWorksListResponseDto`
 
 **Obsługa błędów**:
+
 - `400`: Błąd walidacji → komunikat "Nieprawidłowe parametry zapytania"
 - `404`: Autor nie znaleziony → komunikat "Autor nie został znaleziony" + link powrotu
 - `502`: OpenLibrary niedostępne → komunikat "OpenLibrary jest tymczasowo niedostępne" + retry + opcja ręcznego dodania
 - `500`: Błąd serwera → komunikat "Wystąpił błąd serwera" + retry
 
 **Użycie w komponencie**:
+
 ```typescript
 const params = new URLSearchParams({
   page: filters.page.toString(),
@@ -889,6 +953,7 @@ setTotal(data.total);
 **Typ odpowiedzi**: `BulkAttachUserWorksResponseDto`
 
 **Obsługa błędów**:
+
 - `400`: Błąd walidacji (pusta lista, nieprawidłowe UUID) → komunikat "Nieprawidłowe dane"
 - `401`: Brak autoryzacji → komunikat "Musisz być zalogowany" + redirect do logowania
 - `403`: Brak uprawnień (RLS) → komunikat "Nie masz uprawnień do dodania tych książek"
@@ -896,6 +961,7 @@ setTotal(data.total);
 - `500`: Błąd serwera → komunikat "Wystąpił błąd serwera" + retry
 
 **Użycie w komponencie**:
+
 ```typescript
 const response = await fetch("/api/user/works/bulk", {
   method: "POST",
@@ -914,11 +980,13 @@ const data: BulkAttachUserWorksResponseDto = await response.json();
 **Typ odpowiedzi**: `ProfileResponseDto`
 
 **Obsługa błędów**:
+
 - `401`: Brak autoryzacji → ciche zignorowanie (nie blokuje widoku)
 - `404`: Profil nie znaleziony → ciche zignorowanie
 - `500`: Błąd serwera → ciche zignorowanie (nie blokuje widoku)
 
 **Użycie w komponencie**:
+
 ```typescript
 const response = await fetch("/api/user/profile");
 if (response.ok) {
@@ -934,6 +1002,7 @@ if (response.ok) {
 **Akcja użytkownika**: Wybór opcji sortowania w `SortSelect`
 
 **Oczekiwany wynik**:
+
 1. Aktualizacja URL (`?sort=title_asc` lub `?sort=published_desc`)
 2. Reset paginacji do strony 1
 3. Czyszczenie selekcji checkboxów
@@ -941,6 +1010,7 @@ if (response.ok) {
 5. Wyświetlenie loading state podczas pobierania danych
 
 **Implementacja**:
+
 ```typescript
 const handleSortChange = (sort: "published_desc" | "title_asc") => {
   setSort(sort); // Aktualizuje URL i wywołuje fetchWorks
@@ -952,6 +1022,7 @@ const handleSortChange = (sort: "published_desc" | "title_asc") => {
 **Akcja użytkownika**: Kliknięcie "Poprzednia" lub "Następna" w paginacji
 
 **Oczekiwany wynik**:
+
 1. Aktualizacja URL (`?page=2`)
 2. Czyszczenie selekcji checkboxów (selekcja per strona)
 3. Przewinięcie do góry listy
@@ -959,6 +1030,7 @@ const handleSortChange = (sort: "published_desc" | "title_asc") => {
 5. Wyświetlenie loading state podczas pobierania danych
 
 **Implementacja**:
+
 ```typescript
 const handlePageChange = (page: number) => {
   setPage(page); // Aktualizuje URL i wywołuje fetchWorks
@@ -971,6 +1043,7 @@ const handlePageChange = (page: number) => {
 **Akcja użytkownika**: Kliknięcie checkboxa przy pojedynczym work
 
 **Oczekiwany wynik**:
+
 1. Dodanie/usunięcie `workId` z `selectedWorkIds`
 2. Aktualizacja stanu checkboxa (checked/unchecked)
 3. Aktualizacja stanu checkboxa "Zaznacz wszystkie" (indeterminate/checked/unchecked)
@@ -978,6 +1051,7 @@ const handlePageChange = (page: number) => {
 5. Pojawienie się/zniknięcie `BulkToolbar` (jeśli `selectedCount > 0`)
 
 **Implementacja**:
+
 ```typescript
 const handleWorkToggle = (workId: string) => {
   toggleWork(workId); // Aktualizuje selectedWorkIds
@@ -989,6 +1063,7 @@ const handleWorkToggle = (workId: string) => {
 **Akcja użytkownika**: Kliknięcie checkboxa "Zaznacz wszystkie" w nagłówku tabeli
 
 **Oczekiwany wynik**:
+
 1. Zaznaczenie wszystkich works z bieżącej strony
 2. Aktualizacja wszystkich checkboxów w wierszach
 3. Aktualizacja checkboxa "Zaznacz wszystkie" (checked)
@@ -996,6 +1071,7 @@ const handleWorkToggle = (workId: string) => {
 5. Pojawienie się `BulkToolbar` (jeśli `selectedCount > 0`)
 
 **Implementacja**:
+
 ```typescript
 const handleSelectAll = () => {
   if (isAllSelected) {
@@ -1011,6 +1087,7 @@ const handleSelectAll = () => {
 **Akcja użytkownika**: Kliknięcie "Dodaj zaznaczone" w `BulkToolbar`
 
 **Oczekiwany wynik**:
+
 1. Pre-check limitu 5000 książek (z profilu)
 2. Wyświetlenie loading state na przycisku
 3. Wywołanie API `POST /api/user/works/bulk`
@@ -1024,17 +1101,18 @@ const handleSelectAll = () => {
    - Zachowanie selekcji (użytkownik może spróbować ponownie)
 
 **Implementacja**:
+
 ```typescript
 const handleBulkAdd = async () => {
   setIsAdding(true);
   try {
     const workIds = Array.from(selectedWorkIds);
     const result = await bulkAddWorks(workIds, "to_read");
-    
+
     toast.success(
       `Dodano ${result.added.length} książek${result.skipped.length > 0 ? `, pominięto ${result.skipped.length}` : ""}`
     );
-    
+
     // Selekcja jest czyszczona w bulkAddWorks
   } catch (err) {
     toast.error(err instanceof Error ? err.message : "Nie udało się dodać książek");
@@ -1049,6 +1127,7 @@ const handleBulkAdd = async () => {
 **Akcja użytkownika**: Kliknięcie "Odśwież dane" w toolbarze (tylko dla autorów z OpenLibrary)
 
 **Oczekiwany wynik**:
+
 1. Wyświetlenie loading state
 2. Wywołanie API z parametrem `forceRefresh=true`
 3. Odświeżenie danych autora z OpenLibrary (jeśli cache wygasł)
@@ -1056,6 +1135,7 @@ const handleBulkAdd = async () => {
 5. Toast z potwierdzeniem: "Dane zostały odświeżone"
 
 **Implementacja**:
+
 ```typescript
 const handleForceRefresh = async () => {
   setIsLoadingWorks(true);
@@ -1073,11 +1153,13 @@ const handleForceRefresh = async () => {
 ### 9.1. Walidacja po stronie frontendu
 
 **Walidacja authorId (UUID format)**:
+
 - Wykonywana po stronie API
 - Frontend przekazuje `authorId` z URL bez walidacji
 - W przypadku błędu 400, wyświetlamy komunikat: "Nieprawidłowy identyfikator autora"
 
 **Walidacja parametrów query**:
+
 - `page`: musi być ≥ 1 (domyślnie 1)
 - `sort`: musi być `"published_desc"` lub `"title_asc"` (domyślnie `"published_desc"`)
 - Wykonywana po stronie API
@@ -1085,6 +1167,7 @@ const handleForceRefresh = async () => {
 - W przypadku błędu 400, wyświetlamy komunikat: "Nieprawidłowe parametry zapytania"
 
 **Pre-check limitu 5000 książek**:
+
 - Sprawdzamy przed wywołaniem `POST /api/user/works/bulk`
 - Źródło: `profile.work_count` i `profile.max_works`
 - Warunek: `work_count + selectedWorkIds.length <= max_works`
@@ -1094,6 +1177,7 @@ const handleForceRefresh = async () => {
   - Nie czyszczymy selekcji
 
 **Walidacja selekcji**:
+
 - `selectedWorkIds` nie może być pusty przed bulk dodaniem
 - Sprawdzamy w `BulkToolbar` przed wywołaniem `onBulkAdd`
 - Jeśli puste, przycisk "Dodaj zaznaczone" jest disabled
@@ -1101,12 +1185,14 @@ const handleForceRefresh = async () => {
 ### 9.2. Walidacja po stronie API
 
 **GET /api/authors/{authorId}/works**:
+
 - `authorId`: UUID format (walidacja przez `AuthorIdParamSchema`)
 - `page`: integer ≥ 1 (walidacja przez `AuthorWorksListQuerySchema`)
 - `sort`: enum `["published_desc", "title_asc"]` (walidacja przez `AuthorWorksListQuerySchema`)
 - `forceRefresh`: boolean (walidacja przez `AuthorWorksListQuerySchema`)
 
 **POST /api/user/works/bulk**:
+
 - `work_ids`: array UUID, min 1, max 100, deduplikacja automatyczna (walidacja przez `BulkAttachUserWorksCommandSchema`)
 - `status`: enum `["to_read", "in_progress", "read", "hidden"]`, opcjonalny, domyślnie `"to_read"` (walidacja przez `BulkAttachUserWorksCommandSchema`)
 - Limit 5000 książek: sprawdzany w `WorksService.bulkAttachUserWorks`
@@ -1114,28 +1200,33 @@ const handleForceRefresh = async () => {
 ### 9.3. Wpływ walidacji na stan UI
 
 **Błąd walidacji UUID**:
+
 - `error` state = "Nieprawidłowy identyfikator autora"
 - Wyświetlenie `AuthorWorksError` z komunikatem
 - Brak możliwości retry (błąd w URL)
 
 **Błąd walidacji query parameters**:
+
 - `error` state = "Nieprawidłowe parametry zapytania"
 - Wyświetlenie `AuthorWorksError` z komunikatem
 - Możliwość retry (po poprawieniu URL)
 
 **Błąd limitu 5000 książek (pre-check)**:
+
 - Toast z komunikatem błędu
 - `BulkToolbar` pozostaje widoczny
 - Selekcja pozostaje zachowana
 - Przycisk "Dodaj zaznaczone" pozostaje aktywny (użytkownik może zmniejszyć selekcję)
 
 **Błąd limitu 5000 książek (z API, 409)**:
+
 - Toast z komunikatem: "Osiągnięto limit książek (5000 książek na użytkownika)"
 - `BulkToolbar` pozostaje widoczny
 - Selekcja pozostaje zachowana
 - Odświeżenie profilu (aktualizacja licznika)
 
 **Błąd RLS (403)**:
+
 - Toast z komunikatem: "Nie masz uprawnień do dodania tych książek"
 - `BulkToolbar` pozostaje widoczny
 - Selekcja pozostaje zachowana
@@ -1145,36 +1236,43 @@ const handleForceRefresh = async () => {
 ### 10.1. Błędy API
 
 **400 Bad Request (walidacja)**:
+
 - **Przyczyna**: Nieprawidłowy UUID autora lub nieprawidłowe parametry query
 - **Obsługa**: Wyświetlenie `AuthorWorksError` z komunikatem: "Nieprawidłowe dane. Sprawdź adres URL."
 - **Akcje**: Link powrotu do `/app/authors`
 
 **401 Unauthorized**:
+
 - **Przyczyna**: Sesja wygasła lub użytkownik nie jest zalogowany
 - **Obsługa**: Redirect do `/login` + toast: "Zaloguj się ponownie"
 - **Akcje**: Automatyczny redirect
 
 **403 Forbidden (RLS)**:
+
 - **Przyczyna**: Użytkownik nie ma uprawnień do autora lub works
 - **Obsługa**: Wyświetlenie `AuthorWorksError` z komunikatem: "Nie masz uprawnień do wyświetlenia tego autora"
 - **Akcje**: Link powrotu do `/app/authors`
 
 **404 Not Found**:
+
 - **Przyczyna**: Autor nie został znaleziony lub nie jest dostępny (RLS)
 - **Obsługa**: Wyświetlenie `AuthorWorksError` z komunikatem: "Autor nie został znaleziony"
 - **Akcje**: Link powrotu do `/app/authors` + przycisk "Spróbuj ponownie"
 
 **409 Conflict (limit książek)**:
+
 - **Przyczyna**: Próba dodania książek przekraczająca limit 5000
 - **Obsługa**: Toast z komunikatem: "Osiągnięto limit książek (5000 książek na użytkownika)"
 - **Akcje**: Zachowanie selekcji, możliwość zmniejszenia liczby zaznaczonych
 
 **502 Bad Gateway (OpenLibrary)**:
+
 - **Przyczyna**: OpenLibrary jest niedostępne
 - **Obsługa**: Wyświetlenie `AuthorWorksError` z komunikatem: "OpenLibrary jest tymczasowo niedostępne. Spróbuj ponownie później."
 - **Akcje**: Przycisk "Spróbuj ponownie" + opcjonalnie "Dodaj ręcznie" (jeśli wspierane w MVP)
 
 **500 Internal Server Error**:
+
 - **Przyczyna**: Błąd serwera
 - **Obsługa**: Wyświetlenie `AuthorWorksError` z komunikatem: "Wystąpił błąd serwera. Spróbuj ponownie później."
 - **Akcje**: Przycisk "Spróbuj ponownie"
@@ -1182,32 +1280,39 @@ const handleForceRefresh = async () => {
 ### 10.2. Błędy sieciowe
 
 **Brak połączenia z internetem**:
+
 - **Obsługa**: Wyświetlenie `AuthorWorksError` z komunikatem: "Brak połączenia z internetem. Sprawdź swoje połączenie."
 - **Akcje**: Przycisk "Spróbuj ponownie"
 
 **Timeout**:
+
 - **Obsługa**: Wyświetlenie `AuthorWorksError` z komunikatem: "Przekroczono limit czasu oczekiwania. Spróbuj ponownie."
 - **Akcje**: Przycisk "Spróbuj ponownie"
 
 ### 10.3. Przypadki brzegowe
 
 **Autor bez works**:
+
 - **Obsługa**: Wyświetlenie `AuthorWorksEmpty` z komunikatem: "Ten autor nie ma jeszcze żadnych prac"
 - **Akcje**: Opcjonalnie "Dodaj ręcznie" (jeśli wspierane w MVP)
 
 **Wszystkie works już w profilu**:
+
 - **Obsługa**: Normalne wyświetlenie listy z badgeami "Dodane"
 - **Akcje**: Użytkownik może zobaczyć, które książki już ma
 
 **Selekcja works już w profilu**:
+
 - **Obsługa**: API zwraca `skipped` array z ID works już w profilu
 - **Akcje**: Toast informuje: "Dodano N książek, pominięto M (już w profilu)"
 
 **Zmiana strony podczas bulk dodawania**:
+
 - **Obsługa**: Blokada zmiany strony podczas `isAdding === true`
 - **Akcje**: Disable przycisków paginacji podczas dodawania
 
 **Równoczesne wywołania API**:
+
 - **Obsługa**: Użycie flag `isLoadingWorks` i `isAdding` do blokady równoczesnych wywołań
 - **Akcje**: Ignorowanie kolejnych kliknięć podczas loading
 
@@ -1338,4 +1443,3 @@ const handleForceRefresh = async () => {
 2. Sprawdzenie zgodności z PRD i User Stories
 3. Aktualizacja dokumentacji projektu (jeśli potrzebna)
 4. Code review i refaktoryzacja
-

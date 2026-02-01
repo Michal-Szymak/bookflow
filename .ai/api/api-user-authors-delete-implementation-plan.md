@@ -357,13 +357,16 @@ HTTP/1.1 204 No Content
 2. Dodaj nową metodę `detachUserAuthor(userId: string, authorId: string): Promise<void>`
 3. Metoda powinna:
    a. Znaleźć wszystkie dzieła autora poprzez zapytanie do `author_works`:
+
    ```typescript
    const { data: authorWorks, error: authorWorksError } = await this.supabase
      .from("author_works")
      .select("work_id")
      .eq("author_id", authorId);
    ```
+
    b. Jeśli autor ma dzieła, usuń wszystkie powiązane `user_works`:
+
    ```typescript
    if (authorWorks && authorWorks.length > 0) {
      const workIds = authorWorks.map((aw) => aw.work_id);
@@ -378,7 +381,9 @@ HTTP/1.1 204 No Content
      }
    }
    ```
+
    c. Usuń rekord `user_authors`:
+
    ```typescript
    const { data, error } = await this.supabase
      .from("user_authors")
@@ -400,6 +405,7 @@ HTTP/1.1 204 No Content
      throw new Error("Author is not attached to user profile");
    }
    ```
+
 4. Dodaj dokumentację JSDoc dla metody, opisującą kaskadowe usunięcie `user_works`
 5. Obsłuż błędy bazy danych i przekaż je dalej z odpowiednimi komunikatami
 

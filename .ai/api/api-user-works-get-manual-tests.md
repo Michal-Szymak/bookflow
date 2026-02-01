@@ -1241,10 +1241,10 @@ Przed zakończeniem testów, upewnij się, że:
 
 ## Notatki z testów
 
-**Data testów:** ******\_\_\_******  
-**Tester:** ******\_\_\_******  
-**Środowisko:** ******\_\_\_******  
-**Wersja API:** ******\_\_\_******
+**Data testów:** **\*\***\_\_\_**\*\***  
+**Tester:** **\*\***\_\_\_**\*\***  
+**Środowisko:** **\*\***\_\_\_**\*\***  
+**Wersja API:** **\*\***\_\_\_**\*\***
 
 ### Znalezione problemy:
 

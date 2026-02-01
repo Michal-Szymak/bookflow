@@ -198,4 +198,3 @@ OpenLibraryEdition
 ├── cover_url: string | null
 └── language: string | null
 ```
-

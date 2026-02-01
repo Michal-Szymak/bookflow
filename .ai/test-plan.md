@@ -35,6 +35,7 @@ Plan testów obejmuje:
 #### 2.1.1. Warstwa API (Backend)
 
 **Endpoints autentykacji:**
+
 - `POST /api/auth/register` - Rejestracja użytkownika
 - `POST /api/auth/login` - Logowanie użytkownika
 - `POST /api/auth/logout` - Wylogowanie użytkownika
@@ -44,6 +45,7 @@ Plan testów obejmuje:
 - `DELETE /api/user/account` - Usunięcie konta użytkownika
 
 **Endpoints autorów:**
+
 - `GET /api/authors/search` - Wyszukiwanie autorów w OpenLibrary
 - `POST /api/authors` - Tworzenie ręcznego autora
 - `GET /api/authors/{authorId}` - Pobieranie szczegółów autora
@@ -51,6 +53,7 @@ Plan testów obejmuje:
 - `POST /api/openlibrary/import/author` - Import autora z OpenLibrary
 
 **Endpoints dzieł (works):**
+
 - `POST /api/works` - Tworzenie ręcznego dzieła
 - `GET /api/works/{workId}` - Pobieranie szczegółów dzieła
 - `GET /api/works/{workId}/editions` - Lista wydań dzieła
@@ -58,10 +61,12 @@ Plan testów obejmuje:
 - `POST /api/openlibrary/import/work` - Import dzieła z OpenLibrary
 
 **Endpoints wydań (editions):**
+
 - `POST /api/editions` - Tworzenie ręcznego wydania
 - `POST /api/openlibrary/import/edition` - Import wydania z OpenLibrary
 
 **Endpoints użytkownika:**
+
 - `GET /api/user/profile` - Pobieranie profilu użytkownika
 - `GET /api/user/authors` - Lista autorów użytkownika
 - `POST /api/user/authors` - Dodanie autora do profilu
@@ -75,6 +80,7 @@ Plan testów obejmuje:
 #### 2.1.2. Warstwa Serwisów (Services)
 
 **Serwisy biznesowe:**
+
 - `ProfileService` - Zarządzanie profilem użytkownika
 - `AuthorsService` - Operacje na autorach
 - `WorksService` - Operacje na dziełach
@@ -86,6 +92,7 @@ Plan testów obejmuje:
 #### 2.1.3. Warstwa Walidacji (Validation)
 
 **Schematy walidacji Zod:**
+
 - Walidacja autentykacji (login, register, forgot-password, reset-password)
 - Walidacja autorów (create-author, import-author, author-search)
 - Walidacja dzieł (create-work, import-work, update-user-work)
@@ -102,6 +109,7 @@ Plan testów obejmuje:
 #### 2.1.5. Komponenty React (Frontend)
 
 **Komponenty autentykacji:**
+
 - `LoginForm` - Formularz logowania
 - `RegisterForm` - Formularz rejestracji
 - `ForgotPasswordForm` - Formularz resetu hasła
@@ -111,6 +119,7 @@ Plan testów obejmuje:
 - `DeleteAccountDialog` - Dialog usunięcia konta
 
 **Komponenty autorów:**
+
 - `AuthorsListView` - Główny widok listy autorów
 - `AuthorsTable` - Tabela autorów
 - `AddAuthorModal` - Modal dodawania autora
@@ -120,6 +129,7 @@ Plan testów obejmuje:
 - `AuthorWorksView` - Widok dzieł autora
 
 **Komponenty książek:**
+
 - `BooksListView` - Główny widok listy książek
 - `BooksTable` - Tabela książek
 - `WorkStatusControl` - Kontrolka statusu czytania
@@ -128,6 +138,7 @@ Plan testów obejmuje:
 - `BooksFiltersBar` - Pasek filtrów
 
 **Komponenty UI (Shadcn/ui):**
+
 - Komponenty bazowe (Button, Input, Select, Checkbox, etc.)
 - Komponenty złożone (Accordion, Alert Dialog, Badge, etc.)
 
@@ -150,7 +161,8 @@ Plan testów obejmuje:
 
 **Cel**: Weryfikacja działania pojedynczych funkcji, metod i komponentów w izolacji.
 
-**Narzędzia**: 
+**Narzędzia**:
+
 - **Vitest** (zalecane dla Astro/TypeScript)
 - **@testing-library/react** dla komponentów React
 - **@testing-library/user-event** dla symulacji interakcji użytkownika
@@ -160,12 +172,14 @@ Plan testów obejmuje:
 #### 3.1.1. Serwisy Biznesowe
 
 **ProfileService:**
+
 - ✅ Pobieranie profilu użytkownika
 - ✅ Aktualizacja liczników autorów i dzieł
 - ✅ Sprawdzanie limitów (max_authors, max_works)
 - ✅ Obsługa błędów (brak profilu, błąd bazy danych)
 
 **AuthorsService:**
+
 - ✅ Tworzenie ręcznego autora
 - ✅ Import autora z OpenLibrary
 - ✅ Pobieranie autora po ID
@@ -174,6 +188,7 @@ Plan testów obejmuje:
 - ✅ Obsługa cache OpenLibrary (ol_fetched_at, ol_expires_at)
 
 **WorksService:**
+
 - ✅ Tworzenie ręcznego dzieła
 - ✅ Import dzieła z OpenLibrary
 - ✅ Pobieranie dzieła po ID
@@ -182,12 +197,14 @@ Plan testów obejmuje:
 - ✅ Walidacja constraintów
 
 **EditionsService:**
+
 - ✅ Tworzenie ręcznego wydania
 - ✅ Import wydania z OpenLibrary
 - ✅ Pobieranie wydań dla dzieła
 - ✅ Walidacja constraintów
 
 **OpenLibraryService:**
+
 - ✅ Wyszukiwanie autorów w OpenLibrary
 - ✅ Pobieranie szczegółów autora
 - ✅ Pobieranie listy dzieł autora
@@ -199,6 +216,7 @@ Plan testów obejmuje:
 - ✅ Konwersja OpenLibrary ID (short/long format)
 
 **RateLimitService:**
+
 - ✅ Sprawdzanie limitu zapytań
 - ✅ Rejestrowanie zapytań
 - ✅ Czyszczenie starych wpisów
@@ -206,6 +224,7 @@ Plan testów obejmuje:
 - ✅ Obsługa wielu użytkowników jednocześnie
 
 **AccountService:**
+
 - ✅ Usuwanie konta użytkownika
 - ✅ Kasowanie powiązanych danych (cascade)
 - ✅ Usuwanie z Supabase Auth
@@ -213,6 +232,7 @@ Plan testów obejmuje:
 #### 3.1.2. Walidacja (Zod Schemas)
 
 **Testy schematów walidacji:**
+
 - ✅ Poprawne dane wejściowe
 - ✅ Nieprawidłowe typy danych
 - ✅ Brakujące wymagane pola
@@ -223,6 +243,7 @@ Plan testów obejmuje:
 - ✅ Komunikaty błędów w języku polskim
 
 **Przykładowe schematy do testowania:**
+
 - `LoginSchema`, `RegisterSchema`
 - `CreateAuthorSchema`, `ImportAuthorSchema`
 - `CreateWorkSchema`, `ImportWorkSchema`
@@ -233,6 +254,7 @@ Plan testów obejmuje:
 #### 3.1.3. Komponenty React
 
 **Komponenty formularzy:**
+
 - ✅ Renderowanie formularzy
 - ✅ Walidacja pól formularzy
 - ✅ Obsługa błędów walidacji
@@ -242,6 +264,7 @@ Plan testów obejmuje:
 - ✅ Disabled state podczas submit
 
 **Komponenty list:**
+
 - ✅ Renderowanie pustych list
 - ✅ Renderowanie list z danymi
 - ✅ Paginacja
@@ -252,6 +275,7 @@ Plan testów obejmuje:
 - ✅ Error states
 
 **Komponenty interaktywne:**
+
 - ✅ Otwieranie/zamykanie modali
 - ✅ Wybór opcji w selectach
 - ✅ Zaznaczanie checkboxów
@@ -259,6 +283,7 @@ Plan testów obejmuje:
 - ✅ Obsługa keyboard navigation (gdzie dotyczy)
 
 **Hooks:**
+
 - ✅ `useAuthorsList` - zarządzanie stanem listy autorów
 - ✅ `useAuthorSearch` - wyszukiwanie autorów
 - ✅ `useBooksList` - zarządzanie stanem listy książek
@@ -277,6 +302,7 @@ Plan testów obejmuje:
 **Cel**: Weryfikacja współdziałania wielu komponentów systemu.
 
 **Narzędzia**:
+
 - **Vitest** z możliwością testowania API routes
 - **@supabase/supabase-js** (mock lub testowa instancja)
 - **MSW (Mock Service Worker)** do mockowania zewnętrznych API
@@ -286,24 +312,28 @@ Plan testów obejmuje:
 #### 3.2.1. Integracja API z Bazą Danych
 
 **Endpoints autentykacji:**
+
 - ✅ Rejestracja → utworzenie profilu w `profiles`
 - ✅ Logowanie → ustawienie sesji
 - ✅ Reset hasła → wysłanie emaila → weryfikacja tokena
 - ✅ Usunięcie konta → kasowanie wszystkich powiązanych danych
 
 **Endpoints autorów:**
+
 - ✅ Tworzenie autora → aktualizacja `author_count` w profilu
 - ✅ Import autora z OpenLibrary → cache w bazie
 - ✅ Pobieranie dzieł autora → wywołanie RPC `author_works_list`
 - ✅ Usunięcie autora → aktualizacja liczników
 
 **Endpoints dzieł:**
+
 - ✅ Tworzenie dzieła → powiązanie z autorami (`author_works`)
 - ✅ Import dzieła → powiązanie z autorem
 - ✅ Ustawienie primary_edition → walidacja przynależności
 - ✅ Pobieranie wydań → sortowanie po publish_year
 
 **Endpoints użytkownika:**
+
 - ✅ Dodanie autora → aktualizacja `user_authors` i `author_count`
 - ✅ Masowe dodanie dzieł → deduplikacja, aktualizacja `work_count`
 - ✅ Aktualizacja statusu → aktualizacja `status_updated_at`
@@ -313,6 +343,7 @@ Plan testów obejmuje:
 #### 3.2.2. Integracja z OpenLibrary API
 
 **Scenariusze testowe:**
+
 - ✅ Wyszukiwanie autorów → parsowanie odpowiedzi → zwrócenie wyników
 - ✅ Import autora → pobranie szczegółów → zapis w bazie z cache
 - ✅ Pobieranie dzieł autora → parsowanie → zapis w bazie
@@ -342,6 +373,7 @@ Plan testów obejmuje:
 **Cel**: Weryfikacja pełnych przepływów użytkownika od początku do końca.
 
 **Narzędzia**:
+
 - **Playwright** (zalecane)
 - Testowa instancja Supabase
 - Mock OpenLibrary API (lub testowa instancja)
@@ -351,6 +383,7 @@ Plan testów obejmuje:
 #### 3.3.1. Przepływ Autentykacji
 
 **TC-E2E-001: Rejestracja i pierwsze logowanie**
+
 1. Użytkownik otwiera stronę główną
 2. Przechodzi do /register
 3. Wypełnia formularz rejestracji (email, hasło)
@@ -359,6 +392,7 @@ Plan testów obejmuje:
 6. Weryfikuje utworzenie profilu (GET /api/user/profile)
 
 **TC-E2E-002: Logowanie istniejącego użytkownika**
+
 1. Użytkownik otwiera /login
 2. Wypełnia formularz logowania
 3. Wysyła formularz
@@ -366,6 +400,7 @@ Plan testów obejmuje:
 5. Weryfikuje wyświetlenie danych użytkownika
 
 **TC-E2E-003: Reset hasła**
+
 1. Użytkownik otwiera /forgot-password
 2. Wprowadza email
 3. Wysyła formularz
@@ -375,13 +410,15 @@ Plan testów obejmuje:
 7. Loguje się nowym hasłem
 
 **TC-E2E-004: Wylogowanie**
+
 1. Zalogowany użytkownik klika "Wyloguj"
 2. Weryfikuje przekierowanie do /login
-3. Weryfikuje, że nie może uzyskać dostępu do /app/*
+3. Weryfikuje, że nie może uzyskać dostępu do /app/\*
 
 #### 3.3.2. Przepływ Zarządzania Autorami
 
 **TC-E2E-005: Dodanie autora z OpenLibrary (główny przepływ MVP)**
+
 1. Zalogowany użytkownik otwiera /app/authors
 2. Klika "Dodaj autora"
 3. Wybiera zakładkę "Wyszukaj w OpenLibrary"
@@ -393,6 +430,7 @@ Plan testów obejmuje:
 9. Weryfikuje aktualizację licznika autorów
 
 **TC-E2E-006: Ręczne dodanie autora**
+
 1. Zalogowany użytkownik otwiera /app/authors
 2. Klika "Dodaj autora"
 3. Wybiera zakładkę "Dodaj ręcznie"
@@ -401,6 +439,7 @@ Plan testów obejmuje:
 6. Weryfikuje wyświetlenie autora na liście
 
 **TC-E2E-007: Przeglądanie dzieł autora**
+
 1. Zalogowany użytkownik otwiera /app/authors
 2. Klika na autora w tabeli
 3. Weryfikuje przejście do /app/authors/{authorId}
@@ -409,6 +448,7 @@ Plan testów obejmuje:
 6. Weryfikuje sortowanie (published_desc, title_asc)
 
 **TC-E2E-008: Usunięcie autora**
+
 1. Zalogowany użytkownik otwiera /app/authors
 2. Klika przycisk usuwania przy autorze
 3. Potwierdza usunięcie w dialogu
@@ -418,6 +458,7 @@ Plan testów obejmuje:
 #### 3.3.3. Przepływ Zarządzania Książkami
 
 **TC-E2E-009: Masowe dodanie książek do biblioteki**
+
 1. Zalogowany użytkownik otwiera /app/authors/{authorId}
 2. Zaznacza wiele dzieł (checkbox)
 3. Klika "Dodaj do biblioteki"
@@ -425,6 +466,7 @@ Plan testów obejmuje:
 5. Weryfikuje aktualizację licznika dzieł
 
 **TC-E2E-010: Zmiana statusu czytania**
+
 1. Zalogowany użytkownik otwiera /app/books
 2. Wybiera książkę z listy
 3. Zmienia status (np. "To read" → "In progress")
@@ -432,6 +474,7 @@ Plan testów obejmuje:
 5. Odświeża stronę i weryfikuje zachowanie statusu
 
 **TC-E2E-011: Masowa zmiana statusów**
+
 1. Zalogowany użytkownik otwiera /app/books
 2. Zaznacza wiele książek
 3. Wybiera nowy status z dropdown
@@ -439,6 +482,7 @@ Plan testów obejmuje:
 5. Weryfikuje aktualizację statusów wszystkich zaznaczonych książek
 
 **TC-E2E-012: Filtrowanie i sortowanie książek**
+
 1. Zalogowany użytkownik otwiera /app/books
 2. Wybiera filtr statusu (np. "Read")
 3. Weryfikuje wyświetlenie tylko książek z tym statusem
@@ -447,6 +491,7 @@ Plan testów obejmuje:
 6. Weryfikuje synchronizację filtrów z URL
 
 **TC-E2E-013: Oznaczenie dostępności w Legimi**
+
 1. Zalogowany użytkownik otwiera /app/books
 2. Wybiera książkę
 3. Oznacza jako dostępną w Legimi
@@ -457,6 +502,7 @@ Plan testów obejmuje:
 #### 3.3.4. Przepływ Usuwania Konta
 
 **TC-E2E-014: Usunięcie konta użytkownika**
+
 1. Zalogowany użytkownik otwiera /app/settings
 2. Klika "Usuń konto"
 3. Potwierdza usunięcie w dialogu
@@ -482,6 +528,7 @@ Plan testów obejmuje:
 #### 3.4.2. Row Level Security (RLS)
 
 **Testy RLS w bazie danych:**
+
 - ✅ Użytkownik widzi tylko swoje `user_authors`
 - ✅ Użytkownik widzi tylko swoje `user_works`
 - ✅ Użytkownik nie może modyfikować danych innego użytkownika
@@ -525,6 +572,7 @@ Plan testów obejmuje:
 **Cel**: Weryfikacja, że aplikacja obsługuje oczekiwane obciążenia.
 
 **Narzędzia**:
+
 - **k6** lub **Artillery** do testów obciążeniowych
 - **Lighthouse** do testów wydajności frontendu
 
@@ -533,6 +581,7 @@ Plan testów obejmuje:
 #### 3.5.1. Wydajność API
 
 **Testy obciążeniowe:**
+
 - ✅ 100 równoczesnych użytkowników → czas odpowiedzi < 2s
 - ✅ 500 równoczesnych zapytań do /api/user/works → czas odpowiedzi < 3s
 - ✅ Masowe dodanie 100 dzieł → czas odpowiedzi < 5s
@@ -540,12 +589,14 @@ Plan testów obejmuje:
 - ✅ Import autora z wieloma dziełami (>100) → czas odpowiedzi < 30s
 
 **Testy wydajności zapytań SQL:**
+
 - ✅ Lista autorów użytkownika (500 autorów) → czas < 500ms
 - ✅ Lista dzieł użytkownika (5000 dzieł) z filtrowaniem → czas < 1s
 - ✅ Lista dzieł autora (100+ dzieł) → czas < 500ms
 - ✅ Sprawdzenie limitów użytkownika → czas < 100ms
 
 **Optymalizacje do weryfikacji:**
+
 - ✅ Indeksy na kolumnach używanych w WHERE i ORDER BY
 - ✅ Paginacja (30 elementów na stronę)
 - ✅ Brak N+1 queries
@@ -554,6 +605,7 @@ Plan testów obejmuje:
 #### 3.5.2. Wydajność Frontendu
 
 **Testy Lighthouse:**
+
 - ✅ Performance Score > 80
 - ✅ First Contentful Paint (FCP) < 1.8s
 - ✅ Largest Contentful Paint (LCP) < 2.5s
@@ -561,6 +613,7 @@ Plan testów obejmuje:
 - ✅ Cumulative Layout Shift (CLS) < 0.1
 
 **Testy renderowania:**
+
 - ✅ Renderowanie listy 30 autorów → czas < 100ms
 - ✅ Renderowanie listy 30 książek → czas < 200ms
 - ✅ Przełączanie między stronami → czas < 500ms
@@ -577,6 +630,7 @@ Plan testów obejmuje:
 **Cel**: Weryfikacja, że interfejs użytkownika działa poprawnie i jest intuicyjny.
 
 **Narzędzia**:
+
 - **Playwright** lub **Cypress** do testów wizualnych
 - **@axe-core/playwright** do testów dostępności
 
@@ -621,39 +675,50 @@ Plan testów obejmuje:
 ### 4.1. Autentykacja
 
 #### TC-AUTH-001: Rejestracja użytkownika
+
 **Warunki wstępne**: Brak konta użytkownika
 **Kroki**:
+
 1. Użytkownik otwiera /register
 2. Wypełnia email i hasło (min. 6 znaków)
 3. Wysyła formularz
-**Oczekiwany rezultat**: 
+   **Oczekiwany rezultat**:
+
 - Utworzenie konta w Supabase Auth
 - Utworzenie profilu w tabeli `profiles` (author_count=0, work_count=0)
 - Przekierowanie do /app/authors
 - Sesja użytkownika aktywna
 
 #### TC-AUTH-002: Logowanie użytkownika
+
 **Warunki wstępne**: Istniejące konto użytkownika
 **Kroki**:
+
 1. Użytkownik otwiera /login
 2. Wprowadza email i hasło
 3. Wysyła formularz
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Uwierzytelnienie w Supabase Auth
 - Przekierowanie do /app/authors
 - Sesja użytkownika aktywna
 
 #### TC-AUTH-003: Nieprawidłowe dane logowania
+
 **Kroki**:
+
 1. Użytkownik wprowadza nieprawidłowy email lub hasło
 2. Wysyła formularz
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Komunikat błędu: "Nieprawidłowy email lub hasło"
 - Status 401
 - Brak przekierowania
 
 #### TC-AUTH-004: Reset hasła
+
 **Kroki**:
+
 1. Użytkownik otwiera /forgot-password
 2. Wprowadza email
 3. Wysyła formularz
@@ -661,7 +726,8 @@ Plan testów obejmuje:
 5. Otwiera /reset-password?token=...
 6. Wprowadza nowe hasło
 7. Wysyła formularz
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Wysłanie emaila z tokenem resetu
 - Możliwość ustawienia nowego hasła
 - Możliwość logowania nowym hasłem
@@ -669,23 +735,29 @@ Plan testów obejmuje:
 ### 4.2. Zarządzanie Autorami
 
 #### TC-AUTHORS-001: Wyszukiwanie autora w OpenLibrary
+
 **Kroki**:
+
 1. Zalogowany użytkownik otwiera /app/authors
 2. Klika "Dodaj autora"
 3. Wybiera zakładkę "Wyszukaj w OpenLibrary"
 4. Wprowadza "Tolkien"
 5. Klika "Szukaj"
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Wyświetlenie listy autorów z OpenLibrary
 - Każdy wynik zawiera: name, openlibrary_id
 - Możliwość wyboru autora z listy
 
 #### TC-AUTHORS-002: Import autora z OpenLibrary
+
 **Kroki**:
+
 1. Użytkownik wyszukuje autora (TC-AUTHORS-001)
 2. Wybiera autora z listy
 3. Klika "Importuj"
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Import autora do bazy danych
 - Import wszystkich dzieł autora z OpenLibrary
 - Wyświetlenie autora na liście /app/authors
@@ -693,22 +765,28 @@ Plan testów obejmuje:
 - Cache OpenLibrary (ol_fetched_at, ol_expires_at = +7 dni)
 
 #### TC-AUTHORS-003: Ręczne dodanie autora
+
 **Kroki**:
+
 1. Zalogowany użytkownik otwiera /app/authors
 2. Klika "Dodaj autora"
 3. Wybiera zakładkę "Dodaj ręcznie"
 4. Wprowadza nazwę autora
 5. Zapisuje
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Utworzenie autora w bazie (manual=true, owner_user_id=user.id)
 - Wyświetlenie autora na liście
 - Aktualizacja licznika autorów
 
 #### TC-AUTHORS-004: Przeglądanie dzieł autora
+
 **Kroki**:
+
 1. Zalogowany użytkownik otwiera /app/authors
 2. Klika na autora w tabeli
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Przejście do /app/authors/{authorId}
 - Wyświetlenie listy dzieł autora (max 30 na stronę)
 - Sortowanie domyślne: published_desc
@@ -716,11 +794,14 @@ Plan testów obejmuje:
 - Paginacja (jeśli >30 dzieł)
 
 #### TC-AUTHORS-005: Usunięcie autora
+
 **Kroki**:
+
 1. Zalogowany użytkownik otwiera /app/authors
 2. Klika przycisk usuwania przy autorze
 3. Potwierdza w dialogu
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Usunięcie powiązania user_author
 - Aktualizacja licznika autorów (author_count--)
 - Autor znika z listy
@@ -729,11 +810,14 @@ Plan testów obejmuje:
 ### 4.3. Zarządzanie Książkami
 
 #### TC-BOOKS-001: Masowe dodanie książek do biblioteki
+
 **Kroki**:
+
 1. Zalogowany użytkownik otwiera /app/authors/{authorId}
 2. Zaznacza wiele dzieł (checkbox)
 3. Klika "Dodaj do biblioteki"
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Dodanie dzieł do user_works
 - Status domyślny: "to_read"
 - Aktualizacja licznika dzieł (work_count += liczba dodanych)
@@ -741,41 +825,53 @@ Plan testów obejmuje:
 - Deduplikacja (pominięcie już istniejących)
 
 #### TC-BOOKS-002: Zmiana statusu czytania
+
 **Kroki**:
+
 1. Zalogowany użytkownik otwiera /app/books
 2. Wybiera książkę
 3. Zmienia status (np. "to_read" → "in_progress")
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Aktualizacja statusu w bazie
 - Aktualizacja status_updated_at
 - Wyświetlenie zaktualizowanego statusu w UI
 
 #### TC-BOOKS-003: Masowa zmiana statusów
+
 **Kroki**:
+
 1. Zalogowany użytkownik otwiera /app/books
 2. Zaznacza wiele książek
 3. Wybiera status z dropdown
 4. Klika "Zastosuj"
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Aktualizacja statusu wszystkich zaznaczonych książek
 - Aktualizacja status_updated_at dla każdej książki
 - Wyświetlenie zaktualizowanych statusów w UI
 
 #### TC-BOOKS-004: Filtrowanie książek
+
 **Kroki**:
+
 1. Zalogowany użytkownik otwiera /app/books
 2. Wybiera filtr statusu: "Read"
 3. Wybiera filtr dostępności: "Available in Legimi"
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Wyświetlenie tylko książek ze statusem "Read" i available_in_legimi=true
 - Aktualizacja URL z parametrami zapytania
 - Możliwość wyczyszczenia filtrów
 
 #### TC-BOOKS-005: Sortowanie książek
+
 **Kroki**:
+
 1. Zalogowany użytkownik otwiera /app/books
 2. Wybiera sortowanie "Tytuł A-Z"
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Wyświetlenie książek posortowanych alfabetycznie po tytule
 - Aktualizacja URL z parametrem sort
 - Możliwość zmiany na "Published (newest first)"
@@ -783,55 +879,73 @@ Plan testów obejmuje:
 ### 4.4. Limity Użytkownika
 
 #### TC-LIMITS-001: Przekroczenie limitu autorów
+
 **Warunki wstępne**: Użytkownik ma 500 autorów (max_authors)
 **Kroki**:
+
 1. Użytkownik próbuje dodać kolejnego autora
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Błąd 409 Conflict
 - Komunikat: "Limit autorów osiągnięty (500 autorów na użytkownika)"
 - Autor nie zostaje dodany
 
 #### TC-LIMITS-002: Przekroczenie limitu dzieł
+
 **Warunki wstępne**: Użytkownik ma 5000 dzieł (max_works)
 **Kroki**:
+
 1. Użytkownik próbuje dodać kolejne dzieło
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Błąd 409 Conflict
 - Komunikat: "Limit dzieł osiągnięty (5000 dzieł na użytkownika)"
 - Dzieło nie zostaje dodane
 
 #### TC-LIMITS-003: Wyświetlanie limitów w UI
+
 **Kroki**:
+
 1. Zalogowany użytkownik otwiera /app/authors lub /app/books
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Wyświetlenie wskaźnika limitów (np. "450/500 autorów")
 - Wizualne oznaczenie przy zbliżaniu się do limitu
 
 ### 4.5. Integracja z OpenLibrary
 
 #### TC-OL-001: Timeout OpenLibrary API
+
 **Kroki**:
+
 1. Użytkownik wyszukuje autora
 2. OpenLibrary API nie odpowiada w ciągu 10s
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Timeout po 10s
 - Komunikat błędu: "Timeout podczas pobierania danych z OpenLibrary"
 - Status 504 Gateway Timeout
 
 #### TC-OL-002: Wykorzystanie cache OpenLibrary
+
 **Warunki wstępne**: Autor został zaimportowany wcześniej (cache ważny)
 **Kroki**:
+
 1. Użytkownik ponownie importuje tego samego autora
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Brak wywołania OpenLibrary API
 - Zwrócenie danych z cache
 - Szybsza odpowiedź
 
 #### TC-OL-003: Odświeżanie cache OpenLibrary
+
 **Warunki wstępne**: Autor został zaimportowany wcześniej (cache ważny)
 **Kroki**:
+
 1. Użytkownik importuje autora z parametrem forceRefresh=true
-**Oczekiwany rezultat**:
+   **Oczekiwany rezultat**:
+
 - Wywołanie OpenLibrary API mimo ważnego cache
 - Aktualizacja cache (ol_fetched_at, ol_expires_at)
 - Zwrócenie świeżych danych
@@ -841,18 +955,21 @@ Plan testów obejmuje:
 ### 5.1. Środowiska Testowe
 
 #### 5.1.1. Środowisko Lokalne (Development)
+
 - **Baza danych**: Lokalna instancja Supabase (Docker)
 - **OpenLibrary API**: Mock Service Worker (MSW) lub rzeczywiste API
 - **Node.js**: 22.14.0
 - **Przeznaczenie**: Testy jednostkowe, integracyjne, szybkie iteracje
 
 #### 5.1.2. Środowisko Testowe (Staging)
+
 - **Baza danych**: Dedykowana instancja Supabase (testowa)
 - **OpenLibrary API**: Rzeczywiste API (z ograniczeniami)
 - **Hosting**: DigitalOcean (testowa instancja)
 - **Przeznaczenie**: Testy E2E, testy wydajnościowe, testy bezpieczeństwa
 
 #### 5.1.3. Środowisko Produkcyjne
+
 - **Baza danych**: Produkcyjna instancja Supabase
 - **OpenLibrary API**: Rzeczywiste API
 - **Hosting**: DigitalOcean (produkcyjna instancja)
@@ -863,6 +980,7 @@ Plan testów obejmuje:
 #### 5.2.1. Zmienne Środowiskowe
 
 **Lokalne:**
+
 ```env
 SUPABASE_URL=http://localhost:54321
 SUPABASE_ANON_KEY=test_anon_key
@@ -872,6 +990,7 @@ NODE_ENV=test
 ```
 
 **Staging:**
+
 ```env
 SUPABASE_URL=https://test-project.supabase.co
 SUPABASE_ANON_KEY=staging_anon_key
@@ -883,11 +1002,13 @@ NODE_ENV=staging
 #### 5.2.2. Dane Testowe
 
 **Użytkownicy testowi:**
+
 - `test-user-1@example.com` - użytkownik z danymi testowymi
 - `test-user-2@example.com` - użytkownik bez danych
 - `test-admin@example.com` - (jeśli potrzebne)
 
 **Dane testowe w bazie:**
+
 - 10 autorów testowych (mix OpenLibrary i ręcznych)
 - 100 dzieł testowych
 - 200 wydań testowych
@@ -925,73 +1046,81 @@ npm run test
 ### 6.1. Frameworki Testowe
 
 #### 6.1.1. Testy Jednostkowe i Integracyjne
+
 - **Vitest** (zalecane) - szybki, kompatybilny z Vite/Astro
 - Alternatywa: **Jest** - bardziej dojrzały, większa społeczność
 
 **Instalacja:**
+
 ```bash
 npm install -D vitest @vitest/ui
 ```
 
 **Konfiguracja (vitest.config.ts):**
+
 ```typescript
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'node',
+    environment: "node",
     globals: true,
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: ["./src/test/setup.ts"],
   },
 });
 ```
 
 #### 6.1.2. Testy Komponentów React
+
 - **@testing-library/react** - testowanie komponentów React
 - **@testing-library/user-event** - symulacja interakcji użytkownika
 - **@testing-library/jest-dom** - dodatkowe matchery
 
 **Instalacja:**
+
 ```bash
 npm install -D @testing-library/react @testing-library/user-event @testing-library/jest-dom
 ```
 
 #### 6.1.3. Testy E2E
+
 - **Playwright** (zalecane) - szybki, wsparcie dla wielu przeglądarek
 - Alternatywa: **Cypress** - bardziej dojrzały, lepsze narzędzia deweloperskie
 
 **Instalacja:**
+
 ```bash
 npm install -D @playwright/test
 npx playwright install
 ```
 
 **Konfiguracja (playwright.config.ts):**
+
 ```typescript
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './e2e',
+  testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  reporter: "html",
   use: {
-    baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
+    baseURL: "http://localhost:3000",
+    trace: "on-first-retry",
   },
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
+    command: "npm run dev",
+    url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
   },
 });
@@ -1000,36 +1129,44 @@ export default defineConfig({
 ### 6.2. Narzędzia Pomocnicze
 
 #### 6.2.1. Mockowanie
+
 - **MSW (Mock Service Worker)** - mockowanie HTTP requests
 - **@mswjs/data** - generowanie danych testowych
 
 **Instalacja:**
+
 ```bash
 npm install -D msw @mswjs/data
 ```
 
 #### 6.2.2. Testy Wydajnościowe
+
 - **k6** - testy obciążeniowe API
 - **Lighthouse** - testy wydajności frontendu
 
 **Instalacja:**
+
 ```bash
 npm install -D @lhci/cli
 # k6 - instalacja osobna (https://k6.io/docs/getting-started/installation/)
 ```
 
 #### 6.2.3. Testy Dostępności
+
 - **@axe-core/playwright** - testy dostępności w Playwright
 
 **Instalacja:**
+
 ```bash
 npm install -D @axe-core/playwright
 ```
 
 #### 6.2.4. Coverage
+
 - **@vitest/coverage-v8** - pokrycie kodu testami
 
 **Instalacja:**
+
 ```bash
 npm install -D @vitest/coverage-v8
 ```
@@ -1056,14 +1193,16 @@ npm install -D @vitest/coverage-v8
 ### 7.1. Fazy Testowania
 
 #### Faza 1: Testy Jednostkowe (Tydzień 1-2)
+
 - **Cel**: Pokrycie testami jednostkowymi wszystkich serwisów i funkcji pomocniczych
-- **Zakres**: 
+- **Zakres**:
   - Serwisy biznesowe (ProfileService, AuthorsService, WorksService, etc.)
   - Schematy walidacji Zod
   - Funkcje pomocnicze
 - **Kryterium zakończenia**: 80% pokrycia kodu serwisów i walidacji
 
 #### Faza 2: Testy Integracyjne (Tydzień 2-3)
+
 - **Cel**: Weryfikacja współdziałania komponentów
 - **Zakres**:
   - Integracja API z bazą danych
@@ -1072,6 +1211,7 @@ npm install -D @vitest/coverage-v8
 - **Kryterium zakończenia**: Wszystkie endpointy API przetestowane
 
 #### Faza 3: Testy Komponentów React (Tydzień 3-4)
+
 - **Cel**: Weryfikacja działania komponentów UI
 - **Zakres**:
   - Komponenty formularzy
@@ -1081,6 +1221,7 @@ npm install -D @vitest/coverage-v8
 - **Kryterium zakończenia**: Wszystkie komponenty przetestowane
 
 #### Faza 4: Testy E2E (Tydzień 4-5)
+
 - **Cel**: Weryfikacja pełnych przepływów użytkownika
 - **Zakres**:
   - Przepływ autentykacji
@@ -1090,6 +1231,7 @@ npm install -D @vitest/coverage-v8
 - **Kryterium zakończenia**: Wszystkie scenariusze E2E przetestowane
 
 #### Faza 5: Testy Bezpieczeństwa (Tydzień 5)
+
 - **Cel**: Weryfikacja zabezpieczeń aplikacji
 - **Zakres**:
   - Testy autoryzacji
@@ -1099,6 +1241,7 @@ npm install -D @vitest/coverage-v8
 - **Kryterium zakończenia**: Wszystkie testy bezpieczeństwa przetestowane
 
 #### Faza 6: Testy Wydajnościowe (Tydzień 6)
+
 - **Cel**: Weryfikacja wydajności aplikacji
 - **Zakres**:
   - Testy obciążeniowe API
@@ -1107,6 +1250,7 @@ npm install -D @vitest/coverage-v8
 - **Kryterium zakończenia**: Wszystkie metryki wydajności spełnione
 
 #### Faza 7: Testy Regresji (Tydzień 7)
+
 - **Cel**: Weryfikacja, że nowe zmiany nie zepsuły istniejących funkcjonalności
 - **Zakres**: Wszystkie testy z poprzednich faz
 - **Kryterium zakończenia**: Wszystkie testy przechodzą
@@ -1114,11 +1258,13 @@ npm install -D @vitest/coverage-v8
 ### 7.2. Harmonogram Codzienny
 
 **Poniedziałek-Piątek:**
+
 - **Rano (9:00-12:00)**: Rozwój nowych funkcjonalności
 - **Po południu (13:00-16:00)**: Pisanie testów dla nowych funkcjonalności
 - **Wieczór (16:00-17:00)**: Uruchomienie testów, naprawa błędów
 
 **Codziennie:**
+
 - Uruchomienie testów jednostkowych przed commit (pre-commit hook)
 - Uruchomienie testów integracyjnych w CI/CD
 - Uruchomienie testów E2E przed merge do main
@@ -1143,7 +1289,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '22.14.0'
+          node-version: "22.14.0"
       - run: npm ci
       - run: npm run test
       - run: npm run test:coverage
@@ -1154,7 +1300,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '22.14.0'
+          node-version: "22.14.0"
       - run: npm ci
       - run: npx playwright install --with-deps
       - run: npm run test:e2e
@@ -1173,29 +1319,34 @@ jobs:
 ### 8.2. Kryteria dla Poszczególnych Typów Testów
 
 #### 8.2.1. Testy Jednostkowe
+
 - ✅ Każda funkcja/metoda ma przynajmniej jeden test
 - ✅ Testy pokrywają happy path i edge cases
 - ✅ Testy są izolowane (nie zależą od innych testów)
 - ✅ Testy są deterministyczne (zawsze ten sam wynik)
 
 #### 8.2.2. Testy Integracyjne
+
 - ✅ Wszystkie endpointy API przetestowane
 - ✅ Integracja z bazą danych działa poprawnie
 - ✅ Integracja z OpenLibrary API działa poprawnie (lub mockowana)
 - ✅ Obsługa błędów działa poprawnie
 
 #### 8.2.3. Testy E2E
+
 - ✅ Główny przepływ MVP przetestowany (TC-E2E-005)
 - ✅ Wszystkie krytyczne przepływy użytkownika przetestowane
 - ✅ Testy są stabilne (flakiness < 5%)
 
 #### 8.2.4. Testy Bezpieczeństwa
+
 - ✅ Wszystkie testy autoryzacji przechodzą
 - ✅ RLS działa poprawnie
 - ✅ Walidacja wejścia działa poprawnie
 - ✅ Rate limiting działa poprawnie
 
 #### 8.2.5. Testy Wydajnościowe
+
 - ✅ API: czas odpowiedzi < 2s dla 100 równoczesnych użytkowników
 - ✅ Frontend: Lighthouse Performance Score > 80
 - ✅ Integracja: timeout OpenLibrary 10s
@@ -1203,6 +1354,7 @@ jobs:
 ### 8.3. Definicja "Gotowe" (Definition of Done)
 
 Funkcjonalność jest uznana za "gotową" gdy:
+
 - ✅ Kod został napisany i zreviewowany
 - ✅ Testy jednostkowe napisane i przechodzą
 - ✅ Testy integracyjne napisane i przechodzą
@@ -1216,6 +1368,7 @@ Funkcjonalność jest uznana za "gotową" gdy:
 ### 9.1. Role
 
 #### 9.1.1. Developer (Programista)
+
 - **Odpowiedzialności**:
   - Pisanie testów jednostkowych dla nowego kodu
   - Uruchamianie testów lokalnie przed commit
@@ -1224,6 +1377,7 @@ Funkcjonalność jest uznana za "gotową" gdy:
 - **Narzędzia**: Vitest, lokalne środowisko testowe
 
 #### 9.1.2. QA Engineer (Inżynier QA)
+
 - **Odpowiedzialności**:
   - Tworzenie i utrzymanie planu testów
   - Pisanie testów E2E
@@ -1233,6 +1387,7 @@ Funkcjonalność jest uznana za "gotową" gdy:
 - **Narzędzia**: Playwright, narzędzia do testów ręcznych
 
 #### 9.1.3. Tech Lead / Senior Developer
+
 - **Odpowiedzialności**:
   - Code review testów
   - Weryfikacja jakości testów
@@ -1241,6 +1396,7 @@ Funkcjonalność jest uznana za "gotową" gdy:
 - **Narzędzia**: Wszystkie narzędzia testowe
 
 #### 9.1.4. DevOps Engineer
+
 - **Odpowiedzialności**:
   - Konfiguracja CI/CD pipeline
   - Utrzymanie środowisk testowych
@@ -1270,13 +1426,15 @@ Funkcjonalność jest uznana za "gotową" gdy:
 
 **Tytuł**: Krótki, opisowy tytuł błędu
 
-**Priorytet**: 
+**Priorytet**:
+
 - **P0 (Krytyczny)**: Blokuje główne funkcjonalności, bezpieczeństwo
 - **P1 (Wysoki)**: Wpływa na główne funkcjonalności
 - **P2 (Średni)**: Wpływa na mniej ważne funkcjonalności
 - **P3 (Niski)**: Kosmetyczne, nie wpływa na funkcjonalność
 
 **Kroki do odtworzenia**:
+
 1. Krok 1
 2. Krok 2
 3. ...
@@ -1286,17 +1444,20 @@ Funkcjonalność jest uznana za "gotową" gdy:
 **Rzeczywiste zachowanie**: Opis tego, co się faktycznie wydarzyło
 
 **Środowisko**:
+
 - System operacyjny: Windows 10
 - Przeglądarka: Chrome 120
 - Wersja aplikacji: 0.0.1
 - Środowisko: Development/Staging/Production
 
 **Logi**:
+
 - Logi z konsoli przeglądarki
 - Logi z serwera
 - Screenshoty (jeśli dotyczy)
 
 **Dodatkowe informacje**:
+
 - Czy błąd jest reprodukowalny? Tak/Nie
 - Częstotliwość występowania: Zawsze/Czasami/Rzadko
 - Czy występuje w innych przeglądarkach? Tak/Nie
@@ -1330,11 +1491,11 @@ Funkcjonalność jest uznana za "gotową" gdy:
 #### Przykład Testu Jednostkowego (Vitest)
 
 ```typescript
-import { describe, it, expect, beforeEach } from 'vitest';
-import { AuthorsService } from '@/lib/services/authors.service';
-import { createSupabaseTestClient } from '@/test/utils/supabase';
+import { describe, it, expect, beforeEach } from "vitest";
+import { AuthorsService } from "@/lib/services/authors.service";
+import { createSupabaseTestClient } from "@/test/utils/supabase";
 
-describe('AuthorsService', () => {
+describe("AuthorsService", () => {
   let service: AuthorsService;
   let supabase: ReturnType<typeof createSupabaseTestClient>;
 
@@ -1343,34 +1504,34 @@ describe('AuthorsService', () => {
     service = new AuthorsService(supabase);
   });
 
-  describe('createManualAuthor', () => {
-    it('should create a manual author with correct owner', async () => {
-      const userId = 'test-user-id';
+  describe("createManualAuthor", () => {
+    it("should create a manual author with correct owner", async () => {
+      const userId = "test-user-id";
       const authorData = {
-        name: 'Test Author',
+        name: "Test Author",
         manual: true as const,
       };
 
       const author = await service.createManualAuthor(userId, authorData);
 
       expect(author).toBeDefined();
-      expect(author.name).toBe('Test Author');
+      expect(author.name).toBe("Test Author");
       expect(author.manual).toBe(true);
       expect(author.owner_user_id).toBe(userId);
       expect(author.openlibrary_id).toBeNull();
     });
 
-    it('should throw error if manual author has openlibrary_id', async () => {
-      const userId = 'test-user-id';
+    it("should throw error if manual author has openlibrary_id", async () => {
+      const userId = "test-user-id";
       const authorData = {
-        name: 'Test Author',
+        name: "Test Author",
         manual: true as const,
-        openlibrary_id: 'OL123A',
+        openlibrary_id: "OL123A",
       };
 
-      await expect(
-        service.createManualAuthor(userId, authorData)
-      ).rejects.toThrow('Manual author cannot have openlibrary_id');
+      await expect(service.createManualAuthor(userId, authorData)).rejects.toThrow(
+        "Manual author cannot have openlibrary_id"
+      );
     });
   });
 });
@@ -1379,11 +1540,11 @@ describe('AuthorsService', () => {
 #### Przykład Testu Integracyjnego (Vitest)
 
 ```typescript
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { POST } from '@/pages/api/authors/index';
-import { createTestUser, deleteTestUser } from '@/test/utils/auth';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { POST } from "@/pages/api/authors/index";
+import { createTestUser, deleteTestUser } from "@/test/utils/auth";
 
-describe('POST /api/authors', () => {
+describe("POST /api/authors", () => {
   let testUser: { id: string; email: string };
 
   beforeAll(async () => {
@@ -1394,15 +1555,15 @@ describe('POST /api/authors', () => {
     await deleteTestUser(testUser.id);
   });
 
-  it('should create a manual author', async () => {
-    const request = new Request('http://localhost/api/authors', {
-      method: 'POST',
+  it("should create a manual author", async () => {
+    const request = new Request("http://localhost/api/authors", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${testUser.token}`,
       },
       body: JSON.stringify({
-        name: 'Test Author',
+        name: "Test Author",
         manual: true,
       }),
     });
@@ -1415,7 +1576,7 @@ describe('POST /api/authors', () => {
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data.author).toBeDefined();
-    expect(data.author.name).toBe('Test Author');
+    expect(data.author.name).toBe("Test Author");
   });
 });
 ```
@@ -1423,40 +1584,40 @@ describe('POST /api/authors', () => {
 #### Przykład Testu E2E (Playwright)
 
 ```typescript
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Authors Management', () => {
+test.describe("Authors Management", () => {
   test.beforeEach(async ({ page }) => {
     // Logowanie użytkownika testowego
-    await page.goto('/login');
-    await page.fill('input[name="email"]', 'test@example.com');
-    await page.fill('input[name="password"]', 'testpassword');
+    await page.goto("/login");
+    await page.fill('input[name="email"]', "test@example.com");
+    await page.fill('input[name="password"]', "testpassword");
     await page.click('button[type="submit"]');
-    await page.waitForURL('/app/authors');
+    await page.waitForURL("/app/authors");
   });
 
-  test('should add author from OpenLibrary', async ({ page }) => {
+  test("should add author from OpenLibrary", async ({ page }) => {
     // Otwarcie modala dodawania autora
     await page.click('button:has-text("Dodaj autora")');
-    
+
     // Wybór zakładki wyszukiwania
     await page.click('button:has-text("Wyszukaj w OpenLibrary")');
-    
+
     // Wyszukiwanie autora
-    await page.fill('input[placeholder*="Szukaj"]', 'Tolkien');
+    await page.fill('input[placeholder*="Szukaj"]', "Tolkien");
     await page.click('button:has-text("Szukaj")');
-    
+
     // Oczekiwanie na wyniki
     await page.waitForSelector('[data-testid="author-search-result"]');
-    
+
     // Wybór pierwszego wyniku
     await page.click('[data-testid="author-search-result"]:first-child');
-    
+
     // Import autora
     await page.click('button:has-text("Importuj")');
-    
+
     // Weryfikacja dodania autora
-    await expect(page.locator('text=Tolkien')).toBeVisible();
+    await expect(page.locator("text=Tolkien")).toBeVisible();
   });
 });
 ```
@@ -1493,4 +1654,3 @@ test.describe('Authors Management', () => {
 **Ostatnia aktualizacja**: 2025-01-XX  
 **Autor**: QA Engineer  
 **Status**: Draft / Final
-

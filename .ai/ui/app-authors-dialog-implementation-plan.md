@@ -3,6 +3,7 @@
 ## 1. Przegląd
 
 Modal dodawania autora to dialogowy widok umożliwiający użytkownikowi dodanie autora do swojego profilu na dwa sposoby:
+
 1. **Wyszukiwanie w OpenLibrary** - wyszukiwanie autora po imieniu/nazwisku w katalogu OpenLibrary i wybór kanonicznego autora do dodania
 2. **Ręczne dodanie** - utworzenie autora ręcznie, gdy nie jest dostępny w OpenLibrary
 
@@ -15,10 +16,12 @@ Modal implementuje inteligentną obsługę błędów z fallbackiem do ręcznego 
 Modal nie posiada własnej ścieżki routingu. Jest renderowany jako komponent dialogowy w kontekście widoku `/app/authors` i kontrolowany przez stan lokalny komponentu nadrzędnego (`AuthorsListView`).
 
 **Lokalizacja w kodzie:**
+
 - Komponent główny: `src/components/authors/AddAuthorModal.tsx`
 - Użycie: `src/components/authors/AuthorsListView.tsx`
 
 **Warunki wyświetlenia:**
+
 - Modal jest otwierany przez kliknięcie przycisku "Dodaj autora" w `AuthorsListView`
 - Modal jest zamykany przez: kliknięcie backdrop, przycisk X, klawisz ESC, lub po pomyślnym dodaniu autora
 
@@ -51,6 +54,7 @@ AddAuthorModal (główny kontener)
 Główny kontener modala odpowiedzialny za zarządzanie stanem otwarcia/zamknięcia, przełączanie między trybami (wyszukiwanie OL / ręczne dodanie) oraz obsługę zdarzeń klawiatury i scroll lock.
 
 **Główne elementy:**
+
 - Backdrop (`div` z `onClick` handler) - zamyka modal przy kliknięciu
 - Modal container (`div` z `max-w-2xl`, `max-h-[90vh]`) - responsywny kontener
 - Header (`div` z tytułem i przyciskiem X) - nagłówek modala
@@ -58,13 +62,16 @@ Główny kontener modala odpowiedzialny za zarządzanie stanem otwarcia/zamknię
 - TabContent (`div` z warunkowym renderowaniem) - zawartość aktywnej zakładki
 
 **Obsługiwane zdarzenia:**
+
 - `onClose` - zamyka modal (wywoływane przez backdrop, X, ESC)
 - `onAuthorAdded` - callback po pomyślnym dodaniu autora (zamyka modal i odświeża listę)
 
 **Obsługiwana walidacja:**
+
 - Brak walidacji na poziomie głównego komponentu (walidacja w komponentach dzieci)
 
 **Typy:**
+
 - `AddAuthorModalProps`:
   ```typescript
   interface AddAuthorModalProps {
@@ -80,6 +87,7 @@ Główny kontener modala odpowiedzialny za zarządzanie stanem otwarcia/zamknię
   ```
 
 **Props:**
+
 - `isOpen: boolean` - kontroluje widoczność modala
 - `onClose: () => void` - callback zamykający modal
 - `onAuthorAdded: () => void` - callback wywoływany po pomyślnym dodaniu autora
@@ -90,6 +98,7 @@ Główny kontener modala odpowiedzialny za zarządzanie stanem otwarcia/zamknię
 Zakładka odpowiedzialna za wyszukiwanie autorów w OpenLibrary. Zawiera pole wyszukiwania z debounce, listę wyników oraz obsługę stanów: loading, error, empty, results.
 
 **Główne elementy:**
+
 - `SearchInput` - input tekstowy z ikoną wyszukiwania, maxLength 200
 - `SearchResultsList` - kontener z listą wyników lub stanami
 - `AuthorResultItem` - pojedynczy wynik z nazwą autora i przyciskiem "Dodaj"
@@ -98,14 +107,17 @@ Zakładka odpowiedzialna za wyszukiwanie autorów w OpenLibrary. Zawiera pole wy
 - `EmptyState` - komunikat o braku wyników
 
 **Obsługiwane zdarzenia:**
+
 - `onQueryChange` - zmiana wartości inputu (obsługiwane przez hook `useAuthorSearch`)
 - `onAddAuthor` - kliknięcie przycisku "Dodaj" przy wyniku (wywołuje `addAuthor` z hooka)
 
 **Obsługiwana walidacja:**
+
 - Query minimum 2 znaki (walidacja w hooku przed wykonaniem zapytania)
 - Query maksimum 200 znaków (ograniczenie przez `maxLength` na input)
 
 **Typy:**
+
 - `AuthorSearchTabProps`:
   ```typescript
   interface AuthorSearchTabProps {
@@ -127,6 +139,7 @@ Zakładka odpowiedzialna za wyszukiwanie autorów w OpenLibrary. Zawiera pole wy
   ```
 
 **Props:**
+
 - `onAuthorAdded: () => void` - callback wywoływany po pomyślnym dodaniu autora
 
 ### ManualAuthorTab
@@ -135,6 +148,7 @@ Zakładka odpowiedzialna za wyszukiwanie autorów w OpenLibrary. Zawiera pole wy
 Zakładka odpowiedzialna za ręczne utworzenie autora. Zawiera formularz z polem nazwy autora, walidacją oraz przyciskiem submit.
 
 **Główne elementy:**
+
 - `InfoMessage` - informacja o tym, że autor będzie ręczny (bez połączenia z OL)
 - `NameInput` - input tekstowy dla nazwy autora, maxLength 500
 - `ValidationError` - komunikat błędu walidacji (wyświetlany pod inputem)
@@ -143,16 +157,19 @@ Zakładka odpowiedzialna za ręczne utworzenie autora. Zawiera formularz z polem
 - `SubmitButton` - przycisk "Dodaj autora" z loading state
 
 **Obsługiwane zdarzenia:**
+
 - `onSubmit` - submit formularza (obsługiwane przez `handleSubmit`)
 - `onNameChange` - zmiana wartości inputu (obsługiwane przez hook `useManualAuthor`)
 
 **Obsługiwana walidacja:**
+
 - Nazwa autora: wymagana (nie może być pusta po trim)
 - Nazwa autora: minimum 1 znak (po trim)
 - Nazwa autora: maksimum 500 znaków
 - Nazwa autora: automatycznie trimowana przed walidacją i wysłaniem
 
 **Typy:**
+
 - `ManualAuthorTabProps`:
   ```typescript
   interface ManualAuthorTabProps {
@@ -173,6 +190,7 @@ Zakładka odpowiedzialna za ręczne utworzenie autora. Zawiera formularz z polem
   ```
 
 **Props:**
+
 - `onAuthorAdded: () => void` - callback wywoływany po pomyślnym dodaniu autora
 
 ### useAuthorSearch (custom hook)
@@ -181,6 +199,7 @@ Zakładka odpowiedzialna za ręczne utworzenie autora. Zawiera formularz z polem
 Hook zarządzający stanem wyszukiwania autorów w OpenLibrary. Obsługuje debounced search, wyświetlanie wyników, import autora z OL oraz dołączanie do profilu użytkownika.
 
 **Stan zarządzany:**
+
 - `query: string` - aktualne zapytanie wyszukiwania
 - `results: AuthorSearchResultDto[]` - lista wyników wyszukiwania
 - `isSearching: boolean` - stan ładowania wyszukiwania
@@ -189,11 +208,13 @@ Hook zarządzający stanem wyszukiwania autorów w OpenLibrary. Obsługuje debou
 - `addError: string | null` - błąd dodawania autora
 
 **Funkcje:**
+
 - `setQuery(value: string)` - ustawia zapytanie wyszukiwania
 - `addAuthor(author: AuthorSearchResultDto)` - dodaje autora (import + attach)
 - `resetSearch()` - resetuje stan wyszukiwania
 
 **Efekty:**
+
 - Automatyczne wyszukiwanie po zmianie `debouncedQuery` (debounce 300ms)
 - Wyszukiwanie tylko gdy query >= 2 znaki
 
@@ -203,17 +224,20 @@ Hook zarządzający stanem wyszukiwania autorów w OpenLibrary. Obsługuje debou
 Hook zarządzający stanem ręcznego tworzenia autora. Obsługuje formularz, walidację oraz tworzenie autora i dołączanie do profilu.
 
 **Stan zarządzany:**
+
 - `name: string` - nazwa autora z formularza
 - `isCreating: boolean` - stan tworzenia autora
 - `createError: string | null` - błąd tworzenia autora
 
 **Funkcje:**
+
 - `setName(value: string)` - ustawia nazwę autora
 - `createManualAuthor()` - tworzy autora ręcznego i dołącza do profilu
 - `validateName(value: string)` - waliduje nazwę autora
 - `resetForm()` - resetuje formularz
 
 **Walidacja:**
+
 - Nazwa: wymagana, 1-500 znaków (po trim)
 
 ## 5. Typy
@@ -221,6 +245,7 @@ Hook zarządzający stanem ręcznego tworzenia autora. Obsługuje formularz, wal
 ### Typy DTO z API
 
 **AuthorSearchResultDto:**
+
 ```typescript
 interface AuthorSearchResultDto {
   id?: AuthorRow["id"]; // Opcjonalne - może nie być w DB jeszcze
@@ -232,6 +257,7 @@ interface AuthorSearchResultDto {
 ```
 
 **AuthorSearchResponseDto:**
+
 ```typescript
 interface AuthorSearchResponseDto {
   authors: AuthorSearchResultDto[];
@@ -239,6 +265,7 @@ interface AuthorSearchResponseDto {
 ```
 
 **AuthorResponseDto:**
+
 ```typescript
 interface AuthorResponseDto {
   author: AuthorDto; // AuthorRow z bazy danych
@@ -246,6 +273,7 @@ interface AuthorResponseDto {
 ```
 
 **AuthorDto (AuthorRow):**
+
 ```typescript
 type AuthorDto = AuthorRow; // Typ z Supabase database.types
 // Zawiera: id, name, openlibrary_id, manual, owner_user_id, ol_fetched_at, ol_expires_at, created_at, updated_at
@@ -254,6 +282,7 @@ type AuthorDto = AuthorRow; // Typ z Supabase database.types
 ### Typy Command (request body)
 
 **ImportAuthorCommand:**
+
 ```typescript
 interface ImportAuthorCommand {
   openlibrary_id: NonNullable<AuthorRow["openlibrary_id"]>; // Format: "OL23919A" (max 25 chars)
@@ -261,6 +290,7 @@ interface ImportAuthorCommand {
 ```
 
 **CreateAuthorCommand:**
+
 ```typescript
 type CreateAuthorCommand = Pick<AuthorRow, "name"> & {
   manual: true; // Wymagane true
@@ -269,6 +299,7 @@ type CreateAuthorCommand = Pick<AuthorRow, "name"> & {
 ```
 
 **AttachUserAuthorCommand:**
+
 ```typescript
 interface AttachUserAuthorCommand {
   author_id: AuthorRow["id"]; // UUID autora
@@ -278,12 +309,14 @@ interface AttachUserAuthorCommand {
 ### Typy ViewModel (dla komponentów)
 
 **AuthorResultViewModel:**
+
 ```typescript
 // Używa bezpośrednio AuthorSearchResultDto - brak transformacji
 type AuthorResultViewModel = AuthorSearchResultDto;
 ```
 
 **ManualAuthorFormViewModel:**
+
 ```typescript
 // Wewnętrzny stan formularza - nie wymaga osobnego typu
 // Używa bezpośrednio string dla name
@@ -292,6 +325,7 @@ type AuthorResultViewModel = AuthorSearchResultDto;
 ### Typy błędów API
 
 **ErrorResponse:**
+
 ```typescript
 interface ErrorResponse {
   error: string; // Typ błędu (np. "Validation error", "Conflict")
@@ -301,6 +335,7 @@ interface ErrorResponse {
 ```
 
 **ValidationError:**
+
 ```typescript
 interface ValidationError {
   path: (string | number)[];
@@ -313,18 +348,21 @@ interface ValidationError {
 ### Stan lokalny w AddAuthorModal
 
 Modal zarządza następującym stanem lokalnym:
+
 - `activeTab: TabType` - aktualnie aktywna zakładka ("search" | "manual")
 - Stan jest resetowany do "search" przy zamknięciu modala
 
 ### Stan w custom hooks
 
 **useAuthorSearch:**
+
 - Stan wyszukiwania: `query`, `results`, `isSearching`, `searchError`
 - Stan dodawania: `isAdding`, `addError`
 - Debounced query: `debouncedQuery` (300ms delay) - używany do triggerowania wyszukiwania
 - Efekt automatycznego wyszukiwania: uruchamiany gdy `debouncedQuery.length >= 2`
 
 **useManualAuthor:**
+
 - Stan formularza: `name`
 - Stan tworzenia: `isCreating`, `createError`
 - Walidacja: wykonywana inline przy każdej zmianie `name` oraz przed submitem
@@ -338,6 +376,7 @@ Modal zarządza następującym stanem lokalnym:
 ### Synchronizacja z komponentem nadrzędnym
 
 Modal komunikuje się z `AuthorsListView` przez callback `onAuthorAdded`, który:
+
 1. Zamyka modal
 2. Odświeża listę autorów
 3. Wyświetla toast z komunikatem sukcesu
@@ -349,12 +388,14 @@ Modal komunikuje się z `AuthorsListView` przez callback `onAuthorAdded`, który
 **Opis:** Wyszukuje autorów w OpenLibrary z cache 7 dni.
 
 **Request:**
+
 - Method: `GET`
 - Query parameters:
   - `q: string` (required) - zapytanie wyszukiwania (1-200 znaków)
   - `limit?: number` (optional) - maksymalna liczba wyników (1-50, default: 10)
 
 **Response (200 OK):**
+
 ```typescript
 {
   authors: AuthorSearchResultDto[];
@@ -362,6 +403,7 @@ Modal komunikuje się z `AuthorsListView` przez callback `onAuthorAdded`, który
 ```
 
 **Response (400 Bad Request):**
+
 ```typescript
 {
   error: "Validation error";
@@ -371,6 +413,7 @@ Modal komunikuje się z `AuthorsListView` przez callback `onAuthorAdded`, który
 ```
 
 **Response (502 Bad Gateway):**
+
 ```typescript
 {
   error: "External service error";
@@ -379,6 +422,7 @@ Modal komunikuje się z `AuthorsListView` przez callback `onAuthorAdded`, który
 ```
 
 **Implementacja w hooku:**
+
 ```typescript
 const response = await fetch(`/api/authors/search?q=${encodeURIComponent(debouncedQuery)}&limit=10`);
 const data: AuthorSearchResponseDto = await response.json();
@@ -389,9 +433,11 @@ const data: AuthorSearchResponseDto = await response.json();
 **Opis:** Importuje lub odświeża autora z OpenLibrary do katalogu globalnego (cache TTL 7d).
 
 **Request:**
+
 - Method: `POST`
 - Headers: `Content-Type: application/json`
 - Body:
+
 ```typescript
 {
   openlibrary_id: string; // Format: "OL23919A" (max 25 chars)
@@ -399,6 +445,7 @@ const data: AuthorSearchResponseDto = await response.json();
 ```
 
 **Response (200 OK):**
+
 ```typescript
 {
   author: AuthorDto;
@@ -406,6 +453,7 @@ const data: AuthorSearchResponseDto = await response.json();
 ```
 
 **Response (400 Bad Request):**
+
 ```typescript
 {
   error: "Validation error";
@@ -415,6 +463,7 @@ const data: AuthorSearchResponseDto = await response.json();
 ```
 
 **Response (404 Not Found):**
+
 ```typescript
 {
   error: "Author not found";
@@ -423,6 +472,7 @@ const data: AuthorSearchResponseDto = await response.json();
 ```
 
 **Response (502 Bad Gateway):**
+
 ```typescript
 {
   error: "External service error";
@@ -431,6 +481,7 @@ const data: AuthorSearchResponseDto = await response.json();
 ```
 
 **Implementacja w hooku:**
+
 ```typescript
 const importCommand: ImportAuthorCommand = {
   openlibrary_id: author.openlibrary_id,
@@ -448,9 +499,11 @@ const importData: AuthorResponseDto = await importResponse.json();
 **Opis:** Tworzy ręcznego autora należącego do zalogowanego użytkownika.
 
 **Request:**
+
 - Method: `POST`
 - Headers: `Content-Type: application/json`
 - Body:
+
 ```typescript
 {
   name: string; // 1-500 znaków (trimmed)
@@ -460,14 +513,17 @@ const importData: AuthorResponseDto = await importResponse.json();
 ```
 
 **Response (201 Created):**
+
 ```typescript
 {
   author: AuthorDto;
 }
 ```
+
 Headers: `Location: /api/authors/{authorId}`
 
 **Response (400 Bad Request):**
+
 ```typescript
 {
   error: "Validation error";
@@ -477,6 +533,7 @@ Headers: `Location: /api/authors/{authorId}`
 ```
 
 **Response (401 Unauthorized):**
+
 ```typescript
 {
   error: "Unauthorized";
@@ -485,6 +542,7 @@ Headers: `Location: /api/authors/{authorId}`
 ```
 
 **Response (403 Forbidden):**
+
 ```typescript
 {
   error: "Forbidden";
@@ -493,6 +551,7 @@ Headers: `Location: /api/authors/{authorId}`
 ```
 
 **Response (409 Conflict):**
+
 ```typescript
 {
   error: "Conflict";
@@ -502,6 +561,7 @@ Headers: `Location: /api/authors/{authorId}`
 ```
 
 **Implementacja w hooku:**
+
 ```typescript
 const createCommand: CreateAuthorCommand = {
   name: trimmedName,
@@ -520,9 +580,11 @@ const createData: AuthorResponseDto = await createResponse.json();
 **Opis:** Dołącza autora do profilu użytkownika (zlicza się do limitu 500 autorów).
 
 **Request:**
+
 - Method: `POST`
 - Headers: `Content-Type: application/json`
 - Body:
+
 ```typescript
 {
   author_id: string; // UUID autora
@@ -530,15 +592,18 @@ const createData: AuthorResponseDto = await createResponse.json();
 ```
 
 **Response (201 Created):**
+
 ```typescript
 {
   author_id: string;
   created_at: string; // ISO string
 }
 ```
+
 Headers: `Location: /api/user/authors/{authorId}`
 
 **Response (400 Bad Request):**
+
 ```typescript
 {
   error: "Validation error";
@@ -548,6 +613,7 @@ Headers: `Location: /api/user/authors/{authorId}`
 ```
 
 **Response (401 Unauthorized):**
+
 ```typescript
 {
   error: "Unauthorized";
@@ -556,6 +622,7 @@ Headers: `Location: /api/user/authors/{authorId}`
 ```
 
 **Response (404 Not Found):**
+
 ```typescript
 {
   error: "Not Found";
@@ -564,6 +631,7 @@ Headers: `Location: /api/user/authors/{authorId}`
 ```
 
 **Response (409 Conflict):**
+
 ```typescript
 {
   error: "Conflict";
@@ -572,15 +640,18 @@ Headers: `Location: /api/user/authors/{authorId}`
 ```
 
 **Response (429 Too Many Requests):**
+
 ```typescript
 {
   error: "Too Many Requests";
   message: "Rate limit exceeded: maximum 10 author additions per minute";
 }
 ```
+
 Headers: `Retry-After: 60`
 
 **Implementacja w hooku:**
+
 ```typescript
 const attachCommand: AttachUserAuthorCommand = {
   author_id: authorId,
@@ -622,6 +693,7 @@ const attachResponse = await fetch("/api/user/authors", {
 **Akcja:** Kliknięcie przycisku "Dodaj autora" w `AuthorsListView`
 
 **Rezultat:**
+
 - Modal się otwiera (`isOpen = true`)
 - Domyślnie aktywna zakładka "Szukaj w OpenLibrary"
 - Focus na input wyszukiwania (opcjonalnie, dla a11y)
@@ -630,12 +702,14 @@ const attachResponse = await fetch("/api/user/authors", {
 ### Zamykanie modala
 
 **Akcje zamykające:**
+
 1. Kliknięcie backdrop (ciemne tło)
 2. Kliknięcie przycisku X w headerze
 3. Naciśnięcie klawisza ESC
 4. Pomyślne dodanie autora (automatyczne zamknięcie)
 
 **Rezultat:**
+
 - Modal się zamyka (`isOpen = false`)
 - Stan jest resetowany (query, results, name, errors)
 - Body scroll jest odblokowany
@@ -646,6 +720,7 @@ const attachResponse = await fetch("/api/user/authors", {
 **Akcja:** Kliknięcie zakładki "Szukaj w OpenLibrary" lub "Dodaj ręcznie"
 
 **Rezultat:**
+
 - Aktywna zakładka się zmienia (`activeTab` aktualizuje się)
 - Zawartość modala się zmienia (renderowany odpowiedni komponent)
 - Stan poprzedniej zakładki jest zachowany (można wrócić)
@@ -655,6 +730,7 @@ const attachResponse = await fetch("/api/user/authors", {
 **Akcja:** Wpisanie tekstu w `SearchInput`
 
 **Rezultat:**
+
 - Tekst jest wyświetlany w input (max 200 znaków)
 - Po 300ms bez zmian, automatycznie uruchamia się wyszukiwanie
 - Stan loading jest wyświetlany (`isSearching = true`)
@@ -664,6 +740,7 @@ const attachResponse = await fetch("/api/user/authors", {
 **Akcja:** Kliknięcie "Dodaj" przy wyniku
 
 **Rezultat:**
+
 - Przycisk jest disabled (`isAdding = true`)
 - Jeśli autor nie ma `id`: wykonuje się import z OL
 - Następnie wykonuje się attach do profilu
@@ -675,6 +752,7 @@ const attachResponse = await fetch("/api/user/authors", {
 **Akcja:** Wpisanie nazwy autora w `NameInput`
 
 **Rezultat:**
+
 - Tekst jest wyświetlany w input (max 500 znaków)
 - Walidacja inline: komunikat błędu jeśli < 1 lub > 500 znaków
 - Licznik znaków wyświetlany gdy > 400 znaków
@@ -683,6 +761,7 @@ const attachResponse = await fetch("/api/user/authors", {
 **Akcja:** Kliknięcie "Dodaj autora"
 
 **Rezultat:**
+
 - Formularz jest submitowany
 - Przycisk jest disabled (`isCreating = true`)
 - Wykonuje się `POST /api/authors` (tworzenie ręcznego autora)
@@ -695,12 +774,14 @@ const attachResponse = await fetch("/api/user/authors", {
 **Akcja:** Błąd 502 (OpenLibrary niedostępne)
 
 **Rezultat:**
+
 - Komunikat błędu: "OpenLibrary jest obecnie niedostępne. Spróbuj ponownie później lub dodaj autora ręcznie."
 - Sugestia przełączenia na zakładkę "Dodaj ręcznie" (opcjonalnie automatyczne przełączenie)
 
 **Akcja:** Błąd 400 (walidacja)
 
 **Rezultat:**
+
 - Komunikat błędu z szczegółami walidacji
 - Lista wyników jest czyszczona
 
@@ -709,24 +790,28 @@ const attachResponse = await fetch("/api/user/authors", {
 **Akcja:** Błąd 409 (limit osiągnięty)
 
 **Rezultat:**
+
 - Toast: "Osiągnięto limit 500 autorów"
 - Modal pozostaje otwarty (użytkownik może spróbować innego autora)
 
 **Akcja:** Błąd 409 (autor już dodany)
 
 **Rezultat:**
+
 - Toast: "Autor jest już w Twoim profilu"
 - Modal pozostaje otwarty
 
 **Akcja:** Błąd 429 (rate limit)
 
 **Rezultat:**
+
 - Toast: "Dodano zbyt wielu autorów. Odczekaj 60 sekund."
 - Modal pozostaje otwarty
 
 **Akcja:** Błąd 502 (OpenLibrary niedostępne przy import)
 
 **Rezultat:**
+
 - Toast: "OpenLibrary jest niedostępne. Spróbuj ponownie później."
 - Modal pozostaje otwarty
 
@@ -735,17 +820,20 @@ const attachResponse = await fetch("/api/user/authors", {
 ### Walidacja wyszukiwania (AuthorSearchTab)
 
 **Warunek:** Query minimum 2 znaki
+
 - **Gdzie:** W hooku `useAuthorSearch`, przed wykonaniem zapytania API
 - **Walidacja:** `if (debouncedQuery.length < 2) return;`
 - **Wpływ na UI:** Wyszukiwanie nie jest wykonywane, wyniki są czyszczone
 - **Komunikat:** "Wpisz co najmniej 2 znaki, aby wyszukać" (wyświetlany w UI)
 
 **Warunek:** Query maksimum 200 znaków
+
 - **Gdzie:** Na input `SearchInput` przez atrybut `maxLength={200}`
 - **Walidacja:** Browser natywnie blokuje wpisanie > 200 znaków
 - **Wpływ na UI:** Input nie przyjmuje więcej niż 200 znaków
 
 **Warunek:** Query nie może być puste przy wyszukiwaniu
+
 - **Gdzie:** W hooku `useAuthorSearch`, w efekcie wyszukiwania
 - **Walidacja:** `if (debouncedQuery.length < 2) { setResults([]); return; }`
 - **Wpływ na UI:** Jeśli query < 2 znaki, wyniki są czyszczone
@@ -753,29 +841,34 @@ const attachResponse = await fetch("/api/user/authors", {
 ### Walidacja ręcznego dodawania (ManualAuthorTab)
 
 **Warunek:** Nazwa autora jest wymagana
+
 - **Gdzie:** W hooku `useManualAuthor`, funkcja `validateName`
 - **Walidacja:** `if (trimmed.length === 0) return "Nazwa autora jest wymagana";`
 - **Wpływ na UI:** Komunikat błędu pod inputem, przycisk "Dodaj autora" disabled
 - **Komunikat:** "Nazwa autora jest wymagana"
 
 **Warunek:** Nazwa autora minimum 1 znak (po trim)
+
 - **Gdzie:** W hooku `useManualAuthor`, funkcja `validateName`
 - **Walidacja:** `if (trimmed.length === 0) return "Nazwa autora jest wymagana";`
 - **Wpływ na UI:** Komunikat błędu pod inputem, przycisk disabled
 - **Komunikat:** "Nazwa autora jest wymagana"
 
 **Warunek:** Nazwa autora maksimum 500 znaków
+
 - **Gdzie:** Na input `NameInput` przez atrybut `maxLength={500}` oraz w hooku `validateName`
 - **Walidacja:** `if (trimmed.length > 500) return "Nazwa autora nie może przekraczać 500 znaków";`
 - **Wpływ na UI:** Input nie przyjmuje > 500 znaków, komunikat błędu jeśli > 500 (po trim)
 - **Komunikat:** "Nazwa autora nie może przekraczać 500 znaków"
 
 **Warunek:** Nazwa autora jest automatycznie trimowana
+
 - **Gdzie:** W hooku `useManualAuthor`, przed walidacją i przed wysłaniem do API
 - **Walidacja:** `const trimmed = value.trim();` (w `validateName` i `createManualAuthor`)
 - **Wpływ na UI:** Spacje na początku/końcu są usuwane przed walidacją
 
 **Warunek:** Formularz nie może być submitowany jeśli walidacja nie przechodzi
+
 - **Gdzie:** W komponencie `ManualAuthorTab`, przed wywołaniem `createManualAuthor`
 - **Walidacja:** `const canSubmit = name.trim().length > 0 && !validationError && !isCreating;`
 - **Wpływ na UI:** Przycisk "Dodaj autora" jest disabled jeśli `!canSubmit`
@@ -783,31 +876,38 @@ const attachResponse = await fetch("/api/user/authors", {
 ### Walidacja po stronie API
 
 **GET /api/authors/search:**
+
 - `q`: wymagane, 1-200 znaków (walidacja w `AuthorSearchQuerySchema`)
 - `limit`: opcjonalne, 1-50, default 10 (walidacja w `AuthorSearchQuerySchema`)
 
 **POST /api/openlibrary/import/author:**
+
 - `openlibrary_id`: wymagane, max 25 znaków, format "OL..." (walidacja w `ImportAuthorSchema`)
 
 **POST /api/authors:**
+
 - `name`: wymagane, 1-500 znaków (trimmed) (walidacja w `CreateAuthorSchema`)
 - `manual`: wymagane `true` (walidacja w `CreateAuthorSchema`)
 - `openlibrary_id`: musi być `null` lub undefined (walidacja w `CreateAuthorSchema`)
 
 **POST /api/user/authors:**
+
 - `author_id`: wymagane, UUID format (walidacja w `AttachUserAuthorCommandSchema`)
 
 ### Warunki biznesowe
 
 **Limit autorów:** Maksymalnie 500 autorów na użytkownika
+
 - **Weryfikacja:** API zwraca 409 Conflict z komunikatem "Author limit reached"
 - **Obsługa w UI:** Toast z komunikatem, modal pozostaje otwarty
 
 **Rate limit:** Maksymalnie 10 dodawań autorów na minutę
+
 - **Weryfikacja:** API zwraca 429 Too Many Requests z headerem `Retry-After: 60`
 - **Obsługa w UI:** Toast z komunikatem, modal pozostaje otwarty
 
 **Duplikat autora:** Autor nie może być dodany dwa razy
+
 - **Weryfikacja:** API zwraca 409 Conflict z komunikatem "Author is already attached"
 - **Obsługa w UI:** Toast z komunikatem, modal pozostaje otwarty
 
@@ -816,6 +916,7 @@ const attachResponse = await fetch("/api/user/authors", {
 ### Błędy wyszukiwania (GET /api/authors/search)
 
 **502 Bad Gateway (OpenLibrary niedostępne):**
+
 - **Przyczyna:** OpenLibrary API jest niedostępne lub zwraca błąd
 - **Obsługa:**
   - Komunikat: "OpenLibrary jest obecnie niedostępne. Spróbuj ponownie później lub dodaj autora ręcznie."
@@ -824,6 +925,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Nie blokuje całej aplikacji, modal ma własny stan błędu
 
 **400 Bad Request (walidacja):**
+
 - **Przyczyna:** Nieprawidłowe parametry zapytania (np. query > 200 znaków)
 - **Obsługa:**
   - Komunikat z `error.message` z API
@@ -831,6 +933,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Komunikat błędu, możliwość poprawy zapytania
 
 **500 Internal Server Error:**
+
 - **Przyczyna:** Błąd serwera
 - **Obsługa:**
   - Komunikat: "Nie udało się wyszukać autorów"
@@ -840,6 +943,7 @@ const attachResponse = await fetch("/api/user/authors", {
 ### Błędy importu autora (POST /api/openlibrary/import/author)
 
 **502 Bad Gateway:**
+
 - **Przyczyna:** OpenLibrary API niedostępne
 - **Obsługa:**
   - Komunikat: "OpenLibrary jest niedostępne. Spróbuj ponownie później."
@@ -847,6 +951,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Toast, modal pozostaje otwarty, możliwość ręcznego dodania
 
 **404 Not Found:**
+
 - **Przyczyna:** Autor nie znaleziony w OpenLibrary
 - **Obsługa:**
   - Komunikat: "Autor nie został znaleziony w OpenLibrary"
@@ -854,6 +959,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Toast, modal pozostaje otwarty, sugestia ręcznego dodania
 
 **400 Bad Request:**
+
 - **Przyczyna:** Nieprawidłowy format `openlibrary_id`
 - **Obsługa:**
   - Komunikat z `error.message` z API
@@ -863,6 +969,7 @@ const attachResponse = await fetch("/api/user/authors", {
 ### Błędy tworzenia ręcznego autora (POST /api/authors)
 
 **400 Bad Request:**
+
 - **Przyczyna:** Nieprawidłowa walidacja (np. nazwa > 500 znaków)
 - **Obsługa:**
   - Komunikat z `error.message` z API
@@ -870,6 +977,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Komunikat błędu inline, możliwość poprawy
 
 **401 Unauthorized:**
+
 - **Przyczyna:** Brak sesji użytkownika
 - **Obsługa:**
   - Redirect do `/login` (obsługiwane przez middleware lub hook)
@@ -877,6 +985,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Automatyczny redirect, toast z komunikatem
 
 **403 Forbidden:**
+
 - **Przyczyna:** RLS odmówił dostępu
 - **Obsługa:**
   - Komunikat: "Brak uprawnień do utworzenia autora"
@@ -884,6 +993,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Toast, modal pozostaje otwarty
 
 **409 Conflict (limit):**
+
 - **Przyczyna:** Osiągnięto limit 500 autorów
 - **Obsługa:**
   - Komunikat: "Osiągnięto limit 500 autorów"
@@ -891,6 +1001,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Toast, modal pozostaje otwarty
 
 **409 Conflict (constraint):**
+
 - **Przyczyna:** Naruszenie constraint (np. duplikat nazwy)
 - **Obsługa:**
   - Komunikat z `error.message` z API
@@ -900,6 +1011,7 @@ const attachResponse = await fetch("/api/user/authors", {
 ### Błędy dołączania autora (POST /api/user/authors)
 
 **400 Bad Request:**
+
 - **Przyczyna:** Nieprawidłowy format `author_id` (nie UUID)
 - **Obsługa:**
   - Komunikat: "Nieprawidłowy identyfikator autora"
@@ -907,12 +1019,14 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Toast, modal pozostaje otwarty
 
 **401 Unauthorized:**
+
 - **Przyczyna:** Brak sesji użytkownika
 - **Obsługa:**
   - Redirect do `/login` (obsługiwane przez middleware)
 - **UX:** Automatyczny redirect
 
 **404 Not Found:**
+
 - **Przyczyna:** Autor nie istnieje lub nie jest dostępny (RLS)
 - **Obsługa:**
   - Komunikat: "Autor nie został znaleziony lub nie jest dostępny"
@@ -920,6 +1034,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Toast, modal pozostaje otwarty
 
 **409 Conflict (limit):**
+
 - **Przyczyna:** Osiągnięto limit 500 autorów
 - **Obsługa:**
   - Komunikat: "Osiągnięto limit 500 autorów"
@@ -927,6 +1042,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Toast, modal pozostaje otwarty
 
 **409 Conflict (duplikat):**
+
 - **Przyczyna:** Autor jest już dołączony do profilu
 - **Obsługa:**
   - Komunikat: "Autor jest już w Twoim profilu"
@@ -934,6 +1050,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Toast, modal pozostaje otwarty
 
 **429 Too Many Requests:**
+
 - **Przyczyna:** Przekroczono limit 10 dodawań/minutę
 - **Obsługa:**
   - Komunikat: "Dodano zbyt wielu autorów. Odczekaj 60 sekund."
@@ -942,6 +1059,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Toast, modal pozostaje otwarty, przycisk "Dodaj" może być disabled na 60s
 
 **500 Internal Server Error:**
+
 - **Przyczyna:** Błąd serwera
 - **Obsługa:**
   - Komunikat: "Nie udało się dodać autora"
@@ -951,6 +1069,7 @@ const attachResponse = await fetch("/api/user/authors", {
 ### Błędy sieciowe
 
 **Network Error (brak połączenia):**
+
 - **Przyczyna:** Brak połączenia z internetem lub timeout
 - **Obsługa:**
   - Komunikat: "Brak połączenia z internetem. Sprawdź połączenie i spróbuj ponownie."
@@ -958,6 +1077,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **UX:** Komunikat błędu, możliwość ponowienia próby po przywróceniu połączenia
 
 **Timeout:**
+
 - **Przyczyna:** Zapytanie przekroczyło limit czasu
 - **Obsługa:**
   - Komunikat: "Zapytanie przekroczyło limit czasu. Spróbuj ponownie."
@@ -967,6 +1087,7 @@ const attachResponse = await fetch("/api/user/authors", {
 ### Strategia wyświetlania błędów
 
 **Toast notifications (Sonner):**
+
 - **Kiedy:** Błędy operacji (dodawanie, import) oraz sukcesy
 - **Typy:**
   - Success: "Autor został dodany do profilu"
@@ -975,6 +1096,7 @@ const attachResponse = await fetch("/api/user/authors", {
 - **Auto-dismiss:** 5s dla success, 10s dla error
 
 **Inline errors:**
+
 - **Kiedy:** Błędy walidacji formularzy, błędy wyszukiwania w modalu
 - **Gdzie:** Pod inputem/formularzem w którym wystąpił błąd
 - **Przykłady:**
@@ -983,6 +1105,7 @@ const attachResponse = await fetch("/api/user/authors", {
   - `createError` pod `NameInput` w `ManualAuthorTab`
 
 **Error states:**
+
 - **Kiedy:** Błędy krytyczne wymagające akcji użytkownika
 - **Gdzie:** W miejsce zawartości (np. lista wyników)
 - **Przykłady:**
@@ -1069,13 +1192,15 @@ const attachResponse = await fetch("/api/user/authors", {
 ### Krok 6: Obsługa błędów i toastów
 
 1. Zainstaluj Sonner (jeśli nie zainstalowany):
+
    ```bash
    npm install sonner
    ```
 
 2. W `AppLayout.astro` dodaj `<Toaster />`:
+
    ```astro
-   import { Toaster } from "sonner";
+   import {Toaster} from "sonner";
    <Toaster position="top-right" richColors />
    ```
 

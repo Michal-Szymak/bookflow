@@ -499,7 +499,7 @@ Przykład:
 
 ---
 
-**Data wykonania testów**: ********\_********
-**Tester**: ********\_********
-**Wersja**: ********\_********
+**Data wykonania testów**: **\*\*\*\***\_**\*\*\*\***
+**Tester**: **\*\*\*\***\_**\*\*\*\***
+**Wersja**: **\*\*\*\***\_**\*\*\*\***
 **Status**: ☐ PASS / ☐ FAIL (z issues)
