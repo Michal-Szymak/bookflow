@@ -21,19 +21,35 @@ export function AuthorWorksTableRow({ work, isSelected, isInProfile, onToggle }:
   return (
     <tr className="border-b hover:bg-muted/50" data-testid="author-work-row" data-work-id={work.id}>
       <td className="p-4">
-        <Checkbox checked={isSelected} onCheckedChange={onToggle} aria-label={`Zaznacz ${title}`} />
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={onToggle}
+          aria-label={`Zaznacz ${title}`}
+          data-testid="author-work-checkbox"
+        />
       </td>
       <td className="p-4">
         {coverUrl ? (
-          <img src={coverUrl} alt={`Okładka ${title}`} className="h-16 w-12 object-cover rounded" loading="lazy" />
+          <img
+            src={coverUrl}
+            alt={`Okładka ${title}`}
+            className="h-16 w-12 object-cover rounded"
+            loading="lazy"
+            data-testid="author-work-cover"
+          />
         ) : (
-          <div className="h-16 w-12 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
+          <div
+            className="h-16 w-12 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground"
+            data-testid="author-work-cover-placeholder"
+          >
             Brak
           </div>
         )}
       </td>
       <td className="p-4">
-        <div className="font-medium">{title}</div>
+        <div className="font-medium" data-testid="author-work-title">
+          {title}
+        </div>
       </td>
       <td className="p-4">{publishYear || "N/A"}</td>
       <td className="p-4">{language}</td>

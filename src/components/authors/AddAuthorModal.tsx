@@ -131,7 +131,14 @@ export function AddAuthorModal({ isOpen, onClose, onAuthorAdded }: AddAuthorModa
           <h2 id="modal-title" className="text-xl font-semibold">
             Dodaj autora
           </h2>
-          <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0" aria-label="Zamknij">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="shrink-0"
+            aria-label="Zamknij"
+            data-testid="add-author-modal-close"
+          >
             <X className="size-4" />
           </Button>
         </div>

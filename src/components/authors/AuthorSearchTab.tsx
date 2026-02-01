@@ -102,9 +102,13 @@ export function AuthorSearchTab({ onAuthorAdded, onResetRef, searchInputRef }: A
                 key={author.openlibrary_id}
                 className="flex items-center justify-between gap-3 p-3 border rounded-md hover:bg-accent/50 transition-colors"
                 data-testid="author-search-result"
+                data-author-name={author.name}
+                data-author-id={author.id || undefined}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{author.name}</p>
+                  <p className="text-sm font-medium truncate" data-testid="author-search-result-name">
+                    {author.name}
+                  </p>
                   {author.id && <p className="text-xs text-muted-foreground">Już w katalogu</p>}
                 </div>
                 <Button
@@ -113,7 +117,8 @@ export function AuthorSearchTab({ onAuthorAdded, onResetRef, searchInputRef }: A
                   disabled={isAdding}
                   className="shrink-0 gap-1"
                   aria-label={`Dodaj autora ${author.name}`}
-                  data-testid="author-add-button"
+                  data-testid="author-search-result-add-button"
+                  data-author-name={author.name}
                 >
                   {isAdding ? (
                     <Loader2 className="size-3 animate-spin" aria-hidden="true" />

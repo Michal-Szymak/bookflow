@@ -15,6 +15,7 @@ export function AuthorWorksTableHeader({ isAllSelected, isIndeterminate, onToggl
             checked={isIndeterminate ? "indeterminate" : isAllSelected}
             onCheckedChange={onToggleAll}
             aria-label="Zaznacz wszystkie"
+            data-testid="author-works-select-all"
           />
         </th>
         <th className="w-24 p-4 text-left">Okładka</th>
