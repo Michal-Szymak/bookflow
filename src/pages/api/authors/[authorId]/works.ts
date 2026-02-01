@@ -5,6 +5,7 @@ import { AuthorsService } from "@/lib/services/authors.service";
 import { WorksService } from "@/lib/services/works.service";
 import { OpenLibraryService } from "@/lib/services/openlibrary.service";
 import type { AuthorWorksListResponseDto } from "@/types";
+import type { OpenLibraryEdition, OpenLibraryWork } from "@/lib/services/openlibrary.service";
 import { logger } from "@/lib/logger";
 
 export const prerender = false;
@@ -257,37 +258,42 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
             // Link author to work
             await worksService.linkAuthorWork(authorId, work.id);
 
-            // Import primary edition if available
-            if (olWork.primary_edition_openlibrary_id) {
-              try {
-                const olEdition = await olService.fetchEditionByOpenLibraryId(olWork.primary_edition_openlibrary_id);
+            // Import primary edition - fetch all editions and select the latest one
+            try {
+              // Fetch all editions for this work
+              const olEditions = await olService.fetchWorkEditionsByOpenLibraryId(olWork.openlibrary_id);
+
+              // Select primary edition (prefer work's primary_edition_openlibrary_id, otherwise latest by date)
+              const selectedEdition = selectPrimaryEdition(olWork, olEditions);
+
+              if (selectedEdition) {
                 const fetchedAt = new Date();
                 const expiresAt = new Date(fetchedAt.getTime() + 7 * 24 * 60 * 60 * 1000); // +7 days
 
                 const edition = await worksService.upsertEditionFromOpenLibrary({
                   work_id: work.id,
-                  openlibrary_id: olEdition.openlibrary_id,
-                  title: olEdition.title,
-                  publish_year: olEdition.publish_year,
-                  publish_date: olEdition.publish_date,
-                  publish_date_raw: olEdition.publish_date_raw,
-                  isbn13: olEdition.isbn13,
-                  cover_url: olEdition.cover_url,
-                  language: olEdition.language,
+                  openlibrary_id: selectedEdition.openlibrary_id,
+                  title: selectedEdition.title,
+                  publish_year: selectedEdition.publish_year,
+                  publish_date: selectedEdition.publish_date,
+                  publish_date_raw: selectedEdition.publish_date_raw,
+                  isbn13: selectedEdition.isbn13,
+                  cover_url: selectedEdition.cover_url,
+                  language: selectedEdition.language,
                   ol_fetched_at: fetchedAt.toISOString(),
                   ol_expires_at: expiresAt.toISOString(),
                 });
 
                 await worksService.setPrimaryEdition(work.id, edition.id);
-              } catch (editionError) {
-                // Log but don't fail - primary edition is optional
-                logger.warn("GET /api/authors/{authorId}/works: Failed to import primary edition", {
-                  authorId,
-                  workId: work.id,
-                  editionId: olWork.primary_edition_openlibrary_id,
-                  error: editionError instanceof Error ? editionError.message : "Unknown error",
-                });
               }
+            } catch (editionError) {
+              // Log but don't fail - primary edition is optional
+              logger.warn("GET /api/authors/{authorId}/works: Failed to import primary edition", {
+                authorId,
+                workId: work.id,
+                openlibrary_id: olWork.openlibrary_id,
+                error: editionError instanceof Error ? editionError.message : "Unknown error",
+              });
             }
           } catch (workError) {
             // Log but continue with other works
@@ -346,3 +352,57 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     );
   }
 };
+
+/**
+ * Selects the primary edition from a list of editions.
+ * Prefers the edition specified in work.primary_edition_openlibrary_id if available,
+ * otherwise selects the edition with the latest publication date.
+ *
+ * @param work - Work with optional primary_edition_openlibrary_id
+ * @param editions - Array of available editions
+ * @returns Selected edition or null if no editions available
+ */
+function selectPrimaryEdition(work: OpenLibraryWork, editions: OpenLibraryEdition[]): OpenLibraryEdition | null {
+  if (editions.length === 0) {
+    return null;
+  }
+
+  // If work specifies a primary edition, try to find it in the editions list
+  if (work.primary_edition_openlibrary_id) {
+    const directMatch = editions.find((edition) => edition.openlibrary_id === work.primary_edition_openlibrary_id);
+    if (directMatch) {
+      return directMatch;
+    }
+  }
+
+  // Otherwise, select the edition with the latest publication date
+  return editions.reduce((latest, current) => {
+    return getEditionSortValue(current) > getEditionSortValue(latest) ? current : latest;
+  });
+}
+
+/**
+ * Gets a sortable numeric value for an edition based on its publication date.
+ * Used to compare editions and find the latest one.
+ *
+ * @param edition - Edition to get sort value for
+ * @returns Timestamp value (higher = later date), or 0 if no date available
+ */
+function getEditionSortValue(edition: OpenLibraryEdition): number {
+  // Prefer publish_date (full date) if available
+  if (edition.publish_date) {
+    const timestamp = Date.parse(edition.publish_date);
+    if (!Number.isNaN(timestamp)) {
+      return timestamp;
+    }
+  }
+
+  // Fallback to publish_year (year only)
+  if (typeof edition.publish_year === "number") {
+    // Use end of year as timestamp for comparison
+    return new Date(edition.publish_year, 11, 31).getTime();
+  }
+
+  // No date available
+  return 0;
+}
