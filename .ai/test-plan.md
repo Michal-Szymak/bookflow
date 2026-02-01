@@ -1039,7 +1039,7 @@ npm install -D @vitest/coverage-v8
 ```json
 {
   "scripts": {
-    "test": "vitest",
+    "test": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",
